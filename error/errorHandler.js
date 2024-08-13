@@ -1,4 +1,4 @@
-import { AppError } from "./customError.js";
+import { AppError } from "./AppError.js";
 
 const errorHandler = (err, req, res, next) => {
   res.setHeader("Content-Type", "application/json");

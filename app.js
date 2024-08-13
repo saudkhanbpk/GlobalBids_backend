@@ -5,7 +5,7 @@ import bodyParser from "body-parser";
 import authRoutes from "./routes/auth.routes.js";
 import { connectDB } from "./config/db.js";
 import errorHandler from "./error/errorHandler.js";
-import { RouteNotFoundError } from "./error/customError.js";
+import { RouteNotFoundError } from "./error/AppError.js";
 dotenv.config();
 
 const app = express();
