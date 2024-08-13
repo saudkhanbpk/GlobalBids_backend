@@ -1,14 +1,18 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import bodyParser from "body-parser";
 import authRoutes from "./routes/auth.routes.js";
 import { connectDB } from "./config/db.js";
+import errorHandler from "./error/errorHandler.js";
 dotenv.config();
 
 const app = express();
 connectDB();
-app.use(express.json());
-app.use(cors());
+// app.use(express.json());
+app.use(bodyParser.json());
+app.use(cors({ origin: true }));
+app.use(errorHandler);
 
 app.get("/", (req, res) => {
   return res.status(200).json({ message: "Hello GlobalBids!" });

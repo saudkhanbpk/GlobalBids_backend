@@ -1,33 +1,41 @@
 import UserModel from "../model/user.model.js";
+import {
+  ValidationError,
+  NotFoundError,
+  InternalServerError,
+} from "../error/customError.js";
 
-export const loginController = (req, res) => {
-  return res.status(200).json({ success: false });
-};
-
-export const emailCheckController = async (req, res) => {
+// Email Check Controller
+export const emailCheckController = async (req, res, next) => {
   const { email } = req.body;
-  if (!email)
+  if (!email) {
     return res.status(400).json({
       success: false,
-      message: "Email is Required in order to create account",
+      message: "Email is required to create an account",
     });
+  }
 
   try {
-    const user = await UserModel.findOne({ email });
-    if (user)
-      return res
-        .status(400)
-        .json({ success: false, message: "User already exist " });
+    const user = await UserModel.findByEmail(email);
+
+    if (user) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists",
+      });
+    }
 
     return res.status(200).json({ success: true, message: "Create account!" });
-  } catch (error) {}
-  return res.status(200).json({ success });
+  } catch (error) {
+    return next(new InternalServerError());
+  }
 };
 
-export const signUpController = async (req, res) => {
+// Sign Up Controller
+export const signUpController = async (req, res, next) => {
   const {
     email,
-    firsName,
+    firstName,
     lastName,
     workRole,
     country,
@@ -37,20 +45,41 @@ export const signUpController = async (req, res) => {
   } = req.body;
 
   if (
-    !(email,
-    firsName &&
+    !(
+      email &&
+      firstName &&
       lastName &&
       workRole &&
       country &&
       sendSms &&
       termsOfServices &&
-      password)
-  )
-    return res
-      .status(400)
-      .json({ success: false, message: "All fields are required" });
+      password
+    )
+  ) {
+    return next(new ValidationError("All fields are required"));
+  }
+
+  const newSendSms = sendSms === "on" || false;
+  const newTermsOfServices = termsOfServices === "on" || false;
 
   try {
-    
-  } catch (error) {}
+    const user = new UserModel({
+      email,
+      firstName,
+      lastName,
+      workRole,
+      country,
+      sendSms: newSendSms,
+      termsOfServices: newTermsOfServices,
+      password,
+    });
+    const newUser = await user.save();
+    return res
+      .status(201)
+      .json({ success: true, message: "Account created successfully" });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+    });
+  }
 };
