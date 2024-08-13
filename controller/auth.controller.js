@@ -56,7 +56,7 @@ export const signUpController = async (req, res, next) => {
       password
     )
   ) {
-    return next(new ValidationError("All fields are required"));
+     next(new ValidationError("All fields are required"));
   }
 
   const newSendSms = sendSms === "on" || false;

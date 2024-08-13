@@ -1,3 +1,5 @@
+import { AppError } from "./customError.js";
+
 const errorHandler = (err, req, res, next) => {
   res.setHeader("Content-Type", "application/json");
   if (err instanceof AppError) {

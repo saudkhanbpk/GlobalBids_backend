@@ -1,4 +1,3 @@
-// customErrors.js
 class AppError extends Error {
   constructor(message, statusCode, isOperational = true, logLevel = "error") {
     super(message);
@@ -65,6 +64,11 @@ class BusinessLogicError extends AppError {
   }
 }
 
+class RouteNotFoundError extends AppError {
+  constructor(message = "Route not found") {
+    super(message, 404, true, "warn");
+  }
+}
 export {
   AppError,
   NotFoundError,
@@ -72,4 +76,5 @@ export {
   UnauthorizedError,
   InternalServerError,
   BusinessLogicError,
+  RouteNotFoundError
 };
