@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes.js";
 import { connectDB } from "./config/db.js";
 import errorHandler from "./error/errorHandler.js";
 import { RouteNotFoundError } from "./error/AppError.js";
+import profileRouter from "./routes/profile.routes.js";
 dotenv.config();
 
 const app = express();
@@ -15,13 +16,12 @@ app.use(bodyParser.json());
 app.use(cors({ origin: true }));
 app.use(errorHandler);
 
-
-
 app.get("/", (req, res) => {
   return res.status(200).json({ message: "Hello GlobalBids!" });
 });
 
 app.use("/api/auth/", authRoutes);
+app.use("/api/profile/", profileRouter);
 
 app.use(errorHandler);
 app.all("*", (req, res, next) => {
