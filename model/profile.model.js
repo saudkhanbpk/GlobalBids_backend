@@ -24,9 +24,16 @@ const profileSchema = new mongoose.Schema(
     },
     languages: [
       {
-        type: String,
-        required: [true, "At least one language is required"],
-        trim: true,
+        language: {
+          type: String,
+          required: [true, "At least one language is required"],
+          trim: true,
+        },
+        level: {
+          type: String,
+          required: [true, "At least one language is required"],
+          trim: true,
+        },
       },
     ],
     skills: [
@@ -79,6 +86,12 @@ const profileSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: [true, "Phone number is required"],
+      trim: true,
+    },
+    imageUrl: {
+      type: String,
+      default:
+        "https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg?w=740&t=st=1723716515~exp=1723717115~hmac=10dd0f1942c2b0b97fce83f703730b1a7fdef5bde66fa8eea8528543c6da0aed",
       trim: true,
     },
   },

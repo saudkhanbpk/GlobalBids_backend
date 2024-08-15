@@ -2,12 +2,11 @@ class AppError extends Error {
   constructor(message, statusCode, isOperational = true, logLevel = "error") {
     super(message);
     this.statusCode = statusCode;
-    this.isOperational = isOperational; 
-    this.logLevel = logLevel; 
+    this.isOperational = isOperational;
+    this.logLevel = logLevel;
     this.timestamp = new Date().toISOString();
     Error.captureStackTrace(this, this.constructor);
   }
-
 
   logError() {
     if (process.env.NODE_ENV !== "production") {
@@ -16,7 +15,6 @@ class AppError extends Error {
       );
       console[this.logLevel](this.stack);
     } else {
-
       console.error(`${this.timestamp} - ERROR: ${this.message}`);
     }
   }
@@ -39,7 +37,7 @@ class NotFoundError extends AppError {
 // Validation Error
 class ValidationError extends AppError {
   constructor(message = "Validation failed") {
-    super(message, 400, true, "warn");  
+    super(message, 400, true, "warn");
   }
 }
 
@@ -69,6 +67,22 @@ class RouteNotFoundError extends AppError {
     super(message, 404, true, "warn");
   }
 }
+
+// File Upload Error
+class FileUploadError extends AppError {
+  constructor(message = "File upload failed") {
+    super(message, 500, true, "error");
+  }
+}
+
+// Custom Error for File Size Limit Exceeded
+class FileSizeLimitExceededError extends AppError {
+  constructor(message = "File size exceeds the allowed limit of 1 MB") {
+    super(message, 413, true, "warn");
+  }
+}
+
+
 export {
   AppError,
   NotFoundError,
@@ -76,5 +90,7 @@ export {
   UnauthorizedError,
   InternalServerError,
   BusinessLogicError,
-  RouteNotFoundError
+  RouteNotFoundError,
+  FileUploadError,
+  FileSizeLimitExceededError
 };
