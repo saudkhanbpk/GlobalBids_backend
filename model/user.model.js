@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
     required: [true, "Last name is required"],
     trim: true,
   },
+  username: {
+    type: String,
+    trim: true,
+  },
   workRole: {
     type: String,
     required: [true, "Work role is required"],
@@ -56,12 +60,16 @@ userSchema.pre("save", async function (next) {
   try {
     const salt = await bcryptjs.genSalt(10);
     this.password = await bcryptjs.hash(this.password, salt);
-    next();
   } catch (error) {
-    next(new Error("Password hashing failed"));
+    return next(new Error("Password hashing failed"));
   }
-});
 
+  if (!this.username) {
+    this.username = this.email.split("@")[0];
+  }
+
+  next();
+});
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcryptjs.compare(candidatePassword, this.password);
@@ -74,3 +82,4 @@ userSchema.statics.findByEmail = async function (email) {
 const UserModel = mongoose.model("User", userSchema);
 
 export default UserModel;
+
