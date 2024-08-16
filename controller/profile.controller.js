@@ -8,7 +8,7 @@ import {
 } from "../error/AppError.js";
 import cloudinary from "../config/cloudinary.config.js";
 
-export const ProfileController = async (req, res, next) => {
+export const createProfileController = async (req, res, next) => {
   try {
     const file = req.file;
 
@@ -93,4 +93,11 @@ export const ProfileController = async (req, res, next) => {
       );
     }
   }
+};
+
+export const getProfileController = (req, res, next) => {
+  const user = req.user;
+  console.log(req.user);
+
+  return res.status(200).json({ user });
 };

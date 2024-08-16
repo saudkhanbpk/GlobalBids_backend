@@ -1,8 +1,13 @@
 import express from "express";
-import { ProfileController } from "../controller/profile.controller.js";
+import {
+  createProfileController,
+  getProfileController,
+} from "../controller/profile.controller.js";
 import upload from "../config/mutler.config.js";
+import authMiddleware from "../middleware/auth.middleware.js";
 const router = express.Router();
 
-router.post("/", upload.single("image"), ProfileController);
+router.post("/", upload.single("image"), createProfileController);
+router.get("/", authMiddleware, getProfileController);
 
 export default router;

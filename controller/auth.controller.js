@@ -1,5 +1,11 @@
 import UserModel from "../model/user.model.js";
-import { ValidationError, InternalServerError } from "../error/AppError.js";
+import {
+  ValidationError,
+  InternalServerError,
+  LoginError,
+} from "../error/AppError.js";
+import generateAuthToken from "../utils/generte-auth-token.js";
+import { getUserByEmail } from "../services/user.service.js";
 
 // Email Check Controller
 export const emailCheckController = async (req, res, next) => {
@@ -65,15 +71,43 @@ export const signUpController = async (req, res, next) => {
     });
 
     const newUser = await user.save();
+    const token = await generateAuthToken({
+      id: newUser._id,
+      email: newUser.email,
+    });
     return res.status(201).json({
       success: true,
       message: "Account created successfully",
       user: newUser,
+      token,
     });
   } catch (error) {
-    if (error.errorResponse.code === 11000) {
+    if (error?.errorResponse?.code === 11000) {
       return next(new ValidationError("User already exist"));
     }
     return next(new InternalServerError());
+  }
+};
+
+export const loginController = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!(email && password)) {
+    return next(new ValidationError("Email and Password is Required"));
+  }
+
+  try {
+    const user = await getUserByEmail(email);
+    const passMatch = await user.comparePassword(password);
+    console.log(passMatch);
+
+    if (!user || !passMatch) {
+      return next(new LoginError());
+    }
+
+    const token = await generateAuthToken({ id: user._id, email: user.email });
+    return res.status(200).json({ user, token, success: true });
+  } catch (error) {
+    next(new InternalServerError());
   }
 };

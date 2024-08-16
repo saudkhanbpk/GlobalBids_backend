@@ -1,6 +1,6 @@
 import { AppError } from "./AppError.js";
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, _req, res, _next) => {
   if (err instanceof AppError) {
     err.logError();
 

@@ -82,6 +82,16 @@ class FileSizeLimitExceededError extends AppError {
   }
 }
 
+class AuthenticationError extends AppError {
+  constructor(message = "Authentication failed") {
+    super(message, 401, true, "warn");
+  }
+}
+class LoginError extends AppError {
+  constructor(message = "Invalid Email or Password") {
+    super(message, 401, true, "warn");
+  }
+}
 
 export {
   AppError,
@@ -92,5 +102,7 @@ export {
   BusinessLogicError,
   RouteNotFoundError,
   FileUploadError,
-  FileSizeLimitExceededError
+  FileSizeLimitExceededError,
+  AuthenticationError,
+  LoginError
 };
