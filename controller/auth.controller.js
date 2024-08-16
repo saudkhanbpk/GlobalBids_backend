@@ -108,6 +108,6 @@ export const loginController = async (req, res, next) => {
     const token = await generateAuthToken({ id: user._id, email: user.email });
     return res.status(200).json({ user, token, success: true });
   } catch (error) {
-    next(new InternalServerError());
+    return next(new InternalServerError());
   }
 };
