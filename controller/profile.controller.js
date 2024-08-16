@@ -7,6 +7,7 @@ import {
   FileSizeLimitExceededError,
 } from "../error/AppError.js";
 import cloudinary from "../config/cloudinary.config.js";
+import { getProfileByUserId } from "../services/profile.service.js";
 
 export const createProfileController = async (req, res, next) => {
   try {
@@ -95,9 +96,16 @@ export const createProfileController = async (req, res, next) => {
   }
 };
 
-export const getProfileController = (req, res, next) => {
+export const getProfileController = async (req, res, next) => {
   const user = req.user;
-  console.log(req.user);
 
-  return res.status(200).json({ user });
+  try {
+    const profile = await getProfileByUserId(user._id);
+    if (!profile) {
+      return next(new ValidationError("Profile Not Found"));
+    }
+    return res.status(201).json({ profile });
+  } catch (error) {
+    return next(new InternalServerError());
+  }
 };
