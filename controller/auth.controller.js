@@ -98,16 +98,20 @@ export const loginController = async (req, res, next) => {
 
   try {
     const user = await getUserByEmail(email);
-    const passMatch = await user.comparePassword(password);
-    console.log(passMatch);
+    if (!user) {
+      return next(new LoginError());
+    }
 
-    if (!user || !passMatch) {
+    const passMatch = await user.comparePassword(password);
+    if (!passMatch) {
       return next(new LoginError());
     }
 
     const token = await generateAuthToken({ id: user._id, email: user.email });
     return res.status(200).json({ user, token, success: true });
   } catch (error) {
+    console.log(error);
+
     return next(new InternalServerError());
   }
 };

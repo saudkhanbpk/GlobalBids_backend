@@ -104,7 +104,7 @@ export const getProfileController = async (req, res, next) => {
     if (!profile) {
       return next(new ValidationError("Profile Not Found"));
     }
-    return res.status(201).json({ profile });
+    return res.status(201).json({ success: true, profile });
   } catch (error) {
     return next(new InternalServerError());
   }
