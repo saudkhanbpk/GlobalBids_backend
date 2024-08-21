@@ -4,12 +4,21 @@ import {
   InternalServerError,
   LoginError,
 } from "../error/AppError.js";
+import { EmailValidationError } from "../error/validatorsErrors.js";
 import generateAuthToken from "../utils/generte-auth-token.js";
 import { getUserByEmail } from "../services/user.service.js";
+import { validateEmail } from "../validators/email-validate.js";
 
 // Email Check Controller
 export const emailCheckController = async (req, res, next) => {
   const { email } = req.body;
+
+  const validate = validateEmail(email);
+
+  if (!validate) {
+    next(new EmailValidationError());
+  }
+
   if (!email) {
     return next(new ValidationError("Email is required to create an account"));
   }
