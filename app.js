@@ -7,11 +7,11 @@ import { connectDB } from "./config/db.js";
 import errorHandler from "./error/errorHandler.js";
 import { RouteNotFoundError } from "./error/AppError.js";
 import profileRouter from "./routes/profile.routes.js";
-dotenv.config();
+import jobsRouter from "./routes/jobs.routes.js";
 
+dotenv.config();
 const app = express();
 connectDB();
-// app.use(express.json());
 app.use(bodyParser.json());
 app.use(cors({ origin: true }));
 app.use(errorHandler);
@@ -22,14 +22,15 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth/", authRoutes);
 app.use("/api/profile/", profileRouter);
+app.use("/api/jobs/", jobsRouter);
 
-app.use(errorHandler);
 app.all("*", (req, res, next) => {
   const err = new RouteNotFoundError(
     `Can't find ${req.originalUrl} on the server!`
   );
-  next(err);
+  return next(err);
 });
+app.use(errorHandler);
 
 const port = process.env.PORT;
 app.listen(port, () => {

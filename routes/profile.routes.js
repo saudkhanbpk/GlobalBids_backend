@@ -3,7 +3,7 @@ import {
   createProfileController,
   getProfileController,
 } from "../controller/profile.controller.js";
-import upload from "../config/mutler.config.js";
+import upload from "../config/multer.config.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 const router = express.Router();
 

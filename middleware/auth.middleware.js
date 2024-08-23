@@ -4,10 +4,12 @@ import { AuthenticationError } from "../error/AppError.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-const authMiddleware = async (req, res, next) => {
+const authMiddleware = async (req, _res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) {
-    throw new AuthenticationError("No token provided, authorization denied");
+    return next(
+      new AuthenticationError("authorization denied")
+    );
   }
 
   try {
@@ -19,14 +21,14 @@ const authMiddleware = async (req, res, next) => {
     }
 
     req.user = user;
-    next();
+    return next();
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError && err.message === "jwt expired") {
-      next(new AuthenticationError("Token has expired"));
+      return next(new AuthenticationError("Token has expired"));
     } else if (err instanceof jwt.JsonWebTokenError) {
-      next(new AuthenticationError("Token is not valid"));
+      return next(new AuthenticationError("Token is not valid"));
     } else {
-      next(err);
+      return next(err);
     }
   }
 };
