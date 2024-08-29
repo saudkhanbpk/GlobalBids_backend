@@ -8,8 +8,9 @@ import { validateJobData } from "../validators/jobs-validator.js";
 import JobModel from "../model/job.model.js";
 
 
-// create job function 
+
 export const createJobController = async (req, res, next) => {
+  
   const file = req.file;
   const user = req.user;
   const { status, ...rest } = req.body;

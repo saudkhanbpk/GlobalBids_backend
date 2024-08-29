@@ -8,7 +8,7 @@ const authMiddleware = async (req, _res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) {
     return next(
-      new AuthenticationError("authorization denied")
+      new AuthenticationError("access denied")
     );
   }
 

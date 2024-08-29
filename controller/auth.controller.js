@@ -8,76 +8,19 @@ import { EmailValidationError } from "../error/validatorsErrors.js";
 import generateAuthToken from "../utils/generte-auth-token.js";
 import { getUserByEmail } from "../services/user.service.js";
 import { validateEmail } from "../validators/email-validate.js";
+import { signUpValidate } from "../validators/sign-up-validators.js";
 
-// Email Check Controller
-export const emailCheckController = async (req, res, next) => {
-  const { email } = req.body;
-
-  const validate = validateEmail(email);
-
-  if (!validate) {
-    next(new EmailValidationError());
-  }
-
-  if (!email) {
-    return next(new ValidationError("Email is required to create an account"));
-  }
-
-  try {
-    const user = await UserModel.findByEmail(email);
-
-    if (user) {
-      return next(new ValidationError("User already exists"));
-    }
-
-    return res.status(200).json({ success: true, message: "Create account!" });
-  } catch (error) {
-    return next(new InternalServerError());
-  }
-};
-
-// Sign Up Controller
 export const signUpController = async (req, res, next) => {
-  const {
-    email,
-    firstName,
-    lastName,
-    workRole,
-    country,
-    sendSms,
-    termsOfServices,
-    password,
-  } = req.body;
+  const userData = req.body;
 
-  if (
-    !(
-      email &&
-      firstName &&
-      lastName &&
-      workRole &&
-      country &&
-      sendSms &&
-      termsOfServices &&
-      password
-    )
-  ) {
-    return next(new ValidationError("All fields are required"));
+  const validateData = signUpValidate(userData);
+
+  if (validateData) {
+    return next(new ValidationError(JSON.stringify(validateData)));
   }
 
-  const newSendSms = sendSms === "on";
-  const newTermsOfServices = termsOfServices === "on";
-
   try {
-    const user = new UserModel({
-      email,
-      firstName,
-      lastName,
-      workRole,
-      country,
-      sendSms: newSendSms,
-      termsOfServices: newTermsOfServices,
-      password,
-    });
+    const user = new UserModel(userData);
 
     const newUser = await user.save();
     const token = await generateAuthToken({
@@ -91,6 +34,8 @@ export const signUpController = async (req, res, next) => {
       token,
     });
   } catch (error) {
+    console.log(error);
+
     if (error?.errorResponse?.code === 11000) {
       return next(new ValidationError("User already exist"));
     }

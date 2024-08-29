@@ -1,58 +1,44 @@
 import mongoose from "mongoose";
 import bcryptjs from "bcryptjs";
 
-const userSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: [true, "Email is required"],
-    unique: true,
-    trim: true,
-    match: [
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-      "Please provide a valid email address",
-    ],
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+      trim: true,
+      match: [
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        "Please provide a valid email address",
+      ],
+    },
+    username: {
+      type: String,
+      trim: true,
+    },
+    workRole: {
+      type: String,
+      required: [true, "Work role is required"],
+      enum: ["owner", "contractor", "guest", "admin"],
+      default: "guest",
+    },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      trim: true,
+      minlength: [8, "Password must be at least 8 characters long"],
+      select: false,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
-  firstName: {
-    type: String,
-    required: [true, "First name is required"],
-    trim: true,
-  },
-  lastName: {
-    type: String,
-    required: [true, "Last name is required"],
-    trim: true,
-  },
-  username: {
-    type: String,
-    trim: true,
-  },
-  workRole: {
-    type: String,
-    required: [true, "Work role is required"],
-  },
-  country: {
-    type: String,
-    required: [true, "Country is required"],
-  },
-  sendSms: {
-    type: Boolean,
-    default: false,
-  },
-  termsOfServices: {
-    type: Boolean,
-    required: [true, "Accepting terms of service is required"],
-    default: false,
-  },
-  password: {
-    type: String,
-    required: [true, "Password is required"],
-    trim: true,
-    minlength: [8, "Password must be at least 8 characters long"],
-    select: false, 
-  },
-}, {
-  timestamps: true, 
-});
+  {
+    timestamps: true,
+  }
+);
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
@@ -82,4 +68,3 @@ userSchema.statics.findByEmail = async function (email) {
 const UserModel = mongoose.model("User", userSchema);
 
 export default UserModel;
-

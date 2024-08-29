@@ -8,7 +8,46 @@ export function validateJobData(data) {
     typeof data.title !== "string" ||
     data.title.trim() === ""
   ) {
-    errors.title = "Title is required. ";
+    errors.title = "Title is required.";
+  }
+
+  if (
+    !data.description ||
+    typeof data.description !== "string" ||
+    data.description.trim() === ""
+  ) {
+    errors.description = "Description is required.";
+  }
+
+  if (
+    !data.startDate ||
+    !moment(data.startDate, "YYYY-MM-DD", true).isValid()
+  ) {
+    errors.startDate =
+      "Start Date is required and must be a valid date in YYYY-MM-DD format.";
+  }
+
+  if (!data.startTime || !moment(data.startTime, "HH:mm", true).isValid()) {
+    errors.startTime =
+      "Start Time is required and must be a valid time in HH:mm format.";
+  }
+
+  if (!data.endDate || !moment(data.endDate, "YYYY-MM-DD", true).isValid()) {
+    errors.endDate =
+      "End Date is required and must be a valid date in YYYY-MM-DD format.";
+  }
+
+  if (!data.endTime || !moment(data.endTime, "HH:mm", true).isValid()) {
+    errors.endTime =
+      "End Time is required and must be a valid time in HH:mm format.";
+  }
+
+  if (
+    !data.estimateCost ||
+    typeof data.estimateCost !== "string" ||
+    data.estimateCost.trim() === ""
+  ) {
+    errors.estimateCost = "Estimate Cost is required.";
   }
 
   if (
@@ -17,27 +56,6 @@ export function validateJobData(data) {
     data.location.trim() === ""
   ) {
     errors.location = "Location is required.";
-  }
-
-  if (!data.deadLine || !moment(data.deadLine, "DD-MM-YYYY", true).isValid()) {
-    errors.deadLine =
-      "DeadLine is required. and must be a valid date in DD-MM-YYYY format.";
-  }
-
-  if (
-    !data.estimateCost ||
-    typeof data.estimateCost !== "string" ||
-    data.estimateCost.trim() === ""
-  ) {
-    errors.estimateCost = "EstimateCost is required.";
-  }
-
-  if (
-    !data.description ||
-    typeof data.description !== "string" ||
-    data.description.trim() === ""
-  ) {
-    errors.description = "Description is required. ";
   }
 
   return errors;
