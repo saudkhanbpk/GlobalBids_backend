@@ -16,19 +16,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function sendEmail(mailOptions) {
+export async function sendEmail(mailOptions) {
   const info = await transporter.sendMail({
     from: "saudkhanbpk@gmail.com",
     ...mailOptions,
   });
-
-  console.log("Message sent: %s", info.messageId);
 }
 
-const mailOptions = {
-  to: "naeemkhan9293g@gmail.com",
-  subject: "VERIFICATION-OTP",
-  html: "<b>HTML TEXT</b>",
-};
 
-await sendEmail(mailOptions);

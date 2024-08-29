@@ -8,9 +8,8 @@ import errorHandler from "./error/errorHandler.js";
 import { RouteNotFoundError } from "./error/AppError.js";
 import profileRouter from "./routes/profile.routes.js";
 import jobsRouter from "./routes/jobs.routes.js";
-import "dotenv/config"
 
-// dotenv.config();
+dotenv.config();
 const app = express();
 connectDB();
 // app.use(bodyParser.json());
