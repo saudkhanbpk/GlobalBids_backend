@@ -34,6 +34,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    imageUrl: {
+      type: String,
+      default:
+        "https://res.cloudinary.com/tech-creator/image/upload/v1723793884/kvy9hb4hqyymv7mvcsy4.jpg",
+    },
   },
   {
     timestamps: true,
