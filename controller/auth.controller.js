@@ -3,6 +3,7 @@ import {
   ValidationError,
   InternalServerError,
   LoginError,
+  UnauthorizedError,
 } from "../error/AppError.js";
 import generateAuthToken from "../utils/generte-auth-token.js";
 import { getUserByEmail } from "../services/user.service.js";
@@ -64,6 +65,10 @@ export const loginController = async (req, res, next) => {
 
   try {
     const user = await getUserByEmail(email);
+    // if (!user.isVerified) {
+    //   return next(new UnauthorizedError("please verify your account first"));
+    // }
+
     if (!user) {
       return next(new LoginError());
     }
@@ -76,6 +81,8 @@ export const loginController = async (req, res, next) => {
     const token = await generateAuthToken({ id: user._id, email: user.email });
     return res.status(200).json({ user, token, success: true });
   } catch (error) {
+    console.log(error);
+
     return next(new InternalServerError());
   }
 };
@@ -89,14 +96,15 @@ export const otpController = async (req, res, next) => {
     if (!userOtp) {
       return next(new ValidationError("Invalid Otp"));
     }
+    console.log(userOtp.otp, otp);
 
     if (userOtp?.otp === otp) {
       user.isVerified = true;
       await user.save();
-      return res.status(200).json({ user });
+      return res.status(200).json({ message: "Account verified successfully" });
     }
     return next(new ValidationError("Invalid Otp"));
-  } catch (error) {    
+  } catch (error) {
     return next(new InternalServerError());
   }
 };

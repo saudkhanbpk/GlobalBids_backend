@@ -6,7 +6,6 @@ import authRoutes from "./routes/auth.routes.js";
 import { connectDB } from "./config/db.js";
 import errorHandler from "./error/errorHandler.js";
 import { RouteNotFoundError } from "./error/AppError.js";
-import profileRouter from "./routes/profile.routes.js";
 import jobsRouter from "./routes/jobs.routes.js";
 
 dotenv.config();
@@ -24,7 +23,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth/", authRoutes);
-app.use("/api/profile/", profileRouter);
 app.use("/api/jobs/", jobsRouter);
 
 app.all("*", (req, res, next) => {

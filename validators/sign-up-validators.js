@@ -10,9 +10,9 @@ export const signUpValidate = (data) => {
   }
 
   const validRoles = ["owner", "contractor", "guest", "admin"];
-  if (!data?.workRole) {
+  if (!data?.role) {
     errors.workRole = "Work role is required";
-  } else if (!validRoles.includes(data?.workRole)) {
+  } else if (!validRoles.includes(data?.role)) {
     errors.workRole = `Work role must be one of the following: ${validRoles.join(
       ", "
     )}`;

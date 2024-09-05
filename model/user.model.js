@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    workRole: {
+    role: {
       type: String,
       required: [true, "Work role is required"],
       enum: ["owner", "contractor", "guest", "admin"],
