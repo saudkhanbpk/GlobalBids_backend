@@ -50,6 +50,8 @@ export const signUpController = async (req, res, next) => {
       otpId: newOtp._id,
     });
   } catch (error) {
+    console.log(error);
+    
     if (error?.errorResponse?.code === 11000) {
       return next(new ValidationError("User already exist"));
     }
