@@ -34,6 +34,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    licenseNumber: {
+      type: String,
+    },
+    insuranceInformation: {
+      type: String,
+    },
     imageUrl: {
       type: String,
       default:

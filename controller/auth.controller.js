@@ -3,7 +3,6 @@ import {
   ValidationError,
   InternalServerError,
   LoginError,
-  UnauthorizedError,
 } from "../error/AppError.js";
 import generateAuthToken from "../utils/generte-auth-token.js";
 import { getUserByEmail, getUserById } from "../services/user.service.js";
@@ -12,7 +11,6 @@ import OtpModel from "../model/otp.model.js";
 import { generateOtp } from "../utils/generate-otp.js";
 import { sendEmail } from "../utils/send-emails.js";
 import { otpMailOptions } from "../utils/mail-options.js";
-import { getOtpById } from "../services/otp.services.js";
 
 export const signUpController = async (req, res, next) => {
   const userData = req.body;
@@ -50,8 +48,6 @@ export const signUpController = async (req, res, next) => {
       otpId: newOtp._id,
     });
   } catch (error) {
-    console.log(error);
-    
     if (error?.errorResponse?.code === 11000) {
       return next(new ValidationError("User already exist"));
     }
