@@ -107,7 +107,7 @@ export const otpController = async (req, res, next) => {
   }
 };
 
-export const resendOtp = async (req, res, next) => {
+export const resendOtp = async (req, res) => {
   try {
     const { otpId, userId } = req.body;
 
@@ -165,3 +165,45 @@ export const resendOtp = async (req, res, next) => {
       .json({ success: false, message: "Failed to resend OTP." });
   }
 };
+
+const updateUserInfo = async (req, res, next) => {
+  const { email, username, role, licenseNumber, insuranceInformation, userId } =
+    req.body;
+
+  try {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return next(new NotFoundError("User not found"));
+    }
+
+    user.email = email || user.email;
+    user.username = username || user.username;
+    user.role = role || user.role;
+    user.licenseNumber = licenseNumber || user.licenseNumber;
+    user.insuranceInformation =
+      insuranceInformation || user.insuranceInformation;
+    user.imageUrl = imageUrl || user.imageUrl;
+
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        user,
+      },
+    });
+  } catch (error) {
+    if (error instanceof ValidationError || error instanceof NotFoundError) {
+      error.logError();
+      return next(error);
+    }
+
+    const serverError = new InternalServerError(
+      "An error occurred while updating user information"
+    );
+
+    return next(serverError);
+  }
+};
+
+export { updateUserInfo };
