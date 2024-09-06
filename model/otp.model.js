@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 const otpSchema = mongoose.Schema(
   {
     otp: { type: String, required: true },
-    userId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref:"User" },
+    count: { type: Number, default: 1 },
   },
   {
     timestamps: true,

@@ -6,12 +6,13 @@ import {
   UnauthorizedError,
 } from "../error/AppError.js";
 import generateAuthToken from "../utils/generte-auth-token.js";
-import { getUserByEmail } from "../services/user.service.js";
+import { getUserByEmail, getUserById } from "../services/user.service.js";
 import { signUpValidate } from "../validators/sign-up-validators.js";
 import OtpModel from "../model/otp.model.js";
 import { generateOtp } from "../utils/generate-otp.js";
 import { sendEmail } from "../utils/send-emails.js";
 import { otpMailOptions } from "../utils/mail-options.js";
+import { getOtpById } from "../services/otp.services.js";
 
 export const signUpController = async (req, res, next) => {
   const userData = req.body;
@@ -81,8 +82,6 @@ export const loginController = async (req, res, next) => {
     const token = await generateAuthToken({ id: user._id, email: user.email });
     return res.status(200).json({ user, token, success: true });
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError());
   }
 };
@@ -96,15 +95,75 @@ export const otpController = async (req, res, next) => {
     if (!userOtp) {
       return next(new ValidationError("Invalid Otp"));
     }
-    console.log(userOtp.otp, otp);
 
     if (userOtp?.otp === otp) {
       user.isVerified = true;
       await user.save();
-      return res.status(200).json({ message: "Account verified successfully" });
+      return res
+        .status(200)
+        .json({ message: "Account verified successfully", success: true });
     }
     return next(new ValidationError("Invalid Otp"));
   } catch (error) {
     return next(new InternalServerError());
+  }
+};
+
+export const resendOtp = async (req, res, next) => {
+  try {
+    const { otpId, userId } = req.body;
+
+    let oldOtp;
+    if (otpId) {
+      oldOtp = await OtpModel.findById(otpId).populate({
+        path: "userId",
+        select: "email",
+      });
+    }
+
+    if (oldOtp) {
+      if (oldOtp.count >= 3) {
+        return res.status(400).json({
+          success: false,
+          message: "You can't request OTP more than 3 times in an hour.",
+        });
+      }
+
+      const newOtp = generateOtp();
+      oldOtp.otp = newOtp;
+      oldOtp.count += 1;
+      await oldOtp.save();
+
+      const mailOpt = otpMailOptions(newOtp, oldOtp.userId.email);
+      await sendEmail(mailOpt);
+
+      return res.status(200).json({
+        success: true,
+        message: "OTP resent successfully.",
+      });
+    }
+
+    const user = await getUserById(userId);
+
+    const newOtp = generateOtp();
+    const newOtpEntry = new OtpModel({
+      otp: newOtp,
+      userId: userId,
+      count: 1,
+    });
+    await newOtpEntry.save();
+
+    const mailOpt = otpMailOptions(newOtp, user.email);
+    await sendEmail(mailOpt);
+
+    return res.status(201).json({
+      success: true,
+      message: "Otp sent to your email",
+      otpId: newOtpEntry._id,
+    });
+  } catch (error) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Failed to resend OTP." });
   }
 };
