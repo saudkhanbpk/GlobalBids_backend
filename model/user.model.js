@@ -34,17 +34,14 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    licenseNumber: {
-      type: String,
-    },
-    insuranceInformation: {
-      type: String,
-    },
     imageUrl: {
       type: String,
       default:
         "https://res.cloudinary.com/tech-creator/image/upload/v1723793884/kvy9hb4hqyymv7mvcsy4.jpg",
     },
+    fullName: { type: String, trim: true },
+    phone: { type: String, trim: true },
+    address: { type: String, trim: true },
   },
   {
     timestamps: true,

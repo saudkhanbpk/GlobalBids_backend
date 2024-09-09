@@ -14,9 +14,10 @@ export const contractorProfileController = async (req, res, next) => {
       const user = await getUserById(data.userId);
       if (imageUrl) {
         user.imageUrl = imageUrl;
+        await user.save();
       }
-      await user.save();
     }
+
     let services = "";
     if (data.services) {
       services = JSON.parse(data.services);
@@ -41,9 +42,15 @@ export const contractorProfileController = async (req, res, next) => {
 
       await contractorProfile.save();
 
-      const populatedProfile = await contractorProfile.populate("user");
+      const populatedProfile = await ContractorProfileModel.findById(
+        contractorProfile._id
+      ).populate({
+        path: "user",
+        select: "imageUrl",
+      });
 
       return res.status(200).json({
+        success: true,
         message: "Contractor profile updated successfully!",
         contractorProfile: populatedProfile,
       });
@@ -59,9 +66,15 @@ export const contractorProfileController = async (req, res, next) => {
 
     await contractorProfile.save();
 
-    const populatedProfile = await contractorProfile.populate("user");
+    const populatedProfile = await ContractorProfileModel.findById(
+      contractorProfile._id
+    ).populate({
+      path: "user",
+      select: "imageUrl",
+    });
 
     return res.status(201).json({
+      success: true,
       message: "Contractor profile created successfully!",
       contractorProfile: populatedProfile,
     });

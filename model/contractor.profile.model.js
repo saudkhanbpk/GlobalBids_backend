@@ -10,7 +10,7 @@ const contractorProfileSchema = new mongoose.Schema({
 });
 
 const ContractorProfileModel = mongoose.model(
-  "ContractorProfileModel",
+  "ContractorProfile",
   contractorProfileSchema
 );
 
