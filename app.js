@@ -7,23 +7,23 @@ import { connectDB } from "./config/db.js";
 import errorHandler from "./error/errorHandler.js";
 import { RouteNotFoundError } from "./error/AppError.js";
 import jobsRouter from "./routes/jobs.routes.js";
+import contractorProfileRouter from "./routes/contractor.profile.routes.js";
 
 dotenv.config();
 const app = express();
 connectDB();
-// app.use(bodyParser.json());
-// app.use(express.json());
-app.use(express.json()); 
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({ origin: true }));
 app.use(errorHandler);
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   return res.status(200).json({ message: "Hello GlobalBids!" });
 });
 
 app.use("/api/auth/", authRoutes);
 app.use("/api/jobs/", jobsRouter);
+app.use("/api/contractor/", contractorProfileRouter);
 
 app.all("*", (req, res, next) => {
   const err = new RouteNotFoundError(

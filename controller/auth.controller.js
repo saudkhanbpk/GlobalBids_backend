@@ -11,6 +11,7 @@ import OtpModel from "../model/otp.model.js";
 import { generateOtp } from "../utils/generate-otp.js";
 import { sendEmail } from "../utils/send-emails.js";
 import { otpMailOptions } from "../utils/mail-options.js";
+import { uploadProfileImage } from "../services/upload.image.service.js";
 
 export const signUpController = async (req, res, next) => {
   const userData = req.body;
@@ -167,8 +168,17 @@ export const resendOtp = async (req, res) => {
 };
 
 const updateUserInfo = async (req, res, next) => {
-  const { email, username, role, licenseNumber, insuranceInformation, userId } =
+  const { email, username, role, licenseNumber, insuranceInformation } =
     req.body;
+
+  const userId = req.user._id;
+  const file = req.file;
+  console.log(req.user, userId);
+
+  let imageUrl = "";
+  if (file) {
+    imageUrl = await uploadProfileImage(file);
+  }
 
   try {
     const user = await UserModel.findById(userId);
@@ -193,8 +203,8 @@ const updateUserInfo = async (req, res, next) => {
       },
     });
   } catch (error) {
+    error.logError();
     if (error instanceof ValidationError || error instanceof NotFoundError) {
-      error.logError();
       return next(error);
     }
 
