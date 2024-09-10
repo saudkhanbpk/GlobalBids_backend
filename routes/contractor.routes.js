@@ -2,7 +2,7 @@ import express from "express";
 import {
   contractorProfileController,
   getContractorProfileController,
-} from "../controller/contractor.profile.controller.js";
+} from "../controller/contractor.controller.js";
 import upload from "../config/multer.config.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
