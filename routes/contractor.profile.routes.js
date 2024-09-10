@@ -1,5 +1,8 @@
 import express from "express";
-import { contractorProfileController } from "../controller/contractor.profile.controller.js";
+import {
+  contractorProfileController,
+  getContractorProfileController,
+} from "../controller/contractor.profile.controller.js";
 import upload from "../config/multer.config.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
@@ -10,6 +13,12 @@ contractorProfileRouter.post(
   authMiddleware,
   upload.single("image"),
   contractorProfileController
+);
+
+contractorProfileRouter.get(
+  "/profile",
+  authMiddleware,
+  getContractorProfileController
 );
 
 export default contractorProfileRouter;

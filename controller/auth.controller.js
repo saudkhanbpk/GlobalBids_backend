@@ -168,46 +168,39 @@ export const resendOtp = async (req, res) => {
 };
 
 const updateUserInfo = async (req, res, next) => {
-  const { email, username, role, licenseNumber, insuranceInformation } =
-    req.body;
-
+  const { fullName, address, phone, password } = req.body;
   const userId = req.user._id;
   const file = req.file;
-  console.log(req.user, userId);
-
-  let imageUrl = "";
-  if (file) {
-    imageUrl = await uploadProfileImage(file);
-  }
-
   try {
+    let imageUrl = "";
+    if (file) {
+      imageUrl = await uploadProfileImage(file);
+    }
     const user = await UserModel.findById(userId);
     if (!user) {
       return next(new NotFoundError("User not found"));
     }
 
-    user.email = email || user.email;
-    user.username = username || user.username;
-    user.role = role || user.role;
-    user.licenseNumber = licenseNumber || user.licenseNumber;
-    user.insuranceInformation =
-      insuranceInformation || user.insuranceInformation;
-    user.imageUrl = imageUrl || user.imageUrl;
+    user.fullName = fullName || user.fullName;
+    user.address = address || user.address;
+    user.phone = phone || user.phone;
+
+    if (password) {
+      user.password = password;
+    }
+
+    if (imageUrl) {
+      user.imageUrl = imageUrl;
+    }
 
     await user.save();
 
     res.status(200).json({
-      status: "success",
-      data: {
-        user,
-      },
+      success: true,
+      user,
+      message: "user info updated successfully!",
     });
   } catch (error) {
-    error.logError();
-    if (error instanceof ValidationError || error instanceof NotFoundError) {
-      return next(error);
-    }
-
     const serverError = new InternalServerError(
       "An error occurred while updating user information"
     );
@@ -215,5 +208,7 @@ const updateUserInfo = async (req, res, next) => {
     return next(serverError);
   }
 };
+
+export default updateUserInfo;
 
 export { updateUserInfo };

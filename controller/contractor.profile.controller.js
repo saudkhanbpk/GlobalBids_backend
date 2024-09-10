@@ -1,5 +1,6 @@
 import { InternalServerError } from "../error/AppError.js";
 import ContractorProfileModel from "../model/contractor.profile.model.js";
+import { getProfileByUserId } from "../services/profile.service.js";
 import { uploadProfileImage } from "../services/upload.image.service.js";
 import { getUserById } from "../services/user.service.js";
 
@@ -80,6 +81,19 @@ export const contractorProfileController = async (req, res, next) => {
     });
   } catch (error) {
     console.log(error);
+    return next(new InternalServerError());
+  }
+};
+
+export const getContractorProfileController = async (req, res, next) => {
+  const userId = req.user._id;
+  try {
+    const profile = await getProfileByUserId(userId);
+    return res.status(200).json({
+      success: true,
+      profile,
+    });
+  } catch (error) {
     return next(new InternalServerError());
   }
 };

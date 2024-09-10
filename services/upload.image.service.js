@@ -8,6 +8,8 @@ export const uploadProfileImage = async (file) => {
     });
     return result.secure_url;
   } catch (err) {
+    console.log(err);
+    
     throw new FileUploadError("Can't upload image");
   }
 };
