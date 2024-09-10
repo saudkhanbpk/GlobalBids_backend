@@ -7,7 +7,7 @@ import { connectDB } from "./config/db.js";
 import errorHandler from "./error/errorHandler.js";
 import { RouteNotFoundError } from "./error/AppError.js";
 import jobsRouter from "./routes/jobs.routes.js";
-import contractorProfileRouter from "./routes/contractor.routes.js";
+import contractorRouter from "./routes/contractor.routes.js";
 import ownerRoutes from "./routes/owner.routes.js";
 
 dotenv.config();
@@ -24,7 +24,7 @@ app.get("/", (_req, res) => {
 
 app.use("/api/auth/", authRoutes);
 app.use("/api/jobs/", jobsRouter);
-app.use("/api/contractor/", contractorProfileRouter);
+app.use("/api/contractor/", contractorRouter);
 app.use("/api/owner/", ownerRoutes);
 
 app.all("*", (req, res, next) => {

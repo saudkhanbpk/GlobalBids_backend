@@ -1,24 +1,29 @@
 import express from "express";
 import {
   contractorProfileController,
+  contractorSettings,
   getContractorProfileController,
+  getContractorSettings
 } from "../controller/contractor.controller.js";
 import upload from "../config/multer.config.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
-const contractorProfileRouter = express.Router();
+const contractorRouter = express.Router();
 
-contractorProfileRouter.post(
+contractorRouter.post(
   "/profile",
   authMiddleware,
   upload.single("image"),
   contractorProfileController
 );
 
-contractorProfileRouter.get(
+contractorRouter.get(
   "/profile",
   authMiddleware,
   getContractorProfileController
 );
 
-export default contractorProfileRouter;
+contractorRouter.post("/settings", authMiddleware, contractorSettings);
+contractorRouter.get("/settings", authMiddleware, getContractorSettings);
+
+export default contractorRouter;
