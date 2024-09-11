@@ -42,8 +42,8 @@ const userSchema = new mongoose.Schema(
     fullName: { type: String, trim: true },
     phone: { type: String, trim: true },
     address: { type: String, trim: true },
-    rating: { type: String, trim: true, default:"5" },
-
+    rating: { type: String, trim: true, default: "5" },
+    label: { type: String, trim: true },
   },
   {
     timestamps: true,

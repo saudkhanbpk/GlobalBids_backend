@@ -1,5 +1,6 @@
 import OwnerSettingModel from "../model/owner.settings.model.js";
 import { BusinessLogicError, InternalServerError } from "../error/AppError.js";
+import UserModel from "../model/user.model.js";
 
 export const settings = async (req, res, next) => {
   const userId = req.user._id;
@@ -64,5 +65,22 @@ export const getSettings = async (req, res) => {
     return res.status(200).json({ success: true, settings });
   } catch (error) {
     return next(new InternalServerError("can't get settings"));
+  }
+};
+
+export const getContractors = async (req, res, next) => {
+  try {
+    const contractors = await UserModel.find({ role: "contractor" });
+    const total = await UserModel.countDocuments();
+
+    return res.status(200).json({
+      success: true,
+      total,
+      contractors,
+    });
+  } catch (error) {
+    console.log(error);
+    
+    return next(new InternalServerError());
   }
 };

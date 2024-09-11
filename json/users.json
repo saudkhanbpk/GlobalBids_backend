@@ -1,0 +1,554 @@
+[
+  {
+    "email": "owner1@example.com",
+    "username": "owner1user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner1.jpg",
+    "createdAt": {
+      "$date": "2024-09-06T10:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-09T10:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "123 Elm Street, Springfield, IL 62704, USA",
+    "fullName": "John Doe",
+    "phone": "03123456789",
+    "rating": "5"
+  },
+  {
+    "email": "owner2@example.com",
+    "username": "owner2user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner2.jpg",
+    "createdAt": {
+      "$date": "2024-09-07T11:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-10T11:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "456 Oak Avenue, Shelbyville, IL 62565, USA",
+    "fullName": "Jane Smith",
+    "phone": "03129876543",
+    "rating": "4"
+  },
+  {
+    "email": "owner3@example.com",
+    "username": "owner3user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner3.jpg",
+    "createdAt": {
+      "$date": "2024-09-08T12:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-11T12:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "789 Pine Lane, Capital City, IL 62701, USA",
+    "fullName": "Emily Johnson",
+    "phone": "03131234567",
+    "rating": "5"
+  },
+  {
+    "email": "owner4@example.com",
+    "username": "owner4user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner4.jpg",
+    "createdAt": {
+      "$date": "2024-09-09T13:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-12T13:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "101 Maple Road, Rivertown, IL 62052, USA",
+    "fullName": "Michael Brown",
+    "phone": "03142345678",
+    "rating": "4"
+  },
+  {
+    "email": "owner5@example.com",
+    "username": "owner5user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner5.jpg",
+    "createdAt": {
+      "$date": "2024-09-10T14:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-13T14:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "202 Birch Street, Pleasantville, IL 62704, USA",
+    "fullName": "Sophia Davis",
+    "phone": "03153456789",
+    "rating": "5"
+  },
+  {
+    "email": "owner6@example.com",
+    "username": "owner6user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner6.jpg",
+    "createdAt": {
+      "$date": "2024-09-11T15:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-14T15:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "303 Cedar Street, Oakville, IL 62901, USA",
+    "fullName": "William Wilson",
+    "phone": "03164567890",
+    "rating": "4"
+  },
+  {
+    "email": "owner7@example.com",
+    "username": "owner7user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner7.jpg",
+    "createdAt": {
+      "$date": "2024-09-12T16:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-15T16:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "404 Fir Avenue, Lakewood, IL 62301, USA",
+    "fullName": "Olivia Taylor",
+    "phone": "03175678901",
+    "rating": "5"
+  },
+  {
+    "email": "owner8@example.com",
+    "username": "owner8user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner8.jpg",
+    "createdAt": {
+      "$date": "2024-09-13T17:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-16T17:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "505 Spruce Lane, River City, IL 62567, USA",
+    "fullName": "James Anderson",
+    "phone": "03186789012",
+    "rating": "4"
+  },
+  {
+    "email": "owner9@example.com",
+    "username": "owner9user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner9.jpg",
+    "createdAt": {
+      "$date": "2024-09-14T18:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-17T18:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "606 Willow Drive, Hilltop, IL 62703, USA",
+    "fullName": "Isabella Martinez",
+    "phone": "03197890123",
+    "rating": "5"
+  },
+  {
+    "email": "owner10@example.com",
+    "username": "owner10user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner10.jpg",
+    "createdAt": {
+      "$date": "2024-09-15T19:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-18T19:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "707 Birchwood Street, Greenfield, IL 62859, USA",
+    "fullName": "Daniel Lee",
+    "phone": "03108901234",
+    "rating": "4"
+  },
+
+  {
+    "email": "owner11@example.com",
+    "username": "owner11user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner11.jpg",
+    "createdAt": {
+      "$date": "2024-09-16T20:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-19T20:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "808 Cedar Street, Midtown, IL 62056, USA",
+    "fullName": "Mia Robinson",
+    "phone": "03119012345",
+    "rating": "5"
+  },
+  {
+    "email": "owner12@example.com",
+    "username": "owner12user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner12.jpg",
+    "createdAt": {
+      "$date": "2024-09-17T21:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-20T21:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "909 Oak Avenue, Suburbia, IL 62704, USA",
+    "fullName": "Ethan Moore",
+    "phone": "03120123456",
+    "rating": "4"
+  },
+  {
+    "email": "owner13@example.com",
+    "username": "owner13user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner13.jpg",
+    "createdAt": {
+      "$date": "2024-09-18T22:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-21T22:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "1010 Maple Street, Lakeside, IL 62562, USA",
+    "fullName": "Ava Lee",
+    "phone": "03131234567",
+    "rating": "5"
+  },
+  {
+    "email": "owner14@example.com",
+    "username": "owner14user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner14.jpg",
+    "createdAt": {
+      "$date": "2024-09-19T23:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-22T23:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "1212 Birchwood Drive, Downtown, IL 62025, USA",
+    "fullName": "Noah Carter",
+    "phone": "03142345678",
+    "rating": "4"
+  },
+  {
+    "email": "owner15@example.com",
+    "username": "owner15user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner15.jpg",
+    "createdAt": {
+      "$date": "2024-09-20T10:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-23T10:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "1313 Willow Street, Northside, IL 62703, USA",
+    "fullName": "Liam Harris",
+    "phone": "03153456789",
+    "rating": "5"
+  },
+  {
+    "email": "owner16@example.com",
+    "username": "owner16user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner16.jpg",
+    "createdAt": {
+      "$date": "2024-09-21T11:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-24T11:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "1414 Spruce Avenue, Westside, IL 62565, USA",
+    "fullName": "Isabella King",
+    "phone": "03164567890",
+    "rating": "4"
+  },
+  {
+    "email": "owner17@example.com",
+    "username": "owner17user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner17.jpg",
+    "createdAt": {
+      "$date": "2024-09-22T12:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-25T12:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "1515 Fir Street, Eastside, IL 62056, USA",
+    "fullName": "Mason Wright",
+    "phone": "03175678901",
+    "rating": "5"
+  },
+  {
+    "email": "owner18@example.com",
+    "username": "owner18user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner18.jpg",
+    "createdAt": {
+      "$date": "2024-09-23T13:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-26T13:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "1616 Maple Avenue, Southside, IL 62567, USA",
+    "fullName": "Evelyn Adams",
+    "phone": "03186789012",
+    "rating": "4"
+  },
+  {
+    "email": "owner19@example.com",
+    "username": "owner19user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner19.jpg",
+    "createdAt": {
+      "$date": "2024-09-24T14:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-27T14:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "1717 Oak Lane, Hillcrest, IL 62035, USA",
+    "fullName": "Aiden Nelson",
+    "phone": "03197890123",
+    "rating": "5"
+  },
+  {
+    "email": "owner20@example.com",
+    "username": "owner20user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner20.jpg",
+    "createdAt": {
+      "$date": "2024-09-25T15:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-28T15:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "1818 Pine Street, Riverside, IL 62301, USA",
+    "fullName": "Lucas Miller",
+    "phone": "03108901234",
+    "rating": "4"
+  },
+  {
+    "email": "owner21@example.com",
+    "username": "owner21user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner21.jpg",
+    "createdAt": {
+      "$date": "2024-09-26T16:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-29T16:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "1919 Maple Drive, Brookside, IL 62065, USA",
+    "fullName": "Ella Carter",
+    "phone": "03119012345",
+    "rating": "5"
+  },
+  {
+    "email": "owner22@example.com",
+    "username": "owner22user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner22.jpg",
+    "createdAt": {
+      "$date": "2024-09-27T17:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-09-30T17:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "2020 Elm Street, Hillcrest, IL 62567, USA",
+    "fullName": "Benjamin Davis",
+    "phone": "03120123456",
+    "rating": "4"
+  },
+  {
+    "email": "owner23@example.com",
+    "username": "owner23user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner23.jpg",
+    "createdAt": {
+      "$date": "2024-09-28T18:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-10-01T18:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "2121 Oak Avenue, Crestwood, IL 62025, USA",
+    "fullName": "Charlotte Martinez",
+    "phone": "03131234567",
+    "rating": "5"
+  },
+  {
+    "email": "owner24@example.com",
+    "username": "owner24user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner24.jpg",
+    "createdAt": {
+      "$date": "2024-09-29T19:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-10-02T19:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "2222 Birchwood Drive, Rivertown, IL 62701, USA",
+    "fullName": "Henry Thompson",
+    "phone": "03142345678",
+    "rating": "4"
+  },
+  {
+    "email": "owner25@example.com",
+    "username": "owner25user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner25.jpg",
+    "createdAt": {
+      "$date": "2024-09-30T20:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-10-03T20:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "2323 Cedar Street, Downtown, IL 62567, USA",
+    "fullName": "Amelia Wilson",
+    "phone": "03153456789",
+    "rating": "5"
+  },
+  {
+    "email": "owner26@example.com",
+    "username": "owner26user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner26.jpg",
+    "createdAt": {
+      "$date": "2024-10-01T21:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-10-04T21:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "2424 Pine Avenue, Greenfield, IL 62035, USA",
+    "fullName": "Jack Harris",
+    "phone": "03164567890",
+    "rating": "4"
+  },
+  {
+    "email": "owner27@example.com",
+    "username": "owner27user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner27.jpg",
+    "createdAt": {
+      "$date": "2024-10-02T22:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-10-05T22:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "2525 Maple Lane, Eastside, IL 62562, USA",
+    "fullName": "Olivia Lewis",
+    "phone": "03175678901",
+    "rating": "5"
+  },
+  {
+    "email": "owner28@example.com",
+    "username": "owner28user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner28.jpg",
+    "createdAt": {
+      "$date": "2024-10-03T23:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-10-06T23:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "2626 Elm Street, Riverside, IL 62065, USA",
+    "fullName": "Lucas Walker",
+    "phone": "03186789012",
+    "rating": "4"
+  },
+  {
+    "email": "owner29@example.com",
+    "username": "owner29user",
+    "role": "owner",
+    "password": "$2a$10$K/rclBKeDN0.zBRJ5vJufejDaoiYXBFkFYES1Q3Hf5F/hbdca2A6y",
+    "isVerified": true,
+    "imageUrl": "https://res.cloudinary.com/tech-creator/image/upload/v1725865197/profile-images/owner29.jpg",
+    "createdAt": {
+      "$date": "2024-10-04T10:31:25.385Z"
+    },
+    "updatedAt": {
+      "$date": "2024-10-07T10:28:09.721Z"
+    },
+    "__v": 0,
+    "address": "2727 Fir Avenue, Brookside, IL 62567, USA",
+    "fullName": "Mason Young",
+    "phone": "03197890123",
+    "rating": "5"
+  }
+]
