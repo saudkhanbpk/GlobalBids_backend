@@ -19,7 +19,7 @@ const generateAuthToken = async (user) => {
   };
 
   return await jwt.sign(payload, authSecret, {
-    expiresIn: "1h",
+    expiresIn: "7w",
     algorithm: "HS256",
   });
 };

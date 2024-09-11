@@ -12,7 +12,6 @@ import { validateJobFields } from "../validators/jobs-validator.js";
 export const createJob = async (req, res, next) => {
   const file = req.file;
 
-
   if (req.user.role !== "owner") {
     return next(new BusinessLogicError());
   }
@@ -48,5 +47,24 @@ export const createJob = async (req, res, next) => {
       .json({ success: true, message: "job has been created!", job: savedJob });
   } catch (error) {
     return next(new InternalServerError());
+  }
+};
+
+
+export const getAllJobs = async (req, res) => {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const total = await JobModel.countDocuments();
+
+    const jobs = await JobModel.find({ createdAt: { $gt: thirtyDaysAgo } })
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    res.status(200).json({ success: true, total, jobs });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred while fetching jobs" });
   }
 };
