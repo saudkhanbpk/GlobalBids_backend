@@ -1,51 +1,51 @@
-import cloudinary from "../config/cloudinary.config.js";
+import { JOB_DIRECTORY } from "../constants/dirctory.constants.js";
 import {
+  BusinessLogicError,
   FileUploadError,
   InternalServerError,
   ValidationError,
 } from "../error/AppError.js";
-import { validateJobData } from "../validators/jobs-validator.js";
 import JobModel from "../model/job.model.js";
+import { uploadFile } from "../services/upload.file.service.js";
+import { validateJobFields } from "../validators/jobs-validator.js";
 
-
-
-export const createJobController = async (req, res, next) => {
-  
+export const createJob = async (req, res, next) => {
   const file = req.file;
-  const user = req.user;
-  const { status, ...rest } = req.body;
-  const validate = validateJobData(rest);
-  if (Object.keys(validate).length > 0) {
-    return next(
-      new ValidationError(`validation fail: ${JSON.stringify(validate)}`)
-    );
+
+
+  if (req.user.role !== "owner") {
+    return next(new BusinessLogicError());
+  }
+
+  if (!file) {
+    return next(new FileUploadError("file is required!"));
+  }
+
+  const validate = validateJobFields(req.body);
+  if (validate) {
+    return next(new ValidationError(JSON.stringify(validate)));
+  }
+
+  let fileUrl = "";
+  try {
+    const fileRes = await uploadFile(file, JOB_DIRECTORY);
+    fileUrl = fileRes;
+  } catch (error) {
+    console.log(error);
+
+    return next(new FileUploadError());
   }
   try {
-    const jobData = {
-      postedBy: user?._id,
-      ...rest,
-    };
+    const job = new JobModel({
+      user: req.user._id,
+      ...req.body,
+      file: fileUrl,
+    });
 
-    let secureUrl = "";
-    if (file) {
-      await cloudinary.uploader.upload(file.path, async (err, result) => {
-        if (err) {
-          return next(FileUploadError("can't upload image"));
-        }
-        secureUrl = result.secure_url;
-      });
-    }
-
-    if (secureUrl) {
-      jobData.fileUrl = secureUrl;
-    }
-
-    const newJob = new JobModel(jobData);
-
-    const savedJob = await newJob.save();
-    return res
-      .status(200)
-      .json({ success: true, message: "job created!", job: savedJob });
+    const savedJob = await job.save();
+    res
+      .status(201)
+      .json({ success: true, message: "job has been created!", job: savedJob });
   } catch (error) {
     return next(new InternalServerError());
   }

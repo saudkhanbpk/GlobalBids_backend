@@ -1,32 +1,45 @@
 import mongoose from "mongoose";
 
-const JobSchema = mongoose.Schema(
+const jobSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
-    description: { type: String, required: true },
-    startDate: { type: String, required: true },
-    startTime: { type: String, required: true },
-    endDate: { type: String, required: true },
-    endTime: { type: String, required: true },
-    budgetType: { type: String, required: true },
-    estimateCost: { type: String, required: true },
-    location: { type: String, required: true },
-    fileUrl: { type: String },
-    draft: { type: Boolean, default: false },
-    postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Profile" },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    budget: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    location: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    category: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    file: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-JobSchema.pre("save", function (next) {
-  if (this.isModified("estimateCost")) {
-    this.estimateCost = `${this.fromRate} - ${this.toRate}`;
-  }
-  next();
-});
+const Job = mongoose.model("Job", jobSchema);
 
-const JobModel = mongoose.model("Job", JobSchema);
-
-export default JobModel;
+export default Job;

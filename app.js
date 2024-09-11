@@ -23,7 +23,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api/auth/", authRoutes);
-app.use("/api/jobs/", jobsRouter);
+app.use("/api/job/", jobsRouter);
 app.use("/api/contractor/", contractorRouter);
 app.use("/api/owner/", ownerRoutes);
 
