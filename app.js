@@ -9,6 +9,8 @@ import { RouteNotFoundError } from "./error/AppError.js";
 import jobsRouter from "./routes/jobs.routes.js";
 import contractorRouter from "./routes/contractor.routes.js";
 import ownerRoutes from "./routes/owner.routes.js";
+import bidRouter from "./routes/bid.routes.js";
+import storyRouter from "./routes/story.routes.js";
 
 dotenv.config();
 const app = express();
@@ -26,6 +28,8 @@ app.use("/api/auth/", authRoutes);
 app.use("/api/job/", jobsRouter);
 app.use("/api/contractor/", contractorRouter);
 app.use("/api/owner/", ownerRoutes);
+app.use("/api/bid/", bidRouter);
+app.use("/api/story/", storyRouter)
 
 app.all("*", (req, res, next) => {
   const err = new RouteNotFoundError(

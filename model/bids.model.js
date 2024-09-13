@@ -2,21 +2,27 @@ import mongoose from "mongoose";
 
 const BidSchema = new mongoose.Schema(
   {
-    jobId: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
-    profileId: {
+    amount: { type: String, required: true },
+    bidBreakdown: { type: String, required: true },
+    ownerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Profile",
+      ref: "User",
       required: true,
     },
-    amount: { type: Number, required: true },
-    detail: { type: String, required: true },
-    estimateTime: { type: String, required: true },
+    contractorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    jobId: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
+    status: {
+      type: String,
+      enum: ["accepted", "rejected", "pending"],
+      default: "pending",
+    },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 const BidModel = mongoose.model("Bid", BidSchema);
-
 export default BidModel;
