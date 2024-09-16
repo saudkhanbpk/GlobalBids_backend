@@ -13,7 +13,7 @@ import bidRouter from "./routes/bid.routes.js";
 import storyRouter from "./routes/story.routes.js";
 import projectRouter from "./routes/project.routes.js";
 import http from "http";
-import initSocket from "./chat/chat.js";
+import initSocket from "./event/site-events.js";
 
 dotenv.config();
 const app = express();
