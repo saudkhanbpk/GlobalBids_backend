@@ -11,6 +11,9 @@ import contractorRouter from "./routes/contractor.routes.js";
 import ownerRoutes from "./routes/owner.routes.js";
 import bidRouter from "./routes/bid.routes.js";
 import storyRouter from "./routes/story.routes.js";
+import projectRouter from "./routes/project.routes.js";
+import http from "http";
+import initSocket from "./chat/chat.js";
 
 dotenv.config();
 const app = express();
@@ -29,7 +32,8 @@ app.use("/api/job/", jobsRouter);
 app.use("/api/contractor/", contractorRouter);
 app.use("/api/owner/", ownerRoutes);
 app.use("/api/bid/", bidRouter);
-app.use("/api/story/", storyRouter)
+app.use("/api/story/", storyRouter);
+app.use("/api/project/", projectRouter);
 
 app.all("*", (req, res, next) => {
   const err = new RouteNotFoundError(
@@ -40,6 +44,8 @@ app.all("*", (req, res, next) => {
 app.use(errorHandler);
 
 const port = process.env.PORT;
-app.listen(port, () => {
+const server = http.createServer(app);
+initSocket(server);
+server.listen(port, () => {
   console.log(`server is running on the port ${port}`);
 });

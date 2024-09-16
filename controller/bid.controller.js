@@ -89,8 +89,10 @@ export const changeBidStatus = async (req, res, next) => {
   const { bidId, bidStatus } = req.body;
 
   try {
-    const bid = await BidModel.findById(bidId).populate("jobId");
-
+    const bid = await BidModel.findOne({
+      _id: bidId,
+      status: "pending",
+    }).populate("jobId");
     if (!bid) {
       return next(new NotFoundError("bid not found!"));
     }

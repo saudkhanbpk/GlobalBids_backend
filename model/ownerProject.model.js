@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-export const ownerProjectSchema = new mongoose.Schema(
+const ownerProjectSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     owner: {
