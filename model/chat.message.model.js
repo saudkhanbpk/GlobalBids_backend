@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema(
   {
-    conversationId: {
+    roomId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ChatRoom",
       required: false,
@@ -31,7 +31,6 @@ const messageSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["delivered", "read"],
-      default: "delivered",
     },
   },
   { timestamps: true }

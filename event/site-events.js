@@ -3,8 +3,7 @@ import socketioJwt from "socketio-jwt";
 import { chatHandler } from "./chat/chatHandler.js";
 import { disconnectHandler } from "./disconnectHandler.js";
 
-
-const users = {};
+export const connectedUsers = {};
 
 const initSocket = (server) => {
   const io = new Server(server, {
@@ -20,11 +19,12 @@ const initSocket = (server) => {
 
   io.on("connection", (socket) => {
     const userId = socket.decoded_token.id;
-    users[userId] = socket.id;
+    connectedUsers[userId] = socket.id;
+    io.emit("user_status", { userId, status: "online" });
 
     // Handle different events
-    chatHandler(socket, users, io);
-    disconnectHandler(socket, users);
+    chatHandler(socket, connectedUsers, io);
+    disconnectHandler(socket, connectedUsers, io);
   });
 };
 
