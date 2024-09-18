@@ -128,13 +128,17 @@ export const getNewRoomData = async (req, res, next) => {
   const { id } = req.params;
   const { receiverId } = req.body;
   try {
-    const room = await RoomModel.findById(id).populate({
-      path: "users",
-      match: {
-        _id: { $eq: receiverId },
+    const room = await RoomModel.findById(id).populate([
+      {
+        path: "users",
+        match: { _id: { $eq: receiverId } },
+        select: "username imageUrl",
       },
-      select: "username imageUrl message senderId ",
-    });
+      {
+        path: "last_message",
+        select: "message senderId",
+      },
+    ]);
     return res.status(200).json({ success: true, room });
   } catch (error) {
     return next(new InternalServerError("can't get new room"));

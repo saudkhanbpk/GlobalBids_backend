@@ -15,6 +15,7 @@ import projectRouter from "./routes/project.routes.js";
 import http from "http";
 import initSocket from "./event/site-events.js";
 import chatRouter from "./routes/chat.routes.js";
+import eventRouter from "./routes/event.routes.js";
 
 dotenv.config();
 const app = express();
@@ -36,6 +37,7 @@ app.use("/api/bid/", bidRouter);
 app.use("/api/story/", storyRouter);
 app.use("/api/project/", projectRouter);
 app.use("/api/chat/", chatRouter);
+app.use("/api/event/", eventRouter);
 
 app.all("*", (req, res, next) => {
   const err = new RouteNotFoundError(
