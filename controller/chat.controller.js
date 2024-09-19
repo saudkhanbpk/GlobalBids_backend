@@ -1,6 +1,7 @@
 import { InternalServerError } from "../error/AppError.js";
 import { connectedUsers } from "../event/site-events.js";
 import MessageModel from "../model/chat.message.model.js";
+import MessageNotificationModel from "../model/chat.notification.model.js";
 import RoomModel from "../model/chat.room.model.js";
 import UserModel from "../model/user.model.js";
 
@@ -85,6 +86,27 @@ export const getCurrentUser = async (req, res, next) => {
   }
 };
 
+export const getNewRoomData = async (req, res, next) => {
+  const { id } = req.params;
+  const { receiverId } = req.body;
+  try {
+    const room = await RoomModel.findById(id).populate([
+      {
+        path: "users",
+        match: { _id: { $eq: receiverId } },
+        select: "username imageUrl",
+      },
+      {
+        path: "last_message",
+        select: "message senderId",
+      },
+    ]);
+    return res.status(200).json({ success: true, room });
+  } catch (error) {
+    return next(new InternalServerError("can't get new room"));
+  }
+};
+
 export const sendMessage = async (req, res, next) => {
   const userId = req.user._id;
   const io = req.app.get("io");
@@ -124,6 +146,15 @@ export const sendMessage = async (req, res, next) => {
     room.last_message = newMessage._id;
     await room.save();
 
+    let notification = await MessageNotificationModel.findOne({
+      userId: receiverId,
+    });
+    if (!notification) {
+      notification = new MessageNotificationModel({ userId: receiverId });
+    }
+    notification.unreadMessagesCount += 1;
+    await notification.save();
+
     if (connectedUsers[receiverId]) {
       const receiverSocketId = connectedUsers[receiverId];
       io.to(receiverSocketId).emit("message", newMessage);
@@ -156,28 +187,6 @@ export const markMessagesAsRead = async (req, res, next) => {
       .status(200)
       .json({ success: true, message: "Messages marked as read" });
   } catch (error) {
-    console.log(error);
     return next(new InternalServerError("Can't mark messages as read"));
-  }
-};
-
-export const getNewRoomData = async (req, res, next) => {
-  const { id } = req.params;
-  const { receiverId } = req.body;
-  try {
-    const room = await RoomModel.findById(id).populate([
-      {
-        path: "users",
-        match: { _id: { $eq: receiverId } },
-        select: "username imageUrl",
-      },
-      {
-        path: "last_message",
-        select: "message senderId",
-      },
-    ]);
-    return res.status(200).json({ success: true, room });
-  } catch (error) {
-    return next(new InternalServerError("can't get new room"));
   }
 };
