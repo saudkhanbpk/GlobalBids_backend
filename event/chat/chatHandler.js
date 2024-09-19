@@ -1,9 +1,4 @@
-import MessageModel from "../../model/chat.message.model.js";
-import RoomModel from "../../model/chat.room.model.js";
-
 export const chatHandler = async (socket, users, io) => {
-  const userId = socket.decoded_token.id;
-
   socket.on(
     "chat",
     async ({
@@ -36,7 +31,6 @@ export const chatHandler = async (socket, users, io) => {
           socket.emit("error", { message: `User ${receiverId} not connected` });
         }
       } catch (error) {
-        console.log(error);
         socket.emit("error", { message: "Message sending failed" });
       }
     }

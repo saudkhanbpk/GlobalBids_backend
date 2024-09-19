@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import socketioJwt from "socketio-jwt";
-import { chatHandler } from "./chat/chatHandler.js";
+// import { chatHandler } from "./chat/chatHandler.js";
 import { disconnectHandler } from "./disconnectHandler.js";
 
 export const connectedUsers = {};
@@ -23,9 +23,10 @@ const initSocket = (server) => {
     io.emit("user_status", { userId, status: "online" });
 
     // Handle different events
-    chatHandler(socket, connectedUsers, io);
+    // chatHandler(socket, connectedUsers, io);
     disconnectHandler(socket, connectedUsers, io);
   });
+  return io;
 };
 
 export default initSocket;

@@ -87,6 +87,7 @@ export const getCurrentUser = async (req, res, next) => {
 
 export const sendMessage = async (req, res, next) => {
   const userId = req.user._id;
+  const io = req.app.get("io");
   const { receiverId, message, timestamp, timeZone } = req.body;
   let newRoom = false;
   try {
@@ -116,10 +117,15 @@ export const sendMessage = async (req, res, next) => {
 
     room.last_message = newMessage._id;
     await room.save();
+    if (connectedUsers[receiverId]) {
+      const receiverSocketId = connectedUsers[receiverId];
+      io.to(receiverSocketId).emit("message", newMessage); 
+    } else {
+      console.log(`User ${receiverId} is not connected`);
+    }
     return res.status(201).json({ success: true, newRoom, newMessage });
   } catch (error) {
-    console.log();
-
+    console.log(error);
     return next(new InternalServerError("can't send message"));
   }
 };

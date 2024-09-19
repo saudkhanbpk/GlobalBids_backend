@@ -49,7 +49,8 @@ app.use(errorHandler);
 
 const port = process.env.PORT;
 const server = http.createServer(app);
-initSocket(server);
+const io = initSocket(server);
+app.set("io", io);
 server.listen(port, () => {
   console.log(`server is running on the port ${port}`);
 });
