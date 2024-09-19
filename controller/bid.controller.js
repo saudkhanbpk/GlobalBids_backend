@@ -64,16 +64,19 @@ export const getOwnerBids = async (req, res, next) => {
 
 export const getContractorBids = async (req, res, next) => {
   try {
-    const ownerId = req.user._id;
-    const bids = await BidModel.find({ contractorId: ownerId }).populate({
-      path: "jobId",
-      select: "title",
-    });
+    const contractorId = req.user._id;
+    const bids = await BidModel.find({ contractorId })
+      .populate({
+        path: "jobId",
+        select: "title",
+      })
+      .sort({ createdAt: -1 });
+
     return res.status(200).json({ success: true, bids });
   } catch (error) {
     return next(
       new InternalServerError(
-        "Failed to fetch owner bids Please try again later."
+        "Failed to fetch contractor bids. Please try again later."
       )
     );
   }

@@ -6,6 +6,11 @@ const roomSchema = new mongoose.Schema(
       { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     ],
     last_message: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
+    unreadMessages: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
   },
   { timestamps: true }
 );

@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 
-const HomeOwnerSchema = new mongoose.Schema({
+const eventsSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, required: true },
   title: { type: String, required: true },
   date: { type: String, required: true },
   description: { type: String, required: true },
 });
 
-const HomeOwnerEventModel = mongoose.model("HomeOwnerEvent", HomeOwnerSchema);
-export default HomeOwnerEventModel;
+const EventsModel = mongoose.model("Events", eventsSchema);
+export default EventsModel;

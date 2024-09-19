@@ -90,6 +90,7 @@ export const sendMessage = async (req, res, next) => {
   const io = req.app.get("io");
   const { receiverId, message, timestamp, timeZone } = req.body;
   let newRoom = false;
+
   try {
     let room = await RoomModel.findOne({
       users: { $all: [userId, receiverId] },
@@ -115,18 +116,48 @@ export const sendMessage = async (req, res, next) => {
     const newMessage = new MessageModel(messageData);
     await newMessage.save();
 
+    room.unreadMessages.set(
+      receiverId.toString(),
+      (room.unreadMessages.get(receiverId.toString()) || 0) + 1
+    );
+
     room.last_message = newMessage._id;
     await room.save();
+
     if (connectedUsers[receiverId]) {
       const receiverSocketId = connectedUsers[receiverId];
       io.to(receiverSocketId).emit("message", newMessage);
     } else {
       console.log(`User ${receiverId} is not connected`);
     }
+
     return res.status(201).json({ success: true, newRoom, newMessage });
   } catch (error) {
     console.log(error);
-    return next(new InternalServerError("can't send message"));
+    return next(new InternalServerError("Can't send message"));
+  }
+};
+
+export const markMessagesAsRead = async (req, res, next) => {
+  const userId = req.user._id;
+  const { roomId } = req.body;
+
+  try {
+    const room = await RoomModel.findById(roomId);
+
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    room.unreadMessages.set(userId.toString(), 0);
+    await room.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Messages marked as read" });
+  } catch (error) {
+    console.log(error);
+    return next(new InternalServerError("Can't mark messages as read"));
   }
 };
 

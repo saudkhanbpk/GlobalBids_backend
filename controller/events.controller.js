@@ -3,7 +3,7 @@ import {
   NotFoundError,
   ValidationError,
 } from "../error/AppError.js";
-import HomeOwnerEventModel from "../model/homeOwner.event.model.js";
+import EventsModel from "../model/events.model.js";
 
 export const createEvent = async (req, res, next) => {
   const { title, date, description } = req.body;
@@ -12,7 +12,7 @@ export const createEvent = async (req, res, next) => {
     if (!title || !date || !description) {
       return next(new ValidationError("all fields are required"));
     }
-    const event = new HomeOwnerEventModel({
+    const event = new EventsModel({
       user: userId,
       title,
       date,
@@ -28,10 +28,11 @@ export const createEvent = async (req, res, next) => {
     return next(new InternalServerError("can't create event"));
   }
 };
+
 export const getEvents = async (req, res, next) => {
   const id = req.user._id;
   try {
-    const events = await HomeOwnerEventModel.find({ user: id });
+    const events = await EventsModel.find({ user: id });
     if (!events) {
       return next(new NotFoundError("can't found user events"));
     }
