@@ -57,7 +57,7 @@ export const deleteRoom = async (req, res) => {
     if (!room) {
       return res.status(404).json({ message: "Room not found" });
     }
-    return res.status(200).json({ message: "Room deleted successfully", id });
+    return res.status(200).json({ success: true, id });
   } catch (error) {
     return next(new InternalServerError("Failed to delete room"));
   }
@@ -119,7 +119,7 @@ export const sendMessage = async (req, res, next) => {
     await room.save();
     if (connectedUsers[receiverId]) {
       const receiverSocketId = connectedUsers[receiverId];
-      io.to(receiverSocketId).emit("message", newMessage); 
+      io.to(receiverSocketId).emit("message", newMessage);
     } else {
       console.log(`User ${receiverId} is not connected`);
     }
