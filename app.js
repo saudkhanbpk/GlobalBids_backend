@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import http from "http";
 import bodyParser from "body-parser";
 import authRoutes from "./routes/auth.routes.js";
 import { connectDB } from "./config/db.js";
@@ -12,7 +13,6 @@ import ownerRoutes from "./routes/owner.routes.js";
 import bidRouter from "./routes/bid.routes.js";
 import storyRouter from "./routes/story.routes.js";
 import projectRouter from "./routes/project.routes.js";
-import http from "http";
 import initSocket from "./event/site-events.js";
 import chatRouter from "./routes/chat.routes.js";
 import eventRouter from "./routes/event.routes.js";
@@ -34,10 +34,10 @@ app.use("/api/job/", jobsRouter);
 app.use("/api/contractor/", contractorRouter);
 app.use("/api/owner/", ownerRoutes);
 app.use("/api/bid/", bidRouter);
-app.use("/api/story/", storyRouter);
 app.use("/api/project/", projectRouter);
 app.use("/api/chat/", chatRouter);
 app.use("/api/event/", eventRouter);
+app.use("/api/story/", storyRouter);
 
 app.all("*", (req, res, next) => {
   const err = new RouteNotFoundError(
