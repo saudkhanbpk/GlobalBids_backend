@@ -3,6 +3,7 @@ import {
   ValidationError,
   InternalServerError,
   LoginError,
+  NotFoundError,
 } from "../error/AppError.js";
 import generateAuthToken from "../utils/generte-auth-token.js";
 import { getUserByEmail, getUserById } from "../services/user.service.js";
@@ -12,6 +13,9 @@ import { generateOtp } from "../utils/generate-otp.js";
 import { sendEmail } from "../utils/send-emails.js";
 import { otpMailOptions } from "../utils/mail-options.js";
 import { uploadProfileImage } from "../services/upload.image.service.js";
+import { sendOtpToUser } from "../services/otp.service.js";
+import ResetPasswordModel from "../model/reset.password.js";
+import crypto from "crypto";
 
 export const signUpController = async (req, res, next) => {
   const userData = req.body;
@@ -24,29 +28,14 @@ export const signUpController = async (req, res, next) => {
 
   try {
     const user = new UserModel(userData);
-
     const newUser = await user.save();
+    const otpResponse = await sendOtpToUser(newUser);
 
-    const newOtp = await OtpModel({
-      otp: generateOtp(),
-      userId: newUser._id,
-    });
-
-    await newOtp.save();
-
-    const mailOpt = otpMailOptions(newOtp.otp, newUser.email);
-    await sendEmail(mailOpt);
-
-    const token = await generateAuthToken({
-      id: newUser._id,
-      email: newUser.email,
-    });
     return res.status(201).json({
       success: true,
       message: "Please verify your account",
       user: newUser,
-      token,
-      otpId: newOtp._id,
+      otpId: otpResponse.otpId,
     });
   } catch (error) {
     if (error?.errorResponse?.code === 11000) {
@@ -60,17 +49,23 @@ export const loginController = async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!(email && password)) {
-    return next(new ValidationError("Email and Password is Required"));
+    return next(new ValidationError("Email and Password are Required"));
   }
 
   try {
     const user = await getUserByEmail(email);
-    // if (!user.isVerified) {
-    //   return next(new UnauthorizedError("please verify your account first"));
-    // }
-
     if (!user) {
       return next(new LoginError());
+    }
+
+    if (!user.isVerified) {
+      const otpResponse = await sendOtpToUser(user);
+      return res.status(200).json({
+        success: true,
+        user: { _id: user._id, isVerified: user.isVerified },
+        otpId: otpResponse.otpId,
+        message: "Please verify your account!",
+      });
     }
 
     const passMatch = await user.comparePassword(password);
@@ -167,7 +162,7 @@ export const resendOtp = async (req, res) => {
   }
 };
 
-const updateUserInfo = async (req, res, next) => {
+export const updateUserInfo = async (req, res, next) => {
   const { fullName, address, phone, password } = req.body;
   const userId = req.user._id;
   const file = req.file;
@@ -209,6 +204,78 @@ const updateUserInfo = async (req, res, next) => {
   }
 };
 
-export default updateUserInfo;
+export const findUser = async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    return next(new ValidationError("email is required"));
+  }
+  try {
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return res
+        .status(200)
+        .json({ success: false, message: "user not found!" });
+    }
+    const otpResponse = await sendOtpToUser(user);
+    return res.status(201).json({
+      success: true,
+      otpId: otpResponse.otpId,
+      user: { _id: user._id },
+      message: "Opt has been send to your email",
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new InternalServerError("can't find user"));
+  }
+};
 
-export { updateUserInfo };
+export const verifyUserAndResetPassword = async (req, res, next) => {
+  const { userId, otp } = req.body;
+
+  try {
+    const otpDoc = await OtpModel.findOne({ userId });
+    if (!otpDoc) {
+      return next(new NotFoundError("invalid credentials"));
+    }
+    if (otp !== otpDoc.otp) {
+      return next(new ValidationError("invalid otp"));
+    }
+
+    await ResetPasswordModel.findOneAndDelete({ userId });
+
+    const reset = new ResetPasswordModel({
+      userId: userId,
+      token: crypto.randomBytes(10).toString("hex"),
+    });
+    await reset.save();
+    return res.status(200).json({ success: true, token: reset.token });
+  } catch (error) {
+    console.log(error);
+
+    return next(new InternalServerError("can't verify otp"));
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  const { password, token, userId } = req.body;
+
+  try {
+    const savedToken = await ResetPasswordModel.findOne({ userId });
+    if (savedToken.token !== token) {
+      return next(new ValidationError("some thing went wrong!"));
+    }
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return next(new NotFoundError("User not found"));
+    }
+    user.password = password;
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    return next(new InternalServerError("Failed to update password"));
+  }
+};

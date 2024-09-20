@@ -5,6 +5,9 @@ import {
   otpController,
   resendOtp,
   updateUserInfo,
+  findUser,
+  verifyUserAndResetPassword,
+  resetPassword,
 } from "../controller/auth.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import upload from "../config/multer.config.js";
@@ -21,5 +24,9 @@ router.post(
   authMiddleware,
   updateUserInfo
 );
+
+router.post("/find-user", findUser);
+router.post("/find-and-verify", verifyUserAndResetPassword);
+router.post("/reset-password", resetPassword);
 
 export default router;
