@@ -31,3 +31,37 @@ export const createStory = async (req, res, next) => {
     return next(InternalServerError("Can't post story"));
   }
 };
+
+export const getStoryFeeds = async (req, res, next) => {
+  try {
+    const stories = await StoryModel.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: "$user",
+      },
+      {
+        $project: {
+          description: 1,
+          createdAt: 1,
+          images: 1,
+          likesCount: { $size: "$likes" },
+          commentsCount: { $size: "$comments" },
+          sharesCount: { $size: "$shares" },
+          "user.username": 1,
+          "user.imageUrl": 1,
+        },
+      },
+    ]);
+
+    return res.status(200).json({ success: true, stories });
+  } catch (error) {
+    return next(new InternalServerError("Can't get stories"));
+  }
+};
