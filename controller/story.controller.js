@@ -2,6 +2,8 @@ import { InternalServerError } from "../error/AppError.js";
 import CommentModel from "../model/comment.model.js";
 import StoryModel from "../model/story.model.js";
 import { uploadFile } from "../services/upload.file.service.js";
+import LikeModel from "../model/like.story.model.js";
+import ShareModel from "../model/share.model.js";
 
 export const createStory = async (req, res, next) => {
   const { description } = req.body;
@@ -49,17 +51,47 @@ export const getStoryFeeds = async (_req, res, next) => {
 };
 
 export const addComment = async (req, res, next) => {
-  const { userId, comment, StoryId } = req.body;
+  const { comment, storyId } = req.body;
+  const userId = req.user._id;
   try {
     const newComment = new CommentModel({
       user: userId,
-      story: StoryId,
+      story: storyId,
       comment,
     });
     await newComment.save();
     return res.status(201).json({
       success: true,
-      message: "Added commented successFull",
+      comment: newComment,
+      message: "Comment Added",
     });
-  } catch (error) {}
+  } catch (error) {
+    return next(new InternalServerError("Can't comment"));
+  }
+};
+
+export const getStoryDetails = async (req, res, next) => {
+  const storyId = req.params.id;
+
+  try {
+    const comments = await CommentModel.find({ story: storyId }).populate({
+      path: "user",
+      select: "username imageUrl",
+    });
+
+    const totalComments = await CommentModel.countDocuments({ story: storyId });
+    const totalLikes = await LikeModel.countDocuments({ story: storyId });
+    const totalShares = await ShareModel.countDocuments({ story: storyId });
+
+    return res.status(200).json({
+      success: true,
+      comments,
+      totalComments,
+      totalLikes,
+      totalShares
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new InternalServerError("Can't get all comments"));
+  }
 };
