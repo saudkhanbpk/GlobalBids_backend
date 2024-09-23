@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { InternalServerError } from "../error/AppError.js";
 import { connectedUsers } from "../event/site-events.js";
 import MessageModel from "../model/chat.message.model.js";
@@ -158,13 +159,12 @@ export const sendMessage = async (req, res, next) => {
     if (connectedUsers[receiverId]) {
       const receiverSocketId = connectedUsers[receiverId];
       io.to(receiverSocketId).emit("message", newMessage);
-    } else {
-      console.log(`User ${receiverId} is not connected`);
     }
 
     return res.status(201).json({ success: true, newRoom, newMessage });
   } catch (error) {
     console.log(error);
+    
     return next(new InternalServerError("Can't send message"));
   }
 };
@@ -188,5 +188,57 @@ export const markMessagesAsRead = async (req, res, next) => {
       .json({ success: true, message: "Messages marked as read" });
   } catch (error) {
     return next(new InternalServerError("Can't mark messages as read"));
+  }
+};
+
+export const getUnreadMessages = async (req, res, next) => {
+  const userId = req.user._id;
+
+  try {
+    const result = await RoomModel.aggregate([
+      {
+        $match: {
+          users: userId,
+        },
+      },
+      {
+        $project: {
+          unreadCount: {
+            $ifNull: [
+              {
+                $reduce: {
+                  input: { $objectToArray: "$unreadMessages" },
+                  initialValue: 0,
+                  in: {
+                    $cond: [
+                      { $eq: ["$$this.k", userId.toString()] },
+                      "$$this.v",
+                      "$$value",
+                    ],
+                  },
+                },
+              },
+              0,
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalUnreadMessages: { $sum: "$unreadCount" },
+        },
+      },
+    ]);
+
+    const totalUnreadMessages =
+      result.length > 0 ? result[0].totalUnreadMessages : 0;
+
+    return res.status(200).json({
+      success: true,
+      unreadMessages: totalUnreadMessages,
+    });
+  } catch (error) {
+    return next(new InternalServerError("Failed to fetch notifications"));
   }
 };
