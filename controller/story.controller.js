@@ -1,4 +1,5 @@
 import { InternalServerError } from "../error/AppError.js";
+import CommentModel from "../model/comment.model.js";
 import StoryModel from "../model/story.model.js";
 import { uploadFile } from "../services/upload.file.service.js";
 
@@ -32,36 +33,33 @@ export const createStory = async (req, res, next) => {
   }
 };
 
-export const getStoryFeeds = async (req, res, next) => {
+export const getStoryFeeds = async (_req, res, next) => {
   try {
-    const stories = await StoryModel.aggregate([
-      {
-        $lookup: {
-          from: "users",
-          localField: "user",
-          foreignField: "_id",
-          as: "user",
-        },
-      },
-      {
-        $unwind: "$user",
-      },
-      {
-        $project: {
-          description: 1,
-          createdAt: 1,
-          images: 1,
-          likesCount: { $size: "$likes" },
-          commentsCount: { $size: "$comments" },
-          sharesCount: { $size: "$shares" },
-          "user.username": 1,
-          "user.imageUrl": 1,
-        },
-      },
-    ]);
+    const stories = await StoryModel.find()
+      .populate({
+        path: "user",
+        select: "username imageUrl",
+      })
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({ success: true, stories });
   } catch (error) {
     return next(new InternalServerError("Can't get stories"));
   }
+};
+
+export const addComment = async (req, res, next) => {
+  const { userId, comment, StoryId } = req.body;
+  try {
+    const newComment = new CommentModel({
+      user: userId,
+      story: StoryId,
+      comment,
+    });
+    await newComment.save();
+    return res.status(201).json({
+      success: true,
+      message: "Added commented successFull",
+    });
+  } catch (error) {}
 };
