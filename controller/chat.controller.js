@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { InternalServerError } from "../error/AppError.js";
 import { connectedUsers } from "../event/site-events.js";
 import MessageModel from "../model/chat.message.model.js";
