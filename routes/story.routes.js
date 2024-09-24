@@ -5,6 +5,7 @@ import {
   addComment,
   getStoryDetails,
   toggleLike,
+  deleteComment
 } from "../controller/story.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import upload from "../config/multer.config.js";
@@ -21,5 +22,6 @@ storyRouter.get("/feeds", getStoryFeeds);
 storyRouter.post("/add-comment", authMiddleware, addComment);
 storyRouter.get("/get-details/:id", authMiddleware, getStoryDetails);
 storyRouter.get("/like/:id", authMiddleware, toggleLike);
+storyRouter.delete("/delete-comment/:id", authMiddleware, deleteComment);
 
 export default storyRouter;

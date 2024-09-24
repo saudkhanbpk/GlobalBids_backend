@@ -124,3 +124,16 @@ export const toggleLike = async (req, res, next) => {
     return next(new InternalServerError());
   }
 };
+
+export const deleteComment = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    await CommentModel.deleteOne({ _id: id });
+    return res
+      .status(200)
+      .json({ success: true, id, message: "comment deleted!" });
+  } catch (error) {
+    return next(new InternalServerError("can't delete comment"));
+  }
+};
