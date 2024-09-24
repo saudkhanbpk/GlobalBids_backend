@@ -13,6 +13,7 @@ bidRouter.post("/create", authMiddleware, createBid);
 
 // get owner bids
 bidRouter.get("/owner", authMiddleware, getOwnerBids);
+
 // get contractor bids
 bidRouter.get("/contractor", authMiddleware, getContractorBids);
 

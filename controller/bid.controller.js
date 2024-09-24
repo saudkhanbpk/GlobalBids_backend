@@ -4,7 +4,7 @@ import {
   NotFoundError,
   ValidationError,
 } from "../error/AppError.js";
-import OwnerProjectModel from "../model/ownerProject.model.js";
+import ProjectModel from "../model/project.model.js";
 
 export const createBid = async (req, res, next) => {
   try {
@@ -48,10 +48,12 @@ export const getOwnerBids = async (req, res, next) => {
     const bids = await BidModel.find({
       ownerId: ownerId,
       status: "pending",
-    }).populate({
-      path: "contractorId",
-      select: "username imageUrl label",
-    });
+    })
+      .populate({
+        path: "contractorId",
+        select: "username imageUrl label",
+      })
+      .sort({ createdAt: -1 });
     return res.status(200).json({ success: true, bids });
   } catch (error) {
     return next(
@@ -89,7 +91,7 @@ export const changeBidStatus = async (req, res, next) => {
     return next(new BusinessLogicError());
   }
 
-  const { bidId, bidStatus } = req.body;
+  const { bidId, bidStatus, contractor } = req.body;
 
   try {
     const bid = await BidModel.findOne({
@@ -103,7 +105,8 @@ export const changeBidStatus = async (req, res, next) => {
     bid.status = bidStatus;
 
     if (bid.status === "accepted") {
-      const newProject = new OwnerProjectModel({
+      const newProject = new ProjectModel({
+        contractor,
         title: bid.jobId.title,
         owner: user._id,
         images: [bid.jobId.file],
