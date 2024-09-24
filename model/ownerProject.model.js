@@ -1,8 +1,13 @@
 import mongoose from "mongoose";
 
-const ownerProjectSchema = new mongoose.Schema(
+const projectSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
+    contractor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -20,6 +25,6 @@ const ownerProjectSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const OwnerProjectModel = mongoose.model("OwnerProjects", ownerProjectSchema);
+const ProjectModel = mongoose.model("Projects", projectSchema);
 
-export default OwnerProjectModel;
+export default ProjectModel;
