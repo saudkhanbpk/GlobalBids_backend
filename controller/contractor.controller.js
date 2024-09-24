@@ -5,12 +5,19 @@ import { getProfileByUserId } from "../services/profile.service.js";
 import { uploadProfileImage } from "../services/upload.image.service.js";
 import { getUserById } from "../services/user.service.js";
 import JobModel from "../model/job.model.js";
+import UserModel from "../model/user.model.js";
 
 export const contractorProfileController = async (req, res, next) => {
   const data = req.body;
   const file = req.file;
 
   try {
+    if (req.body.label) {
+      const user = await UserModel.findOne({ _id: data.userId });
+      user.label = req.body.label;
+      await user.save();
+    }
+
     let imageUrl = "";
     if (file) {
       imageUrl = await uploadProfileImage(file);
@@ -49,7 +56,7 @@ export const contractorProfileController = async (req, res, next) => {
         contractorProfile._id
       ).populate({
         path: "user",
-        select: "imageUrl",
+        select: "imageUrl label",
       });
 
       return res.status(200).json({
@@ -73,7 +80,7 @@ export const contractorProfileController = async (req, res, next) => {
       contractorProfile._id
     ).populate({
       path: "user",
-      select: "imageUrl",
+      select: "imageUrl label",
     });
 
     return res.status(201).json({
@@ -82,7 +89,6 @@ export const contractorProfileController = async (req, res, next) => {
       contractorProfile: populatedProfile,
     });
   } catch (error) {
-    console.log(error);
     return next(new InternalServerError());
   }
 };
