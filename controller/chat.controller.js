@@ -1,7 +1,6 @@
 import { InternalServerError } from "../error/AppError.js";
 import { connectedUsers } from "../event/site-events.js";
 import MessageModel from "../model/chat.message.model.js";
-import MessageNotificationModel from "../model/chat.notification.model.js";
 import RoomModel from "../model/chat.room.model.js";
 import UserModel from "../model/user.model.js";
 
@@ -146,15 +145,6 @@ export const sendMessage = async (req, res, next) => {
     room.last_message = newMessage._id;
     await room.save();
 
-    let notification = await MessageNotificationModel.findOne({
-      userId: receiverId,
-    });
-    if (!notification) {
-      notification = new MessageNotificationModel({ userId: receiverId });
-    }
-    notification.unreadMessagesCount += 1;
-    await notification.save();
-
     if (connectedUsers[receiverId]) {
       const receiverSocketId = connectedUsers[receiverId];
       io.to(receiverSocketId).emit("message", newMessage);
@@ -162,8 +152,6 @@ export const sendMessage = async (req, res, next) => {
 
     return res.status(201).json({ success: true, newRoom, newMessage });
   } catch (error) {
-    console.log(error);
-    
     return next(new InternalServerError("Can't send message"));
   }
 };

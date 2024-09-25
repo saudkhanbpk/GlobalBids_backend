@@ -13,19 +13,33 @@ export const getOwnerProjects = async (req, res, next) => {
   }
 };
 
-export const getOwnerCurrentProjects = async (req, res, next) => {
-  const user = req.user;
+export const getProjectsInProgress = async (req, res, next) => {
+  const id = req.user._id;
+
   try {
-    const projects = await ProjectModel.find({ owner: user._id }).populate({
-      path:"contractor",
-      select:"username"
+    const projects = await ProjectModel.find({
+      $and: [
+        { $or: [{ contractor: id }, { owner: id }] },
+        {
+          $or: [{ status: { $ne: "completed" } }, { progress: { $lt: "100" } }],
+        },
+      ],
     })
-      .sort({
-        createdAt: -1,
-      })
-      .limit(2);
-    return res.status(201).json({ success: true, projects });
+      .populate("contractor", "username")
+      .populate("owner", "username");
+
+    return res.status(200).json({ success: true, projects });
   } catch (error) {
-    return next(new InternalServerError("No projects found"));
+    return next(new InternalServerError("can't get work in progress"));
+  }
+};
+
+export const getAllContractorProjects = async (req, res, next) => {
+  const id = req.user._id;
+  try {
+    const projects = await ProjectModel.find({ contractor: id });
+    return res.status(200).json({ success: true, projects });
+  } catch (error) {
+    return next(new InternalServerError());
   }
 };

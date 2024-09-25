@@ -50,8 +50,7 @@ export const createJob = async (req, res, next) => {
   }
 };
 
-
-export const getAllJobs = async (req, res) => {
+export const getAllJobs = async (_req, res, next) => {
   try {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -64,7 +63,10 @@ export const getAllJobs = async (req, res) => {
 
     res.status(200).json({ success: true, total, jobs });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "An error occurred while fetching jobs" });
+    return next(
+      new InternalServerError("An error occurred while fetching jobs")
+    );
   }
 };
+
+export const getAllContractorJobs = (req, res, next) => {};
