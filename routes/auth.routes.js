@@ -3,7 +3,7 @@ import {
   loginController,
   signUpController,
   otpController,
-  resendOtp,
+  resendOtpController,
   updateUserInfo,
   findUser,
   verifyUserAndResetPassword,
@@ -17,7 +17,7 @@ const router = express.Router();
 router.post("/signup", signUpController);
 router.post("/login", loginController);
 router.post("/otp", otpController);
-router.post("/resend-otp", resendOtp);
+router.post("/resend-otp", resendOtpController);
 router.post(
   "/update-user-info",
   upload.single("image"),

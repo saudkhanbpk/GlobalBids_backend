@@ -1,15 +1,15 @@
 import jwt from "jsonwebtoken";
-import UserModel from "../model/user.model.js";
+
 import { AuthenticationError } from "../error/AppError.js";
 import dotenv from "dotenv";
+import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
+import UserContractorModel from "../model/user.contractor.model.js";
 dotenv.config();
 
 const authMiddleware = async (req, _res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) {
-    return next(
-      new AuthenticationError("access denied")
-    );
+    return next(new AuthenticationError("access denied"));
   }
 
   try {

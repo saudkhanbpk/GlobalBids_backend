@@ -4,7 +4,10 @@ import { otpMailOptions } from "../utils/mail-options.js";
 import { sendEmail } from "../utils/send-emails.js";
 
 export const sendOtpToUser = async (user) => {
-  let otpRecord = await OtpModel.findOne({ userId: user._id });
+  const userType = user.role === "owner" ? "Homeowner" : "Contractor";
+
+  let otpRecord = await OtpModel.findOne({ userId: user._id, userType });
+
   if (otpRecord && otpRecord.count < 3) {
     otpRecord.count += 1;
     await otpRecord.save();
@@ -12,10 +15,12 @@ export const sendOtpToUser = async (user) => {
     otpRecord = new OtpModel({
       otp: generateOtp(),
       userId: user._id,
+      userType,
       count: 1,
     });
     await otpRecord.save();
   }
+
   const mailOpt = otpMailOptions(otpRecord.otp, user.email);
   await sendEmail(mailOpt);
 
@@ -25,3 +30,5 @@ export const sendOtpToUser = async (user) => {
     message: "OTP sent successfully",
   };
 };
+
+

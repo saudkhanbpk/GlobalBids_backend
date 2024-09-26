@@ -19,9 +19,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      required: [true, "Work role is required"],
-      enum: ["owner", "contractor", "guest", "admin"],
-      default: "guest",
+      trim: true,
+      default: "contractor",
     },
     password: {
       type: String,
@@ -44,6 +43,10 @@ const userSchema = new mongoose.Schema(
     address: { type: String, trim: true },
     rating: { type: String, trim: true, default: "5" },
     label: { type: String, trim: true },
+    licenseNumber: { type: String, trim: true },
+    insuranceInformation: { type: String, trim: true },
+    services: [{ type: String, trim: true }],
+    professionalExperience: [{ type: String, trim: true }],
   },
   {
     timestamps: true,
@@ -75,6 +78,6 @@ userSchema.statics.findByEmail = async function (email) {
   return await this.findOne({ email }).select("+password");
 };
 
-const UserModel = mongoose.model("User", userSchema);
+const UserContractorModel = mongoose.model("Contractor", userSchema);
 
-export default UserModel;
+export default UserContractorModel;

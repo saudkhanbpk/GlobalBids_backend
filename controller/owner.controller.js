@@ -1,6 +1,6 @@
 import OwnerSettingModel from "../model/owner.settings.model.js";
 import { BusinessLogicError, InternalServerError } from "../error/AppError.js";
-import UserModel from "../model/user.model.js";
+// import UserModel from "../model/user.model.js";
 
 export const settings = async (req, res, next) => {
   const userId = req.user._id;

@@ -2,7 +2,7 @@ import { InternalServerError } from "../error/AppError.js";
 import { connectedUsers } from "../event/site-events.js";
 import MessageModel from "../model/chat.message.model.js";
 import RoomModel from "../model/chat.room.model.js";
-import UserModel from "../model/user.model.js";
+// import UserModel from "../model/user.model.js";
 
 export const getAllMessages = async (req, res, next) => {
   const { receiverId } = req.body;

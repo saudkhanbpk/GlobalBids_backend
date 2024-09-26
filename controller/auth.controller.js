@@ -1,4 +1,3 @@
-import UserModel from "../model/user.model.js";
 import {
   ValidationError,
   InternalServerError,
@@ -6,7 +5,11 @@ import {
   NotFoundError,
 } from "../error/AppError.js";
 import generateAuthToken from "../utils/generte-auth-token.js";
-import { getUserByEmail, getUserById } from "../services/user.service.js";
+import {
+  getUserByEmail,
+  getUserById,
+  updateUserVerificationStatus,
+} from "../services/user.service.js";
 import { signUpValidate } from "../validators/sign-up-validators.js";
 import OtpModel from "../model/otp.model.js";
 import { generateOtp } from "../utils/generate-otp.js";
@@ -15,20 +18,41 @@ import { otpMailOptions } from "../utils/mail-options.js";
 import { uploadProfileImage } from "../services/upload.image.service.js";
 import { sendOtpToUser } from "../services/otp.service.js";
 import ResetPasswordModel from "../model/reset.password.js";
+import UserContractorModel from "../model/user.contractor.model.js";
+import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
 import crypto from "crypto";
 
 export const signUpController = async (req, res, next) => {
   const userData = req.body;
 
   const validateData = signUpValidate(userData);
-
   if (validateData) {
     return next(new ValidationError(JSON.stringify(validateData)));
   }
 
   try {
-    const user = new UserModel(userData);
-    const newUser = await user.save();
+    const existingOwner = await UserHomeOwnerModel.findOne({
+      email: userData.email,
+    });
+    const existingContractor = await UserContractorModel.findOne({
+      email: userData.email,
+    });
+
+    if (existingOwner || existingContractor) {
+      return next(new ValidationError("User with this email already exists"));
+    }
+
+    let newUser;
+    if (userData.role === "owner") {
+      newUser = new UserHomeOwnerModel(userData);
+    } else if (userData.role === "contractor") {
+      newUser = new UserContractorModel(userData);
+    } else {
+      return next(new ValidationError("Invalid user role"));
+    }
+
+    newUser = await newUser.save();
+
     const otpResponse = await sendOtpToUser(newUser);
 
     return res.status(201).json({
@@ -38,9 +62,8 @@ export const signUpController = async (req, res, next) => {
       otpId: otpResponse.otpId,
     });
   } catch (error) {
-    if (error?.errorResponse?.code === 11000) {
-      return next(new ValidationError("User already exist"));
-    }
+    console.log(error);
+    
     return next(new InternalServerError());
   }
 };
@@ -54,6 +77,9 @@ export const loginController = async (req, res, next) => {
 
   try {
     const user = await getUserByEmail(email);
+    console.log(user);
+    
+    
     if (!user) {
       return next(new LoginError());
     }
@@ -76,89 +102,97 @@ export const loginController = async (req, res, next) => {
     const token = await generateAuthToken({ id: user._id, email: user.email });
     return res.status(200).json({ user, token, success: true });
   } catch (error) {
+    console.log(error);
+    
     return next(new InternalServerError());
   }
 };
 
 export const otpController = async (req, res, next) => {
   const { userId, otp, otpId } = req.body;
+
   try {
-    const user = await UserModel.findById(userId);
+    const user = await getUserById(userId);
     const userOtp = await OtpModel.findById(otpId);
 
     if (!userOtp) {
       return next(new ValidationError("Invalid Otp"));
     }
 
-    if (userOtp?.otp === otp) {
-      user.isVerified = true;
-      await user.save();
-      return res
-        .status(200)
-        .json({ message: "Account verified successfully", success: true });
+    if (userOtp.otp === otp) {
+      await updateUserVerificationStatus(user._id);
+      await OtpModel.deleteOne({ _id: otpId });
+      return res.status(200).json({
+        message: "Account verified successfully",
+        success: true,
+      });
     }
+
     return next(new ValidationError("Invalid Otp"));
   } catch (error) {
+    console.log(error);
+
     return next(new InternalServerError());
   }
 };
 
-export const resendOtp = async (req, res) => {
+export const resendOtpController = async (req, res, next) => {
   try {
-    const { otpId, userId } = req.body;
+    const { otpId, userId, userRole } = req.body;
+    const userType = userRole === "owner" ? "Homeowner" : "Contractor";
 
-    let oldOtp;
+    let otpRecord;
+
     if (otpId) {
-      oldOtp = await OtpModel.findById(otpId).populate({
+      otpRecord = await OtpModel.findById(otpId).populate({
         path: "userId",
         select: "email",
       });
-    }
 
-    if (oldOtp) {
-      if (oldOtp.count >= 3) {
-        return res.status(400).json({
-          success: false,
-          message: "You can't request OTP more than 3 times in an hour.",
+      if (otpRecord) {
+        if (otpRecord.count >= 3) {
+          return res.status(400).json({
+            success: false,
+            message: "You can't request OTP more than 3 times.",
+          });
+        }
+
+        otpRecord.otp = generateOtp();
+        otpRecord.count += 1;
+        await otpRecord.save();
+
+        const mailOpt = otpMailOptions(otpRecord.otp, otpRecord.userId.email);
+        await sendEmail(mailOpt);
+
+        return res.status(200).json({
+          success: true,
+          message: "OTP resent successfully.",
         });
       }
-
-      const newOtp = generateOtp();
-      oldOtp.otp = newOtp;
-      oldOtp.count += 1;
-      await oldOtp.save();
-
-      const mailOpt = otpMailOptions(newOtp, oldOtp.userId.email);
-      await sendEmail(mailOpt);
-
-      return res.status(200).json({
-        success: true,
-        message: "OTP resent successfully.",
-      });
     }
 
     const user = await getUserById(userId);
-
     const newOtp = generateOtp();
-    const newOtpEntry = new OtpModel({
+    otpRecord = new OtpModel({
       otp: newOtp,
-      userId: userId,
+      userId,
+      userType,
       count: 1,
     });
-    await newOtpEntry.save();
+    await otpRecord.save();
 
     const mailOpt = otpMailOptions(newOtp, user.email);
     await sendEmail(mailOpt);
 
     return res.status(201).json({
       success: true,
-      message: "Otp sent to your email",
-      otpId: newOtpEntry._id,
+      message: "OTP sent to your email",
+      otpId: otpRecord._id,
     });
   } catch (error) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Failed to resend OTP." });
+    console.log(error);
+    
+    return next(new InternalServerError("Failed to resend OTP!"));
   }
 };
 

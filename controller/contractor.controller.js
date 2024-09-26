@@ -5,7 +5,7 @@ import { getProfileByUserId } from "../services/profile.service.js";
 import { uploadProfileImage } from "../services/upload.image.service.js";
 import { getUserById } from "../services/user.service.js";
 import JobModel from "../model/job.model.js";
-import UserModel from "../model/user.model.js";
+// import UserModel from "../model/user.model.js";
 
 export const contractorProfileController = async (req, res, next) => {
   const data = req.body;

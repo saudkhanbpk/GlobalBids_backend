@@ -1,12 +1,17 @@
 import mongoose from "mongoose";
 
-const otpSchema = mongoose.Schema(
+const otpSchema = new mongoose.Schema(
   {
     otp: { type: String, required: true },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "User",
+      refPath: "userType",
+    },
+    userType: {
+      type: String,
+      required: true,
+      enum: ["Homeowner", "Contractor"],
     },
     count: { type: Number, default: 1 },
   },
