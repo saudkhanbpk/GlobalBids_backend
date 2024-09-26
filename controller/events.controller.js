@@ -8,6 +8,7 @@ import EventsModel from "../model/events.model.js";
 export const createEvent = async (req, res, next) => {
   const { title, date, description } = req.body;
   const userId = req.user._id;
+  const userType = req.user.role === "owner" ? "Homeowner" : "Contractor";
   try {
     if (!title || !date || !description) {
       return next(new ValidationError("all fields are required"));
@@ -17,6 +18,7 @@ export const createEvent = async (req, res, next) => {
       title,
       date,
       description,
+      userType,
     });
     await event.save();
     return res
@@ -24,7 +26,7 @@ export const createEvent = async (req, res, next) => {
       .json({ success: true, event, message: "event has been added" });
   } catch (error) {
     console.log(error);
-    
+
     return next(new InternalServerError("can't create event"));
   }
 };
