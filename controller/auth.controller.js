@@ -4,10 +4,12 @@ import {
   LoginError,
   NotFoundError,
 } from "../error/AppError.js";
-import generateAuthToken from "../utils/generte-auth-token.js";
+import generateAuthToken from "../utils/generate-auth-token.js";
 import {
   getUserByEmail,
   getUserById,
+  updateContractorInfo,
+  updateHomeownerInfo,
   updateUserVerificationStatus,
 } from "../services/user.service.js";
 import { signUpValidate } from "../validators/sign-up-validators.js";
@@ -15,7 +17,6 @@ import OtpModel from "../model/otp.model.js";
 import { generateOtp } from "../utils/generate-otp.js";
 import { sendEmail } from "../utils/send-emails.js";
 import { otpMailOptions } from "../utils/mail-options.js";
-import { uploadProfileImage } from "../services/upload.image.service.js";
 import { sendOtpToUser } from "../services/otp.service.js";
 import ResetPasswordModel from "../model/reset.password.js";
 import UserContractorModel from "../model/user.contractor.model.js";
@@ -63,7 +64,7 @@ export const signUpController = async (req, res, next) => {
     });
   } catch (error) {
     console.log(error);
-    
+
     return next(new InternalServerError());
   }
 };
@@ -77,9 +78,6 @@ export const loginController = async (req, res, next) => {
 
   try {
     const user = await getUserByEmail(email);
-    console.log(user);
-    
-    
     if (!user) {
       return next(new LoginError());
     }
@@ -99,11 +97,15 @@ export const loginController = async (req, res, next) => {
       return next(new LoginError());
     }
 
-    const token = await generateAuthToken({ id: user._id, email: user.email });
+    const token = await generateAuthToken({
+      id: user._id,
+      email: user.email,
+      role: user.role,
+    });
     return res.status(200).json({ user, token, success: true });
   } catch (error) {
     console.log(error);
-    
+
     return next(new InternalServerError());
   }
 };
@@ -191,49 +193,37 @@ export const resendOtpController = async (req, res, next) => {
     });
   } catch (error) {
     console.log(error);
-    
+
     return next(new InternalServerError("Failed to resend OTP!"));
   }
 };
 
 export const updateUserInfo = async (req, res, next) => {
-  const { fullName, address, phone, password } = req.body;
-  const userId = req.user._id;
-  const file = req.file;
+  const user = req.user;
   try {
-    let imageUrl = "";
-    if (file) {
-      imageUrl = await uploadProfileImage(file);
-    }
-    const user = await UserModel.findById(userId);
-    if (!user) {
-      return next(new NotFoundError("User not found"));
-    }
+    let updatedUser = null;
 
-    user.fullName = fullName || user.fullName;
-    user.address = address || user.address;
-    user.phone = phone || user.phone;
-
-    if (password) {
-      user.password = password;
+    switch (user.role) {
+      case "owner":
+        updatedUser = await updateHomeownerInfo(user._id, req.body, req.file);
+        break;
+      case "contractor":
+        updatedUser = await updateContractorInfo(user._id, req.body, req.file);
+        break;
+      default:
+        return next(new Error("Invalid user role"));
     }
-
-    if (imageUrl) {
-      user.imageUrl = imageUrl;
-    }
-
-    await user.save();
 
     res.status(200).json({
       success: true,
-      user,
-      message: "user info updated successfully!",
+      user: updatedUser,
+      message: "User info updated successfully!",
     });
   } catch (error) {
+    console.log(error);
     const serverError = new InternalServerError(
       "An error occurred while updating user information"
     );
-
     return next(serverError);
   }
 };

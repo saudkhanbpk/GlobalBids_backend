@@ -1,6 +1,6 @@
 import OwnerSettingModel from "../model/owner.settings.model.js";
 import { BusinessLogicError, InternalServerError } from "../error/AppError.js";
-// import UserModel from "../model/user.model.js";
+import UserContractorModel from "../model/user.contractor.model.js";
 
 export const settings = async (req, res, next) => {
   const userId = req.user._id;
@@ -70,8 +70,10 @@ export const getSettings = async (req, res) => {
 
 export const getContractors = async (req, res, next) => {
   try {
-    const contractors = await UserModel.find({ role: "contractor" });
-    const total = await UserModel.countDocuments();
+    const contractors = await UserContractorModel.find().select(
+      "username imageUrl label rating"
+    );
+    const total = await UserContractorModel.countDocuments();
 
     return res.status(200).json({
       success: true,
@@ -79,8 +81,6 @@ export const getContractors = async (req, res, next) => {
       contractors,
     });
   } catch (error) {
-    console.log(error);
-    
     return next(new InternalServerError());
   }
 };

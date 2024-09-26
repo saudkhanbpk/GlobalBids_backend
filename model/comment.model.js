@@ -2,7 +2,16 @@ import mongoose from "mongoose";
 
 const CommentSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      refPath: "userType",
+    },
+    userType: {
+      type: String,
+      required: true,
+      enum: ["Homeowner", "Contractor"],
+    },
     story: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Story",

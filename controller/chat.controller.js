@@ -2,7 +2,7 @@ import { InternalServerError } from "../error/AppError.js";
 import { connectedUsers } from "../event/site-events.js";
 import MessageModel from "../model/chat.message.model.js";
 import RoomModel from "../model/chat.room.model.js";
-// import UserModel from "../model/user.model.js";
+import { getUserById } from "../services/user.service.js";
 
 export const getAllMessages = async (req, res, next) => {
   const { receiverId } = req.body;
@@ -67,7 +67,7 @@ export const getCurrentUser = async (req, res, next) => {
   const { userId } = req.body;
 
   try {
-    const user = await UserModel.findById(userId).select("imageUrl username");
+    const user = await getUserById(userId, "username imageUrl role");
 
     if (!user) {
       return res
@@ -107,19 +107,24 @@ export const getNewRoomData = async (req, res, next) => {
 };
 
 export const sendMessage = async (req, res, next) => {
-  const userId = req.user._id;
+  const user = req.user;
   const io = req.app.get("io");
   const { receiverId, message, timestamp, timeZone } = req.body;
   let newRoom = false;
 
+  const userType = user.role === "owner" ? "Homeowner" : "Contractor";
+  const receiverType =
+    req.body.receiverType === "owner" ? "Homeowner" : "Contractor";
+
   try {
     let room = await RoomModel.findOne({
-      users: { $all: [userId, receiverId] },
+      users: { $all: [user._id, receiverId] },
     });
 
     if (!room) {
       room = new RoomModel({
-        users: [userId, receiverId],
+        users: [user._id, receiverId],
+        userTypes: [userType, receiverType],
       });
       await room.save();
       newRoom = true;
@@ -127,7 +132,7 @@ export const sendMessage = async (req, res, next) => {
 
     const messageData = {
       roomId: room._id,
-      senderId: userId,
+      senderId: user._id,
       receiverId,
       message,
       timestamp,

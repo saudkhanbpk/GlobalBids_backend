@@ -3,7 +3,18 @@ import mongoose from "mongoose";
 const roomSchema = new mongoose.Schema(
   {
     users: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        refPath: "userTypes",
+      },
+    ],
+    userTypes: [
+      {
+        type: String,
+        required: true,
+        enum: ["Homeowner", "Contractor"],
+      },
     ],
     last_message: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
     unreadMessages: {

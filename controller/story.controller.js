@@ -8,8 +8,8 @@ import ShareModel from "../model/share.model.js";
 export const createStory = async (req, res, next) => {
   const { description } = req.body;
   const user = req.user;
+  const userType = user.role === "owner" ? "Homeowner" : "Contractor";
   let images = [];
-
   try {
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
@@ -19,6 +19,7 @@ export const createStory = async (req, res, next) => {
     }
     const newStory = new StoryModel({
       user: user._id,
+      userType,
       description,
       images,
     });
@@ -31,7 +32,9 @@ export const createStory = async (req, res, next) => {
       story: savedStory,
     });
   } catch (error) {
-    return next(InternalServerError("Can't post story"));
+    console.log(error);
+
+    return next(new InternalServerError("Can't post story"));
   }
 };
 
@@ -52,10 +55,12 @@ export const getStoryFeeds = async (_req, res, next) => {
 
 export const addComment = async (req, res, next) => {
   const { comment, storyId } = req.body;
-  const userId = req.user._id;
+  const user = req.user;
+  const userType = user.role === "owner" ? "Homeowner" : "Contractor";
   try {
     const newComment = new CommentModel({
-      user: userId,
+      user: user._id,
+      userType,
       story: storyId,
       comment,
     });
@@ -66,6 +71,8 @@ export const addComment = async (req, res, next) => {
       message: "Comment Added",
     });
   } catch (error) {
+    console.log(error);
+
     return next(new InternalServerError("Can't comment"));
   }
 };
@@ -104,23 +111,27 @@ export const getStoryDetails = async (req, res, next) => {
 
 export const toggleLike = async (req, res, next) => {
   const { id } = req.params;
-  const userId = req.user._id;
+  const user = req.user;
+  const userType = user.role === "owner" ? "Homeowner" : "Contractor";
 
   try {
     const existingLike = await LikeModel.findOne({
       story: id,
-      user: userId,
+
+      user: user._id,
     });
 
     if (existingLike) {
       await LikeModel.deleteOne({ _id: existingLike._id });
       return res.status(200).json({ success: true, liked: false });
     } else {
-      const newLike = new LikeModel({ user: userId, story: id });
+      const newLike = new LikeModel({ user: user._id, story: id, userType });
       await newLike.save();
       return res.status(201).json({ success: true, liked: true });
     }
   } catch (error) {
+    console.log(error);
+
     return next(new InternalServerError());
   }
 };

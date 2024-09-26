@@ -2,9 +2,18 @@ import mongoose from "mongoose";
 
 const storySchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      refPath: "userType",
+    },
     description: { type: String },
     images: [{ type: String }],
+    userType: {
+      type: String,
+      required: true,
+      enum: ["Homeowner", "Contractor"],
+    },
   },
   { timestamps: true }
 );

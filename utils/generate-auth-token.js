@@ -16,6 +16,7 @@ const generateAuthToken = async (user) => {
   const payload = {
     id: user.id,
     email: user.email,
+    role: user.role,
   };
 
   return await jwt.sign(payload, authSecret, {

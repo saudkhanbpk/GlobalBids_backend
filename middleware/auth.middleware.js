@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-
 import { AuthenticationError } from "../error/AppError.js";
 import dotenv from "dotenv";
 import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
@@ -14,7 +13,23 @@ const authMiddleware = async (req, _res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await UserModel.findById(decoded.id).select("-password");
+    let user = null;
+
+    switch (decoded.role) {
+      case "owner":
+        user = await UserHomeOwnerModel.findById(decoded.id).select(
+          "-password"
+        );
+        break;
+      case "contractor":
+        user = await UserContractorModel.findById(decoded.id).select(
+          "-password"
+        );
+        break;
+      default:
+        user = null;
+        break;
+    }
 
     if (!user) {
       throw new AuthenticationError("User not found");
