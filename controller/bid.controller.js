@@ -5,12 +5,23 @@ import {
   ValidationError,
 } from "../error/AppError.js";
 import ProjectModel from "../model/project.model.js";
+import NotificationModel from "../model/notification.model.js";
+import { connectedUsers } from "../event/site-events.js";
 
 export const createBid = async (req, res, next) => {
+  const io = req.app.get("io");
   try {
-    const { amount, ownerId, contractorId, jobId, bidBreakdown } = req.body;
+    const { amount, ownerId, contractorId, jobId, bidBreakdown, jobTitle } =
+      req.body;
 
-    if (!amount || !ownerId || !contractorId || !jobId || !bidBreakdown) {
+    if (
+      !amount ||
+      !ownerId ||
+      !contractorId ||
+      !jobId ||
+      !bidBreakdown ||
+      !jobTitle
+    ) {
       return next(
         new ValidationError(
           "All fields (amount, ownerId, contractorId, jobId) are required."
@@ -20,12 +31,26 @@ export const createBid = async (req, res, next) => {
     const newBid = new BidModel({
       amount,
       bidBreakdown,
-      owner:ownerId,
-      contractor:contractorId,
+      owner: ownerId,
+      contractor: contractorId,
       jobId,
     });
 
     const savedBid = await newBid.save();
+
+    const notification = new NotificationModel({
+      recipientId: ownerId,
+      recipientModel: "Homeowner",
+      senderId: contractorId,
+      senderModel: "Contractor",
+      message: `New bid submitted by contractor for Job ${jobTitle}`,
+      type: "bid",
+      url: `/home-owner/jobs/job-details/${jobId}`,
+    });
+
+    await notification.save();
+
+    io.to(connectedUsers[ownerId]).emit("notification", notification);
 
     return res.status(201).json({
       success: true,
@@ -124,5 +149,3 @@ export const changeBidStatus = async (req, res, next) => {
     return next(new InternalServerError("bid status can't be change"));
   }
 };
-
-

@@ -73,7 +73,7 @@ export const getAllJobs = async (_req, res, next) => {
 export const getOwnerJobs = async (req, res, next) => {
   const id = req.user._id;
   try {
-    const jobs = await JobModel.find({ user: id });
+    const jobs = await JobModel.find({ user: id }).sort({ createdAt: -1 });
     return res.status(200).json({ success: true, jobs });
   } catch (error) {
     return next(new InternalServerError("can't get jobs"));
