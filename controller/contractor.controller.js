@@ -1,8 +1,5 @@
-import { InternalServerError, NotFoundError } from "../error/AppError.js";
+import { InternalServerError } from "../error/AppError.js";
 import ContractorSettingsModel from "../model/contractor.settings.model.js";
-import JobModel from "../model/job.model.js";
-
-
 
 export const contractorSettings = async (req, res, next) => {
   const userId = req.user._id;
@@ -65,19 +62,5 @@ export const getContractorSettings = async (req, res, next) => {
     });
   } catch (error) {
     return next(new InternalServerError(""));
-  }
-};
-
-export const getJobDetails = async (req, res, next) => {
-  try {
-    const jobId = req.params.id;
-    const jobDetails = await JobModel.findById(jobId);
-
-    if (!jobDetails) {
-      return next(new NotFoundError());
-    }
-    return res.status(200).json({ success: true, job: jobDetails });
-  } catch (error) {
-    return next(new InternalServerError());
   }
 };

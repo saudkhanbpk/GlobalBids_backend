@@ -4,14 +4,14 @@ const BidSchema = new mongoose.Schema(
   {
     amount: { type: String, required: true },
     bidBreakdown: { type: String, required: true },
-    ownerId: {
+    owner: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Homeowner",
       required: true,
     },
-    contractorId: {
+    contractor: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Contractor",
       required: true,
     },
     jobId: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },

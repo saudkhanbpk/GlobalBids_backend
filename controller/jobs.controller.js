@@ -3,6 +3,7 @@ import {
   BusinessLogicError,
   FileUploadError,
   InternalServerError,
+  NotFoundError,
   ValidationError,
 } from "../error/AppError.js";
 import JobModel from "../model/job.model.js";
@@ -69,4 +70,26 @@ export const getAllJobs = async (_req, res, next) => {
   }
 };
 
-export const getAllContractorJobs = (req, res, next) => {};
+export const getOwnerJobs = async (req, res, next) => {
+  const id = req.user._id;
+  try {
+    const jobs = await JobModel.find({ user: id });
+    return res.status(200).json({ success: true, jobs });
+  } catch (error) {
+    return next(new InternalServerError("can't get jobs"));
+  }
+};
+
+export const getJobDetails = async (req, res, next) => {
+  try {
+    const jobId = req.params.id;
+    const jobDetails = await JobModel.findById(jobId);
+
+    if (!jobDetails) {
+      return next(new NotFoundError());
+    }
+    return res.status(200).json({ success: true, job: jobDetails });
+  } catch (error) {
+    return next(new InternalServerError());
+  }
+};

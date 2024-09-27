@@ -20,8 +20,8 @@ export const createBid = async (req, res, next) => {
     const newBid = new BidModel({
       amount,
       bidBreakdown,
-      ownerId,
-      contractorId,
+      owner:ownerId,
+      contractor:contractorId,
       jobId,
     });
 
@@ -46,11 +46,11 @@ export const getOwnerBids = async (req, res, next) => {
   try {
     const ownerId = req.user._id;
     const bids = await BidModel.find({
-      ownerId: ownerId,
+      owner: ownerId,
       status: "pending",
     })
       .populate({
-        path: "contractorId",
+        path: "contractor",
         select: "username imageUrl label",
       })
       .sort({ createdAt: -1 });
@@ -66,8 +66,8 @@ export const getOwnerBids = async (req, res, next) => {
 
 export const getContractorBids = async (req, res, next) => {
   try {
-    const contractorId = req.user._id;
-    const bids = await BidModel.find({ contractorId })
+    const contractor = req.user._id;
+    const bids = await BidModel.find({ contractor })
       .populate({
         path: "jobId",
         select: "title",
@@ -124,3 +124,5 @@ export const changeBidStatus = async (req, res, next) => {
     return next(new InternalServerError("bid status can't be change"));
   }
 };
+
+
