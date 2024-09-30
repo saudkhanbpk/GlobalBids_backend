@@ -1,4 +1,4 @@
-import { JOB_DIRECTORY } from "../constants/dirctory.constants.js";
+import { JOB_DIRECTORY } from "../constants/directory.constants.js";
 import {
   BusinessLogicError,
   FileUploadError,
