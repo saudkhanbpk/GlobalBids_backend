@@ -71,16 +71,16 @@ export const signUpController = async (req, res, next) => {
 export const loginController = async (req, res, next) => {
   const { email, password } = req.body;
 
+  
   if (!(email && password)) {
     return next(new ValidationError("Email and Password are Required"));
   }
-
+  
   try {
     const user = await getUserByEmail(email);
     if (!user) {
       return next(new LoginError());
     }
-
     if (!user.isVerified) {
       const otpResponse = await sendOtpToUser(user);
       return res.status(200).json({
@@ -104,7 +104,6 @@ export const loginController = async (req, res, next) => {
     return res.status(200).json({ user, token, success: true });
   } catch (error) {
     console.log(error);
-
     return next(new InternalServerError());
   }
 };

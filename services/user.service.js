@@ -4,13 +4,13 @@ import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
 import { uploadProfileImage } from "./upload.image.service.js";
 import { NotFoundError } from "../error/AppError.js";
 
-export const getUserByEmail = async (email) => {
+export const getUserByEmail = async (email, select = "+password") => {
   const contractor = await UserContractorModel.findOne({ email }).select(
-    "-password"
+    select
   );
   if (contractor) return contractor;
 
-  const owner = await UserHomeOwnerModel.findOne({ email }).select("-password");
+  const owner = await UserHomeOwnerModel.findOne({ email }).select(select);
   if (owner) return owner;
 
   return null;
