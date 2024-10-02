@@ -2,7 +2,6 @@ import passport from "passport";
 import GoogleAuth from "passport-google-oauth20";
 import dotenv from "dotenv";
 import { getUserByEmail } from "../services/user.service.js";
-import { InternalServerError } from "../error/AppError.js";
 import UserContractorModel from "../model/user.contractor.model.js";
 import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
 dotenv.config();
@@ -12,7 +11,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback",
+      callbackURL: "https://globalbids-backend.onrender.com/auth/google/callback",
       scope: ["profile", "email"],
       passReqToCallback: true,
     },
@@ -58,11 +57,12 @@ passport.use(
             req.res.redirect(
               `${process.env.REDIRECT_URL}/auth/login?error=404`
             );
-            return 
+            return;
         }
         return cb(null, newUser);
       } catch (error) {
-        return cb(new InternalServerError(), null);
+        req.res.redirect(`${process.env.REDIRECT_URL}/auth-redirect?error=400`);
+        return;
       }
     }
   )
