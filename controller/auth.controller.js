@@ -28,7 +28,7 @@ export const signUpController = async (req, res, next) => {
 
   const validateData = signUpValidate(userData);
   if (validateData) {
-    return next(new ValidationError(JSON.stringify(validateData)));
+    return next(new ValidationError());
   }
 
   try {
@@ -43,6 +43,7 @@ export const signUpController = async (req, res, next) => {
       return next(new ValidationError("User with this email already exists"));
     }
 
+    userData.provider = "credentials";
     let newUser;
     if (userData.role === "owner") {
       newUser = new UserHomeOwnerModel(userData);
@@ -59,12 +60,10 @@ export const signUpController = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       message: "Please verify your account",
-      user: newUser,
+      userId: newUser.id,
       otpId: otpResponse.otpId,
     });
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError());
   }
 };
@@ -112,6 +111,7 @@ export const loginController = async (req, res, next) => {
 
 export const otpController = async (req, res, next) => {
   const { userId, otp, otpId } = req.body;
+  console.log(userId);
 
   try {
     const user = await getUserById(userId);
@@ -301,5 +301,15 @@ export const resetPassword = async (req, res, next) => {
   } catch (error) {
     console.error("Error updating password:", error);
     return next(new InternalServerError("Failed to update password"));
+  }
+};
+
+export const getUser = async (req, res, next) => {
+  const userId = req.user;
+  try {
+    const user = await getUserById(userId);
+    return res.status(200).json({ user, success: true });
+  } catch (error) {
+    return next(new InternalServerError());
   }
 };

@@ -1,9 +1,10 @@
 import { AppError } from "./AppError.js";
 
 const errorHandler = (err, _req, res, _next) => {
+  console.log(err);
+
   if (err instanceof AppError) {
     err.logError();
-
     res.status(err.statusCode).json({
       success: false,
       type: err.getErrorType(),
@@ -12,8 +13,6 @@ const errorHandler = (err, _req, res, _next) => {
       stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
     });
   } else {
-    console.error("Unknown error occurred:", err);
-
     res.status(500).json({
       success: false,
       type: "Unknown Error",

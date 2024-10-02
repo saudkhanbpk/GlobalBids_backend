@@ -17,6 +17,6 @@ bidRouter.get("/owner", authMiddleware, getOwnerBids);
 // get contractor bids
 bidRouter.get("/contractor", authMiddleware, getContractorBids);
 
-bidRouter.post("/status", authMiddleware,changeBidStatus);
+bidRouter.post("/status", authMiddleware, changeBidStatus);
 
 export default bidRouter;

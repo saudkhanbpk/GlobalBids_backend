@@ -10,6 +10,7 @@ const authSecret = process.env.JWT_SECRET;
  * @param {Object} user - The user object containing user details.
  * @param {string} user.id - The user ID.
  * @param {string} user.email - The user's email.
+ * @param {string} user.role - The user's role.
  * @returns {string} - The generated JWT token.
  */
 const generateAuthToken = async (user) => {

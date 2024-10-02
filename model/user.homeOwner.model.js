@@ -24,10 +24,15 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
       trim: true,
       minlength: [8, "Password must be at least 8 characters long"],
       select: false,
+      validate: {
+        validator: function (value) {
+          return this.provider === "google" || value?.length >= 8;
+        },
+        message: "Password is required and must be at least 8 characters long",
+      },
     },
     isVerified: {
       type: Boolean,
@@ -38,11 +43,13 @@ const userSchema = new mongoose.Schema(
       default:
         "https://res.cloudinary.com/tech-creator/image/upload/v1723793884/kvy9hb4hqyymv7mvcsy4.jpg",
     },
+    googleId: { type: String, trim: true },
     fullName: { type: String, trim: true },
     phone: { type: String, trim: true },
     address: { type: String, trim: true },
     rating: { type: String, trim: true, default: "5" },
     label: { type: String, trim: true },
+    provider: { type: String, required: true, enum: ["google", "credentials"] },
   },
   {
     timestamps: true,
@@ -50,7 +57,7 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (this.provider === "google" || !this.isModified("password")) return next();
 
   try {
     const salt = await bcryptjs.genSalt(10);

@@ -14,7 +14,7 @@ import upload from "../config/multer.config.js";
 
 const router = express.Router();
 
-router.post("/signup", signUpController);
+router.post("/register", signUpController);
 router.post("/login", loginController);
 router.post("/otp", otpController);
 router.post("/resend-otp", resendOtpController);

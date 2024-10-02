@@ -6,11 +6,11 @@ import { NotFoundError } from "../error/AppError.js";
 
 export const getUserByEmail = async (email) => {
   const contractor = await UserContractorModel.findOne({ email }).select(
-    "+password"
+    "-password"
   );
   if (contractor) return contractor;
 
-  const owner = await UserHomeOwnerModel.findOne({ email }).select("+password");
+  const owner = await UserHomeOwnerModel.findOne({ email }).select("-password");
   if (owner) return owner;
 
   return null;

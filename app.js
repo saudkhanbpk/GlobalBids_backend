@@ -17,6 +17,8 @@ import initSocket from "./event/site-events.js";
 import chatRouter from "./routes/chat.routes.js";
 import eventRouter from "./routes/event.routes.js";
 import notificationRouter from "./routes/notifications.routes.js";
+import oAuthRoutes from "./routes/auth.google.routes.js";
+import passport from "./config/passport.config.js";
 
 dotenv.config();
 const app = express();
@@ -30,6 +32,9 @@ app.get("/", (_req, res) => {
   return res.status(200).json({ message: "Hello GlobalBids!" });
 });
 
+app.use(passport.initialize());
+
+app.use(oAuthRoutes);
 app.use("/api/auth/", authRoutes);
 app.use("/api/job/", jobsRouter);
 app.use("/api/contractor/", contractorRouter);

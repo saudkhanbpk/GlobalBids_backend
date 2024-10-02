@@ -28,6 +28,10 @@ export const createBid = async (req, res, next) => {
         )
       );
     }
+
+    const Project = await ProjectModel.findById(jobId);
+    
+
     const newBid = new BidModel({
       amount,
       bidBreakdown,
