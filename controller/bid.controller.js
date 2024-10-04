@@ -1,5 +1,6 @@
 import BidModel from "../model/bids.model.js";
 import {
+  BusinessLogicError,
   InternalServerError,
   NotFoundError,
   ValidationError,
@@ -7,6 +8,7 @@ import {
 import ProjectModel from "../model/project.model.js";
 import NotificationModel from "../model/notification.model.js";
 import { connectedUsers } from "../event/site-events.js";
+import Job from "../model/job.model.js";
 
 export const createBid = async (req, res, next) => {
   const io = req.app.get("io");
@@ -30,7 +32,22 @@ export const createBid = async (req, res, next) => {
     }
 
     const Project = await ProjectModel.findById(jobId);
-    
+
+    if (Project) {
+      return next(new BusinessLogicError("Bids are close for this job!"));
+    }
+
+    const existingBid = await BidModel.findOne({
+      owner: ownerId,
+      contractor: contractorId,
+      jobId,
+    });
+
+    if (existingBid) {
+      return next(
+        new BusinessLogicError("You have already submitted a bid for this job.")
+      );
+    }
 
     const newBid = new BidModel({
       amount,
@@ -62,9 +79,8 @@ export const createBid = async (req, res, next) => {
       bid: savedBid,
     });
   } catch (error) {
-    if (error.name === "ValidationError") {
-      return next(new ValidationError(error.message));
-    }
+    console.log(error);
+
     return next(
       new InternalServerError("Failed to create bid. Please try again later.")
     );
@@ -131,6 +147,9 @@ export const changeBidStatus = async (req, res, next) => {
       return next(new NotFoundError("bid not found!"));
     }
 
+    const job = await Job.findById(bid.jobId._id);    
+    job.bidStatus = "closed";
+    await job.save();
     bid.status = bidStatus;
 
     if (bid.status === "accepted") {
@@ -150,6 +169,8 @@ export const changeBidStatus = async (req, res, next) => {
       .status(200)
       .json({ success: true, message: `Bid is ${bidStatus}`, bid });
   } catch (error) {
+    console.log(error);
+    
     return next(new InternalServerError("bid status can't be change"));
   }
 };

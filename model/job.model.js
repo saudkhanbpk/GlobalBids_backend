@@ -36,6 +36,11 @@ const jobSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    bidStatus: {
+      type: String,
+      enum: ["open", "closed"],
+      default: "open",
+    },
   },
   { timestamps: true }
 );
