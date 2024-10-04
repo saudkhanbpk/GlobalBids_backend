@@ -11,6 +11,11 @@ const eventsSchema = new mongoose.Schema({
     required: true,
     enum: ["Homeowner", "Contractor"],
   },
+  eventtype: {
+    type: String,
+    required: true,
+    enum: ["installation", "general", "meetings"],
+  },
   title: { type: String, required: true },
   date: { type: String, required: true },
   description: { type: String, required: true },

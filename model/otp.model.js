@@ -22,7 +22,7 @@ const otpSchema = new mongoose.Schema(
 
 otpSchema.index(
   { createdAt: 1 },
-  { expireAfterSeconds: 300 * 12, partialFilterExpression: { state: "TMP" } }
+  { expireAfterSeconds: 300, partialFilterExpression: { state: "TMP" } }
 );
 
 const OtpModel = mongoose.model("verification-otp", otpSchema);

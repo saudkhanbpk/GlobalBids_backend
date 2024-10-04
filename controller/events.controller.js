@@ -6,11 +6,11 @@ import {
 import EventsModel from "../model/events.model.js";
 
 export const createEvent = async (req, res, next) => {
-  const { title, date, description } = req.body;
+  const { title, date, description, eventType } = req.body;
   const userId = req.user._id;
   const userType = req.user.role === "owner" ? "Homeowner" : "Contractor";
   try {
-    if (!title || !date || !description) {
+    if (!title || !date || !description || !eventType) {
       return next(new ValidationError("all fields are required"));
     }
     const event = new EventsModel({
@@ -19,6 +19,7 @@ export const createEvent = async (req, res, next) => {
       date,
       description,
       userType,
+      eventType,
     });
     await event.save();
     return res
