@@ -11,7 +11,7 @@ const eventsSchema = new mongoose.Schema({
     required: true,
     enum: ["Homeowner", "Contractor"],
   },
-  eventtype: {
+  eventType: {
     type: String,
     required: true,
     enum: ["installation", "general", "meetings"],
