@@ -7,7 +7,7 @@ const notificationSchema = new mongoose.Schema(
       required: true,
       refPath: "recipientModel",
     },
-    recipientModel: {
+    recipient: {
       type: String,
       required: true,
       enum: ["Contractor", "Homeowner"],

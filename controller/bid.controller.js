@@ -60,7 +60,7 @@ export const createBid = async (req, res, next) => {
 
     const notification = new NotificationModel({
       recipientId: ownerId,
-      recipientModel: "Homeowner",
+      recipient: "Homeowner",
       senderId: contractorId,
       senderModel: "Contractor",
       message: `New bid submitted by contractor for Job ${jobTitle}`,
