@@ -78,8 +78,6 @@ export const createBid = async (req, res, next) => {
       bid: savedBid,
     });
   } catch (error) {
-    console.log(error);
-
     return next(
       new InternalServerError("Failed to create bid. Please try again later.")
     );
