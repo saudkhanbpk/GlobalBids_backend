@@ -13,6 +13,11 @@ const projectSchema = new mongoose.Schema(
       ref: "Homeowner",
       required: true,
     },
+    jobId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Job",
+      required: true,
+    },
     progress: { type: String, default: "0" },
     images: [{ type: String }],
     status: { type: String, default: "pending" },

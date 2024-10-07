@@ -31,9 +31,8 @@ export const createBid = async (req, res, next) => {
       );
     }
 
-    const Project = await ProjectModel.findById(jobId);
-
-    if (Project) {
+    const job = await Job.findOne({ _id: jobId });
+    if (job.bidStatus === "closed") {
       return next(new BusinessLogicError("Bids are close for this job!"));
     }
 
@@ -136,7 +135,7 @@ export const changeBidStatus = async (req, res, next) => {
     return next(new BusinessLogicError());
   }
 
-  const { bidId, bidStatus, contractor } = req.body;
+  const { bidId, job, contractor } = req.body;
 
   try {
     const bid = await BidModel.findOne({
@@ -147,16 +146,17 @@ export const changeBidStatus = async (req, res, next) => {
       return next(new NotFoundError("bid not found!"));
     }
 
-    const job = await Job.findById(bid.jobId._id);    
-    job.bidStatus = "closed";
+    const job = await Job.findById(bid.jobId._id);
+    job.job = "closed";
     await job.save();
-    bid.status = bidStatus;
+    bid.status = job;
 
     if (bid.status === "accepted") {
       const newProject = new ProjectModel({
         contractor,
         title: bid.jobId.title,
         owner: user._id,
+        jobId: bid.jobId._id,
         images: [bid.jobId.file],
         totalBudget: bid.jobId.budget,
       });
@@ -167,10 +167,8 @@ export const changeBidStatus = async (req, res, next) => {
 
     return res
       .status(200)
-      .json({ success: true, message: `Bid is ${bidStatus}`, bid });
+      .json({ success: true, message: `Bid is ${job}`, bid });
   } catch (error) {
-    console.log(error);
-    
     return next(new InternalServerError("bid status can't be change"));
   }
 };
