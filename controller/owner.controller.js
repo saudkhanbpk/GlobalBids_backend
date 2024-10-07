@@ -1,6 +1,7 @@
 import OwnerSettingModel from "../model/owner.settings.model.js";
 import { BusinessLogicError, InternalServerError } from "../error/AppError.js";
 import UserContractorModel from "../model/user.contractor.model.js";
+import EventsModel from "../model/events.model.js";
 
 export const settings = async (req, res, next) => {
   const userId = req.user._id;
@@ -68,7 +69,7 @@ export const getSettings = async (req, res) => {
   }
 };
 
-export const getContractors = async (req, res, next) => {
+export const getContractors = async (_req, res, next) => {
   try {
     const contractors = await UserContractorModel.find().select(
       "username imageUrl label rating"
@@ -82,5 +83,14 @@ export const getContractors = async (req, res, next) => {
     });
   } catch (error) {
     return next(new InternalServerError());
+  }
+};
+
+export const getHomeMaintenanceReminders = async (req, res, next) => {
+  try {
+    const reminders = await EventsModel.find().sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, reminders });
+  } catch (error) {
+    return next(new InternalServerError("can't get reminders"));
   }
 };
