@@ -1,6 +1,7 @@
 import BidModel from "../model/bids.model.js";
 import {
   BusinessLogicError,
+  FileUploadError,
   InternalServerError,
   NotFoundError,
   ValidationError,
@@ -9,37 +10,29 @@ import ProjectModel from "../model/project.model.js";
 import NotificationModel from "../model/notification.model.js";
 import { connectedUsers } from "../event/site-events.js";
 import Job from "../model/job.model.js";
+import { validateBidFields } from "../validators/bid-validators.js";
+import { uploadFile } from "../services/upload.file.service.js";
 
 export const createBid = async (req, res, next) => {
   const io = req.app.get("io");
+
+  const data = req.body;
+  const files = req.files;
+  let attachments = [];
+
   try {
-    const { amount, ownerId, contractorId, jobId, bidBreakdown, jobTitle } =
-      req.body;
-
-    if (
-      !amount ||
-      !ownerId ||
-      !contractorId ||
-      !jobId ||
-      !bidBreakdown ||
-      !jobTitle
-    ) {
-      return next(
-        new ValidationError(
-          "All fields (amount, ownerId, contractorId, jobId) are required."
-        )
-      );
+    const job = await Job.findOne({ _id: req.body.jobId });
+    if (!job) {
+      return next(new NotFoundError("Job not found."));
     }
-
-    const job = await Job.findOne({ _id: jobId });
     if (job.bidStatus === "closed") {
-      return next(new BusinessLogicError("Bids are close for this job!"));
+      return next(new BusinessLogicError("Bids are closed for this job!"));
     }
 
     const existingBid = await BidModel.findOne({
-      owner: ownerId,
-      contractor: contractorId,
-      jobId,
+      owner: req.body.ownerId,
+      contractor: req.body.contractorId,
+      jobId: req.body.jobId,
     });
 
     if (existingBid) {
@@ -47,30 +40,65 @@ export const createBid = async (req, res, next) => {
         new BusinessLogicError("You have already submitted a bid for this job.")
       );
     }
+  } catch (error) {
+    return next(
+      new InternalServerError("Failed to create bid. Please try again later.")
+    );
+  }
+
+  try {
+    for (const file of files) {
+      const fileUrl = await uploadFile(file, "bids");
+      attachments.push(fileUrl);
+    }
+  } catch (error) {
+    return next(new FileUploadError());
+  }
+
+  try {
+    const validateFields = validateBidFields({
+      ...data,
+      stages: JSON.parse(data.stages),
+    });
+
+    if (validateFields) {
+      return next(new ValidationError(JSON.stringify(validateFields)));
+    }
+
+    const comments = [
+      {
+        user: data.contractorId,
+        comment: req.body.comment,
+        userType: "Contractor",
+      },
+    ];
 
     const newBid = new BidModel({
-      amount,
-      bidBreakdown,
-      owner: ownerId,
-      contractor: contractorId,
-      jobId,
+      amount: data.amount,
+      bidBreakdown: data.bidBreakdown,
+      owner: data.ownerId,
+      contractor: data.contractorId,
+      jobId: data.jobId,
+      stages: JSON.parse(data.stages),
+      comments,
+      attachments: attachments,
     });
 
     const savedBid = await newBid.save();
 
     const notification = new NotificationModel({
-      recipientId: ownerId,
+      recipientId: newBid.owner,
       recipient: "Homeowner",
-      senderId: contractorId,
+      senderId: newBid.contractor,
       senderModel: "Contractor",
-      message: `New bid submitted by contractor for Job ${jobTitle}`,
+      message: `New bid submitted by contractor for Job ${req.body.jobTitle}`,
       type: "bid",
-      url: `/home-owner/jobs/job-details/${jobId}`,
+      url: `/home-owner/jobs/job-details/${req.body.jobId}`,
     });
 
     await notification.save();
 
-    io.to(connectedUsers[ownerId]).emit("notification", notification);
+    io.to(connectedUsers[newBid.owner]).emit("notification", notification);
 
     return res.status(201).json({
       success: true,
@@ -168,5 +196,24 @@ export const changeBidStatus = async (req, res, next) => {
       .json({ success: true, message: `Bid is ${job}`, bid });
   } catch (error) {
     return next(new InternalServerError("bid status can't be change"));
+  }
+};
+
+export const getBid = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const bid = await BidModel.findById(id)
+      .populate({
+        path: "contractor",
+        select: "username imageUrl label",
+      })
+      .populate({
+        path: "comments.user",
+        select: "username profileImage",
+      });
+    return res.status(200).json({ success: true, bid });
+  } catch (error) {
+    return next(new InternalServerError("Failed to fetch the bid"));
   }
 };

@@ -20,7 +20,11 @@ const projectSchema = new mongoose.Schema(
     },
     progress: { type: String, default: "0" },
     images: [{ type: String }],
-    status: { type: String, default: "pending" },
+    status: {
+      type: String,
+      default: "pending",
+      enum: ["pending", "started", "completed"],
+    },
     nextStage: { type: String },
     totalBudget: { type: String },
     spent: { type: String },

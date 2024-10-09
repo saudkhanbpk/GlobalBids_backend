@@ -32,8 +32,6 @@ export const createStory = async (req, res, next) => {
       story: savedStory,
     });
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError("Can't post story"));
   }
 };
