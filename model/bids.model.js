@@ -1,22 +1,5 @@
 import mongoose from "mongoose";
 
-const CommentSchema = new mongoose.Schema(
-  {
-    comment: { type: String, required: true },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      refPath: "userType",
-    },
-    userType: {
-      type: String,
-      required: true,
-      enum: ["Homeowner", "Contractor"],
-    },
-  },
-  { timestamps: true }
-);
-
 const BidSchema = new mongoose.Schema(
   {
     amount: { type: String, required: true },
@@ -44,7 +27,21 @@ const BidSchema = new mongoose.Schema(
         estimatedCompletion: { type: Date, required: true },
       },
     ],
-    comments: [CommentSchema],
+    comments: [
+      {
+        comment: { type: String, required: true },
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          refPath: "userType",
+        },
+        userType: {
+          type: String,
+          required: true,
+          enum: ["Homeowner", "Contractor"],
+        },
+      },
+    ],
     attachments: [{ type: String }],
   },
   { timestamps: true }

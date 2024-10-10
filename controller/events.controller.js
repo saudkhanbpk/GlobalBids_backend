@@ -41,8 +41,6 @@ export const getEvents = async (req, res, next) => {
     }
     return res.status(200).json({ success: true, events });
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError(""));
   }
 };

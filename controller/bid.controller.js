@@ -12,6 +12,8 @@ import { connectedUsers } from "../event/site-events.js";
 import Job from "../model/job.model.js";
 import { validateBidFields } from "../validators/bid-validators.js";
 import { uploadFile } from "../services/upload.file.service.js";
+import Contractor from "../model/user.contractor.model.js";
+import Homeowner from "../model/user.homeOwner.model.js";
 
 export const createBid = async (req, res, next) => {
   const io = req.app.get("io");
@@ -203,15 +205,11 @@ export const getBid = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const bid = await BidModel.findById(id)
-      .populate({
-        path: "contractor",
-        select: "username imageUrl label",
-      })
-      .populate({
-        path: "comments.user",
-        select: "username profileImage",
-      });
+    const bid = await BidModel.findById(id).populate({
+      path: "contractor",
+      select: "username imageUrl label",
+    });
+
     return res.status(200).json({ success: true, bid });
   } catch (error) {
     return next(new InternalServerError("Failed to fetch the bid"));

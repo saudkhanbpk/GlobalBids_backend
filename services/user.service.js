@@ -56,6 +56,9 @@ export const updateHomeownerInfo = async (userId, data, file) => {
   user.fullName = data.fullName || user.fullName;
   user.address = data.address || user.address;
   user.phone = data.phone || user.phone;
+  user.city = data.city || user.city;
+  user.state = data.state || user.state;
+  user.zipCode = data.zipCode || user.zipCode;
 
   if (data.password) {
     const salt = await bcrypt.genSalt(10);
