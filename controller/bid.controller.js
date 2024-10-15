@@ -12,8 +12,6 @@ import { connectedUsers } from "../event/site-events.js";
 import Job from "../model/job.model.js";
 import { validateBidFields } from "../validators/bid-validators.js";
 import { uploadFile } from "../services/upload.file.service.js";
-import Contractor from "../model/user.contractor.model.js";
-import Homeowner from "../model/user.homeOwner.model.js";
 
 export const createBid = async (req, res, next) => {
   const io = req.app.get("io");
@@ -58,10 +56,7 @@ export const createBid = async (req, res, next) => {
   }
 
   try {
-    const validateFields = validateBidFields({
-      ...data,
-      stages: JSON.parse(data.stages),
-    });
+    const validateFields = validateBidFields(data);
 
     if (validateFields) {
       return next(new ValidationError(JSON.stringify(validateFields)));
@@ -81,7 +76,7 @@ export const createBid = async (req, res, next) => {
       owner: data.ownerId,
       contractor: data.contractorId,
       jobId: data.jobId,
-      stages: JSON.parse(data.stages),
+
       comments,
       attachments: attachments,
     });

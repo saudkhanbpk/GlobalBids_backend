@@ -37,34 +37,6 @@ export const validateBidFields = (data) => {
     errors.jobTitle = "Job title must be a string";
   }
 
-  if (!Array.isArray(data?.stages) || data.stages.length === 0) {
-    errors.stages = "Stages must be an array with at least one stage";
-  } else {
-    data.stages.forEach((stage, index) => {
-      if (!stage?.name) {
-        errors[`stages[${index}].name`] = "Stage name is required";
-      } else if (typeof stage.name !== "string") {
-        errors[`stages[${index}].name`] = "Stage name must be a string";
-      }
-
-      if (!stage?.description) {
-        errors[`stages[${index}].description`] =
-          "Stage description is required";
-      } else if (typeof stage.description !== "string") {
-        errors[`stages[${index}].description`] =
-          "Stage description must be a string";
-      }
-
-      if (!stage?.estimatedCompletion) {
-        errors[`stages[${index}].estimatedCompletion`] =
-          "Estimated completion date is required";
-      } else if (isNaN(Date.parse(stage.estimatedCompletion))) {
-        errors[`stages[${index}].estimatedCompletion`] =
-          "Estimated completion must be a valid date";
-      }
-    });
-  }
-
   if (!data?.comment) {
     errors.comment = "Comments you must provide an comment";
   }

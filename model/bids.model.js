@@ -20,13 +20,6 @@ const BidSchema = new mongoose.Schema(
       enum: ["accepted", "rejected", "pending"],
       default: "pending",
     },
-    stages: [
-      {
-        name: { type: String, required: true },
-        description: { type: String, required: true },
-        estimatedCompletion: { type: Date, required: true },
-      },
-    ],
     comments: [
       {
         comment: { type: String, required: true },

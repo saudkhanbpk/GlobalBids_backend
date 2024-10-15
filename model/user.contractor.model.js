@@ -29,9 +29,9 @@ const userSchema = new mongoose.Schema(
       select: false,
       validate: {
         validator: function (value) {
-          return this.provider === "google" || value?.length >= 8;
+          return this.provider === "google" || (value && value.length >= 8);
         },
-        message: "Password is required and must be at least 8 characters long",
+        message: "Password must be at least 8 characters long",
       },
     },
     isVerified: {
@@ -47,27 +47,60 @@ const userSchema = new mongoose.Schema(
     fullName: { type: String, trim: true },
     phone: { type: String, trim: true },
     address: { type: String, trim: true },
-    rating: { type: String, trim: true, default: "5" },
+    rating: {
+      type: Number,
+      default: 5,
+      min: [1, "Rating must be at least 1"],
+      max: [5, "Rating cannot exceed 5"],
+    },
     label: { type: String, trim: true },
-    licenseNumber: { type: String, trim: true },
-    insuranceInformation: { type: String, trim: true },
+    insurance: {
+      insuranceNumber: { type: String, trim: true },
+      insuranceProvider: { type: String, trim: true },
+      insuranceExpiryDate: { type: Date },
+      file: { type: String, trim: true },
+    },
+    companyName: {
+      name: { type: String, trim: true },
+      EIN: { type: String, trim: true },
+      licenseNumber: { type: String, trim: true },
+    },
+    business: {
+      address: { type: String, trim: true },
+      location: { type: String, trim: true },
+    },
     services: [{ type: String, trim: true }],
-    professionalExperience: [{ type: String, trim: true }],
-    provider: { type: String, required: true, enum: ["google", "credentials"] },
+    experience: { type: String, trim: true },
+    certifications: { type: String, trim: true },
+    onlinePresence: [{ type: String, trim: true }],
+    provider: {
+      type: String,
+      required: true,
+      enum: ["google", "credentials"],
+    },
+    profileCompleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
   }
 );
 
+// Pre-save hook for password hashing
 userSchema.pre("save", async function (next) {
+  if (this.provider !== "credentials") {
+    return next();
+  }
+
   if (!this.isModified("password")) return next();
 
   try {
     const salt = await bcryptjs.genSalt(10);
     this.password = await bcryptjs.hash(this.password, salt);
   } catch (error) {
-    return next(new Error("Password hashing failed"));
+    return next(error);
   }
 
   if (!this.username) {
@@ -77,10 +110,12 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+// Method to compare passwords
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcryptjs.compare(candidatePassword, this.password);
 };
 
+// Static method to find user by email
 userSchema.statics.findByEmail = async function (email) {
   return await this.findOne({ email }).select("+password");
 };

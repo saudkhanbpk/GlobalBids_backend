@@ -41,6 +41,22 @@ const jobSchema = new mongoose.Schema(
       enum: ["open", "closed"],
       default: "open",
     },
+    jobType: {
+      type: String,
+      enum: ["project-based", "stages-based"],
+      required: true,
+    },
+    stages: [
+      {
+        name: { type: String },
+        description: { type: String },
+        estimatedCompletion: { type: String },
+      },
+    ],
+    projectDetails: {
+      deadline: { type: Date },
+      contractorNotes: { type: String },
+    },
   },
   { timestamps: true }
 );

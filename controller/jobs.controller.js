@@ -18,7 +18,7 @@ export const createJob = async (req, res, next) => {
   }
 
   if (!file) {
-    return next(new FileUploadError("file is required!"));
+    return next(new FileUploadError("File is required!"));
   }
 
   const validate = validateJobFields(req.body);
@@ -26,26 +26,50 @@ export const createJob = async (req, res, next) => {
     return next(new ValidationError(JSON.stringify(validate)));
   }
 
+  const { type, stages, projectDetails } = req.body;
+
+  // Validate based on job type
+  if (type === "stages-based" && (!stages || stages.length === 0)) {
+    return next(
+      new ValidationError("Stages are required for a stages-based job")
+    );
+  }
+
+  if (type === "project-based" && !projectDetails) {
+    return next(
+      new ValidationError(
+        "Project details are required for a project-based job"
+      )
+    );
+  }
+
   let fileUrl = "";
   try {
     const fileRes = await uploadFile(file, JOB_DIRECTORY);
     fileUrl = fileRes;
   } catch (error) {
-    console.log(error);
-
     return next(new FileUploadError());
   }
+
   try {
-    const job = new JobModel({
+    const jobData = {
       user: req.user._id,
       ...req.body,
       file: fileUrl,
-    });
+    };
+
+    if (type === "project-based") {
+      delete jobData.stages;
+    } else if (type === "stages-based") {
+      delete jobData.projectDetails;
+    }
+
+    const job = new JobModel(jobData);
 
     const savedJob = await job.save();
     res
       .status(201)
-      .json({ success: true, message: "job has been created!", job: savedJob });
+      .json({ success: true, message: "Job has been created!", job: savedJob });
   } catch (error) {
     return next(new InternalServerError());
   }
