@@ -93,6 +93,12 @@ class LoginError extends AppError {
   }
 }
 
+class UnsupportedFileTypeError extends Error {
+  constructor(message = "Unsupported file format") {
+    super(message, 415, true, "warn");
+  }
+}
+
 export {
   AppError,
   NotFoundError,
@@ -104,5 +110,6 @@ export {
   FileUploadError,
   FileSizeLimitExceededError,
   AuthenticationError,
-  LoginError
+  LoginError,
+  UnsupportedFileTypeError,
 };

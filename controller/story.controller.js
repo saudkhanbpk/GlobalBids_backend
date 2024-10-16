@@ -1,7 +1,7 @@
 import { InternalServerError } from "../error/AppError.js";
 import CommentModel from "../model/comment.model.js";
 import StoryModel from "../model/story.model.js";
-import { uploadFile } from "../services/upload.file.service.js";
+import { uploadFile } from "../services/upload.files.media.service.js";
 import LikeModel from "../model/like.story.model.js";
 import ShareModel from "../model/share.model.js";
 

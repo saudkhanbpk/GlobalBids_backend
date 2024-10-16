@@ -7,7 +7,7 @@ import {
   ValidationError,
 } from "../error/AppError.js";
 import JobModel from "../model/job.model.js";
-import { uploadFile } from "../services/upload.file.service.js";
+import { uploadFile } from "../services/upload.files.media.service.js";
 import { validateJobFields } from "../validators/jobs-validator.js";
 
 export const createJob = async (req, res, next) => {

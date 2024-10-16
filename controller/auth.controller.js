@@ -3,6 +3,7 @@ import {
   InternalServerError,
   LoginError,
   NotFoundError,
+  UnsupportedFileTypeError,
 } from "../error/AppError.js";
 import generateAuthToken from "../utils/generate-auth-token.js";
 import {
@@ -22,6 +23,7 @@ import ResetPasswordModel from "../model/reset.password.js";
 import UserContractorModel from "../model/user.contractor.model.js";
 import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
 import crypto from "crypto";
+import { log } from "console";
 
 export const signUpController = async (req, res, next) => {
   const userData = req.body;
@@ -71,11 +73,10 @@ export const signUpController = async (req, res, next) => {
 export const loginController = async (req, res, next) => {
   const { email, password } = req.body;
 
-  
   if (!(email && password)) {
     return next(new ValidationError("Email and Password are Required"));
   }
-  
+
   try {
     const user = await getUserByEmail(email);
     if (!user) {
@@ -103,7 +104,6 @@ export const loginController = async (req, res, next) => {
     });
     return res.status(200).json({ user, token, success: true });
   } catch (error) {
-    console.log(error);
     return next(new InternalServerError());
   }
 };
@@ -204,10 +204,10 @@ export const updateUserInfo = async (req, res, next) => {
 
     switch (user.role) {
       case "owner":
-        updatedUser = await updateHomeownerInfo(user._id, req.body, req.file);
+        updatedUser = await updateHomeownerInfo(user._id, req.body, req.files);
         break;
       case "contractor":
-        updatedUser = await updateContractorInfo(user._id, req.body, req.file);
+        updatedUser = await updateContractorInfo(user._id, req.body, req.files);
         break;
       default:
         return next(new Error("Invalid user role"));
@@ -219,11 +219,15 @@ export const updateUserInfo = async (req, res, next) => {
       message: "User info updated successfully!",
     });
   } catch (error) {
-    console.log(error);
-    const serverError = new InternalServerError(
-      "An error occurred while updating user information"
-    );
-    return next(serverError);
+    if (error.code === 415) {
+      console.log(error);
+      return next(new UnsupportedFileTypeError(error.message));
+    }
+
+    // const serverError = new InternalServerError(
+    //   "An error occurred while updating user information"
+    // );
+    // return next(serverError);
   }
 };
 

@@ -20,7 +20,10 @@ router.post("/otp", otpController);
 router.post("/resend-otp", resendOtpController);
 router.post(
   "/update-user-info",
-  upload.single("image"),
+  upload.fields([
+    { name: "insuranceFile", maxCount: 1 },
+    { name: "profilePic", maxCount: 1 },
+  ]),
   authMiddleware,
   updateUserInfo
 );

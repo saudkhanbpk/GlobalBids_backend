@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
 import UserContractorModel from "../model/user.contractor.model.js";
 import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
-import { uploadProfileImage } from "./upload.image.service.js";
+
 import { NotFoundError } from "../error/AppError.js";
+import { uploadFile } from "./upload.files.media.service.js";
 
 export const getUserByEmail = async (email, select = "+password") => {
   const contractor = await UserContractorModel.findOne({ email }).select(
@@ -45,7 +46,7 @@ export const updateUserVerificationStatus = async (userId) => {
 export const updateHomeownerInfo = async (userId, data, file) => {
   let imageUrl = "";
   if (file) {
-    imageUrl = await uploadProfileImage(file);
+    imageUrl = await uploadFile(file, "profile-images");
   }
 
   const user = await UserHomeOwnerModel.findById(userId);
@@ -73,31 +74,28 @@ export const updateHomeownerInfo = async (userId, data, file) => {
   return user;
 };
 
-export const updateContractorInfo = async (userId, updateData, file) => {
+export const updateContractorInfo = async (userId, reqData, files) => {
+  const data = JSON.parse(reqData.payload);
   const user = await UserContractorModel.findById(userId);
   if (!user) {
     throw new Error("User not found");
   }
 
-  if (file) {
-    const imageUrl = await uploadProfileImage(file);
-    user.imageUrl = imageUrl;
-  }
+  user.company = data.company || user.company;
+  user.insurance = data.insurance || user.insurance;
+  user.business = data.business || user.business;
+  user.services = data.services || user.services;
+  user.experience = data.experience || user.experience;
+  user.expertise = data.expertise || user.expertise;
+  user.onlinePresence = data.onlinePresence || user.onlinePresence;
 
-  user.fullName = updateData.fullName || user.fullName;
-  user.phone = updateData.phone || user.phone;
-  user.address = updateData.address || user.address;
-  user.rating = updateData.rating || user.rating;
-  user.label = updateData.label || user.label;
-  user.licenseNumber = updateData.licenseNumber || user.licenseNumber;
-  user.insuranceInformation =
-    updateData.insuranceInformation || user.insuranceInformation;
-  user.services = updateData.services
-    ? JSON.parse(updateData.services)
-    : user.services;
-  user.professionalExperience = updateData.professionalExperience
-    ? JSON.parse(updateData.professionalExperience)
-    : user.professionalExperience;
+  if (files?.insuranceFile) {
+    const fileUrl = await uploadFile(
+      files.insuranceFile[0],
+      "contractor-insurance-files"
+    );
+    user.insurance.file = fileUrl;
+  }
 
   await user.save();
   return user;

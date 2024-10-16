@@ -11,7 +11,7 @@ import NotificationModel from "../model/notification.model.js";
 import { connectedUsers } from "../event/site-events.js";
 import Job from "../model/job.model.js";
 import { validateBidFields } from "../validators/bid-validators.js";
-import { uploadFile } from "../services/upload.file.service.js";
+import { uploadFile } from "../services/upload.files.media.service.js";
 
 export const createBid = async (req, res, next) => {
   const io = req.app.get("io");

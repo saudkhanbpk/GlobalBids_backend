@@ -60,19 +60,28 @@ const userSchema = new mongoose.Schema(
       insuranceExpiryDate: { type: Date },
       file: { type: String, trim: true },
     },
-    companyName: {
+    company: {
       name: { type: String, trim: true },
-      EIN: { type: String, trim: true },
+      employerID: { type: String, trim: true },
       licenseNumber: { type: String, trim: true },
+      workerCompensationStatus: { type: String, trim: true },
     },
     business: {
       address: { type: String, trim: true },
-      location: { type: String, trim: true },
+      location: {
+        latitude: { type: String },
+        longitude: { type: String },
+      },
     },
     services: [{ type: String, trim: true }],
     experience: { type: String, trim: true },
-    certifications: { type: String, trim: true },
-    onlinePresence: [{ type: String, trim: true }],
+    expertise: { type: String, trim: true },
+    onlinePresence: {
+      companyWebsite: { type: String, trim: true },
+      googleReviewLink: { type: String, trim: true },
+      facebookProfileLink: { type: String, trim: true },
+      instagramProfileLink: { type: String, trim: true },
+    },
     provider: {
       type: String,
       required: true,

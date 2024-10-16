@@ -1,8 +1,6 @@
 import { AppError } from "./AppError.js";
 
 const errorHandler = (err, _req, res, _next) => {
-  console.log(err);
-
   if (err instanceof AppError) {
     err.logError();
     res.status(err.statusCode).json({
