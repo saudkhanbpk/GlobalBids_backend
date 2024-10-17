@@ -42,6 +42,7 @@ passport.use(
           isVerified: true,
           role: userRole,
           provider,
+          profileCompleted: false,
         };
 
         let newUser = null;

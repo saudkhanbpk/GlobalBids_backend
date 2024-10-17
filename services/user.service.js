@@ -97,6 +97,14 @@ export const updateContractorInfo = async (userId, reqData, files) => {
     user.insurance.file = fileUrl;
   }
 
+  if (profilePic) {
+    const fileUrl = await uploadFile(
+      files.profilePic[0],
+      "contractor-profile-images"
+    );
+    user.imageUrl = fileUrl;
+  }
+
   await user.save();
   return user;
 };

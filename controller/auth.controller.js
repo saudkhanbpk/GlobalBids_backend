@@ -220,14 +220,13 @@ export const updateUserInfo = async (req, res, next) => {
     });
   } catch (error) {
     if (error.code === 415) {
-      console.log(error);
       return next(new UnsupportedFileTypeError(error.message));
     }
-
-    // const serverError = new InternalServerError(
-    //   "An error occurred while updating user information"
-    // );
-    // return next(serverError);
+    return next(
+      new InternalServerError(
+        "An error occurred while updating user information"
+      )
+    );
   }
 };
 
