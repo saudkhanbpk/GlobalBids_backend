@@ -40,9 +40,8 @@ const userSchema = new mongoose.Schema(
     },
     imageUrl: {
       type: String,
-      default:
-        "https://res.cloudinary.com/tech-creator/image/upload/v1723793884/kvy9hb4hqyymv7mvcsy4.jpg",
     },
+    isFirstLogin: { type: Boolean, default: true },
     googleId: { type: String, trim: true },
     fullName: { type: String, trim: true },
     phone: { type: String, trim: true },

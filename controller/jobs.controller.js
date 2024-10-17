@@ -8,7 +8,7 @@ import {
 } from "../error/AppError.js";
 import JobModel from "../model/job.model.js";
 import { uploadFile } from "../services/upload.files.media.service.js";
-import { validateJobFields } from "../validators/jobs-validator.js";
+// import { validateJobFields } from "../validators/jobs-validator.js";
 
 export const createJob = async (req, res, next) => {
   const file = req.file;
@@ -59,8 +59,9 @@ export const createJob = async (req, res, next) => {
     };
 
     if (jobType === "project-based") {
-      jobData.contractorNotes = contractorNotes;
-      jobData.deadline = deadline;
+      jobData.projectDetails = {};
+      jobData.projectDetails.contractorNotes = contractorNotes;
+      jobData.projectDetails.deadline = deadline;
     } else if (jobType === "stages-based") {
       jobData.stages = JSON.parse(stages);
     }
@@ -72,7 +73,9 @@ export const createJob = async (req, res, next) => {
       .status(201)
       .json({ success: true, message: "Job has been created!", job: savedJob });
   } catch (error) {
-    return next(new InternalServerError());
+    console.log(error);
+
+    // return next(new InternalServerError());
   }
 };
 

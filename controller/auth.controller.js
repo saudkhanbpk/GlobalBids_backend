@@ -23,7 +23,6 @@ import ResetPasswordModel from "../model/reset.password.js";
 import UserContractorModel from "../model/user.contractor.model.js";
 import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
 import crypto from "crypto";
-import { log } from "console";
 
 export const signUpController = async (req, res, next) => {
   const userData = req.body;
@@ -46,6 +45,9 @@ export const signUpController = async (req, res, next) => {
     }
 
     userData.provider = "credentials";
+    userData.profileCompleted = true;
+    userData.isFirstLogin = true;
+
     let newUser;
     if (userData.role === "owner") {
       newUser = new UserHomeOwnerModel(userData);
@@ -96,6 +98,9 @@ export const loginController = async (req, res, next) => {
     if (!passMatch) {
       return next(new LoginError());
     }
+
+    user.isFirstLogin = false;
+    await user.save();
 
     const token = await generateAuthToken({
       id: user._id,
@@ -219,6 +224,8 @@ export const updateUserInfo = async (req, res, next) => {
       message: "User info updated successfully!",
     });
   } catch (error) {
+    console.log(error);
+
     if (error.code === 415) {
       return next(new UnsupportedFileTypeError(error.message));
     }
@@ -310,6 +317,8 @@ export const getUser = async (req, res, next) => {
   const userId = req.user;
   try {
     const user = await getUserById(userId);
+    user.isFirstLogin = true;
+    user.save();
     return res.status(200).json({ user, success: true });
   } catch (error) {
     return next(new InternalServerError());

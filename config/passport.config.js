@@ -22,6 +22,7 @@ passport.use(
 
       try {
         const existUser = await getUserByEmail(user.email);
+        
 
         if (existUser?.provider === "credentials") {
           req.res.redirect(
@@ -43,6 +44,7 @@ passport.use(
           role: userRole,
           provider,
           profileCompleted: false,
+          isFirstLogin: true,
         };
 
         let newUser = null;

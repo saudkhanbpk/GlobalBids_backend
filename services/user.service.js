@@ -97,7 +97,7 @@ export const updateContractorInfo = async (userId, reqData, files) => {
     user.insurance.file = fileUrl;
   }
 
-  if (profilePic) {
+  if (files?.profilePic) {
     const fileUrl = await uploadFile(
       files.profilePic[0],
       "contractor-profile-images"
