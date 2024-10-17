@@ -21,24 +21,23 @@ export const createJob = async (req, res, next) => {
     return next(new FileUploadError("File is required!"));
   }
 
-  const validate = validateJobFields(req.body);
-  if (validate) {
-    return next(new ValidationError(JSON.stringify(validate)));
-  }
+  // const validate = validateJobFields(req.body);
+  // if (validate) {
+  //   return next(new ValidationError(JSON.stringify(validate)));
+  // }
 
-  const { type, stages, projectDetails } = req.body;
+  const { jobType, stages, contractorNotes, deadline, ...rest } = req.body;
 
-  // Validate based on job type
-  if (type === "stages-based" && (!stages || stages.length === 0)) {
+  if (jobType === "stages-based" && (!stages || stages.length === 0)) {
     return next(
       new ValidationError("Stages are required for a stages-based job")
     );
   }
 
-  if (type === "project-based" && !projectDetails) {
+  if (jobType === "project-based" && !contractorNotes && !deadline) {
     return next(
       new ValidationError(
-        "Project details are required for a project-based job"
+        "Project deadline and contractor notes are required for a project-based job"
       )
     );
   }
@@ -54,14 +53,16 @@ export const createJob = async (req, res, next) => {
   try {
     const jobData = {
       user: req.user._id,
-      ...req.body,
       file: fileUrl,
+      jobType,
+      ...rest,
     };
 
-    if (type === "project-based") {
-      delete jobData.stages;
-    } else if (type === "stages-based") {
-      delete jobData.projectDetails;
+    if (jobType === "project-based") {
+      jobData.contractorNotes = contractorNotes;
+      jobData.deadline = deadline;
+    } else if (jobType === "stages-based") {
+      jobData.stages = JSON.parse(stages);
     }
 
     const job = new JobModel(jobData);
