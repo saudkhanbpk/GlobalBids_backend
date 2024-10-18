@@ -99,8 +99,8 @@ export const loginController = async (req, res, next) => {
       return next(new LoginError());
     }
 
-    user.isFirstLogin = false;
-    await user.save();
+    // user.isFirstLogin = false;
+    // await user.save();
 
     const token = await generateAuthToken({
       id: user._id,
