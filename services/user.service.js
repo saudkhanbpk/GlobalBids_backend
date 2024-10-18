@@ -43,10 +43,14 @@ export const updateUserVerificationStatus = async (userId) => {
   }
 };
 
-export const updateHomeownerInfo = async (userId, data, file) => {
+export const updateHomeownerInfo = async (userId, data, files) => {
   let imageUrl = "";
-  if (file) {
-    imageUrl = await uploadFile(file, "profile-images");
+  if (files?.profilePic) {
+    const fileUrl = await uploadFile(
+      files.profilePic[0],
+      "contractor-profile-images"
+    );
+    user.imageUrl = fileUrl;
   }
 
   const user = await UserHomeOwnerModel.findById(userId);

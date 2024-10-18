@@ -317,8 +317,6 @@ export const getUser = async (req, res, next) => {
   const userId = req.user;
   try {
     const user = await getUserById(userId);
-    user.isFirstLogin = true;
-    user.save();
     return res.status(200).json({ user, success: true });
   } catch (error) {
     return next(new InternalServerError());

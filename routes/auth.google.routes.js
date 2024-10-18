@@ -30,7 +30,7 @@ router.get(
       email: user.email,
       role: user.role,
     });
-
+ 
     res.redirect(`${process.env.REDIRECT_URL}/auth-redirect?token=${token}`);
   }
 );
