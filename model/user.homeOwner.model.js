@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import bcryptjs from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -41,7 +40,8 @@ const userSchema = new mongoose.Schema(
     imageUrl: {
       type: String,
     },
-    isFirstLogin: { type: Boolean, default: true },
+    isFirstLogin: { type: Boolean, default: true, required: true },
+    profileCompleted: { type: Boolean, default: false, required: true },
     googleId: { type: String, trim: true },
     fullName: { type: String, trim: true },
     phone: { type: String, trim: true },
@@ -52,6 +52,59 @@ const userSchema = new mongoose.Schema(
     rating: { type: String, trim: true, default: "5" },
     label: { type: String, trim: true },
     provider: { type: String, required: true, enum: ["google", "credentials"] },
+
+    personalInformation: {
+      fullName: { type: String, trim: true },
+      email: { type: String, trim: true },
+      phone: { type: String, trim: true },
+      bestTimeToContact: {
+        type: String,
+        trim: true,
+      },
+    },
+    propertyDetails: {
+      propertyType: { type: String, trim: true },
+      bedrooms: { type: Number },
+      bathrooms: { type: Number },
+      lotSize: { type: String, trim: true },
+      propertyAge: { type: String, trim: true },
+    },
+    projectNeeds: {
+      ProjectType: {
+        homeRenovation: { type: Boolean, default: false },
+        repairs: { type: Boolean, default: false },
+        homeAddition: { type: Boolean, default: false },
+        outdoorLandscaping: { type: Boolean, default: false },
+        energy: { type: Boolean, default: false },
+      },
+      desireProjectTimeLine: { type: String, trim: true },
+      estimateBudget: { type: String, trim: true },
+      projectDescription: { type: String, trim: true },
+    },
+    specificArea: {
+      roof: { type: Boolean, default: false },
+      plumbing: { type: Boolean, default: false },
+      electrical: { type: Boolean, default: false },
+      HVAC: { type: Boolean, default: false },
+      foundation: { type: Boolean, default: false },
+      window: { type: Boolean, default: false },
+      installation: { type: Boolean, default: false },
+      additionalNotes: { type: String, trim: true },
+    },
+    contractorPreferences: {
+      contractorSize: { type: String, trim: true },
+      importantFactors: {
+        competitivePricing: { type: Boolean, default: false },
+        highQualityWorkManShip: { type: Boolean, default: false },
+        quickCompletion: { type: Boolean, default: false },
+        clearCommunication: { type: Boolean, default: false },
+        ecoFriendly: { type: Boolean, default: false },
+      },
+    },
+    additionalInformation: {
+      pastRenovation: { type: String, trim: true },
+      specialRequirements: { type: String, trim: true },
+    },
   },
   {
     timestamps: true,

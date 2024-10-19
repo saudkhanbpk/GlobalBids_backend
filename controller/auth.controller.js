@@ -115,8 +115,6 @@ export const loginController = async (req, res, next) => {
 
 export const otpController = async (req, res, next) => {
   const { userId, otp, otpId } = req.body;
-  console.log(userId);
-
   try {
     const user = await getUserById(userId);
     const userOtp = await OtpModel.findById(otpId);
