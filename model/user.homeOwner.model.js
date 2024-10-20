@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcryptjs from "bcryptjs"
 
 const userSchema = new mongoose.Schema(
   {
@@ -43,25 +44,19 @@ const userSchema = new mongoose.Schema(
     isFirstLogin: { type: Boolean, default: true, required: true },
     profileCompleted: { type: Boolean, default: false, required: true },
     googleId: { type: String, trim: true },
+    rating: { type: String, trim: true, default: "5" },
+    provider: { type: String, required: true, enum: ["google", "credentials"] },
     fullName: { type: String, trim: true },
     phone: { type: String, trim: true },
+    bestTimeToContact: {
+      type: String,
+      trim: true,
+    },
     address: { type: String, trim: true },
     city: { type: String, trim: true },
     state: { type: String, trim: true },
     zipCode: { type: String, trim: true },
-    rating: { type: String, trim: true, default: "5" },
-    label: { type: String, trim: true },
-    provider: { type: String, required: true, enum: ["google", "credentials"] },
 
-    personalInformation: {
-      fullName: { type: String, trim: true },
-      email: { type: String, trim: true },
-      phone: { type: String, trim: true },
-      bestTimeToContact: {
-        type: String,
-        trim: true,
-      },
-    },
     propertyDetails: {
       propertyType: { type: String, trim: true },
       bedrooms: { type: Number },

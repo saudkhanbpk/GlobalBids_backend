@@ -109,6 +109,8 @@ export const loginController = async (req, res, next) => {
     });
     return res.status(200).json({ user, token, success: true });
   } catch (error) {
+    console.log(error);
+    
     return next(new InternalServerError());
   }
 };

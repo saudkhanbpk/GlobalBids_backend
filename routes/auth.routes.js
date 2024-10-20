@@ -8,6 +8,7 @@ import {
   findUser,
   verifyUserAndResetPassword,
   resetPassword,
+  getUser,
 } from "../controller/auth.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import upload from "../config/multer.config.js";
@@ -31,5 +32,6 @@ router.post(
 router.post("/find-user", findUser);
 router.post("/find-and-verify", verifyUserAndResetPassword);
 router.post("/reset-password", resetPassword);
+router.get("/login/success", authMiddleware, getUser);
 
 export default router;

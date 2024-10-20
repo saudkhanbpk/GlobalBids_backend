@@ -43,8 +43,13 @@ export const updateUserVerificationStatus = async (userId) => {
   }
 };
 
-export const updateHomeownerInfo = async (userId, data, files) => {
-  let imageUrl = "";
+export const updateHomeownerInfo = async (userId, reqData, files) => {
+  const data = JSON.parse(reqData.payload);
+  const user = await UserHomeOwnerModel.findById(userId);
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+
   if (files?.profilePic) {
     const fileUrl = await uploadFile(
       files.profilePic[0],
@@ -53,25 +58,16 @@ export const updateHomeownerInfo = async (userId, data, files) => {
     user.imageUrl = fileUrl;
   }
 
-  const user = await UserHomeOwnerModel.findById(userId);
-  if (!user) {
-    throw new NotFoundError("User not found");
-  }
-
-  user.fullName = data.fullName || user.fullName;
-  user.address = data.address || user.address;
-  user.phone = data.phone || user.phone;
-  user.city = data.city || user.city;
-  user.state = data.state || user.state;
-  user.zipCode = data.zipCode || user.zipCode;
+  user.personalInformation = data.personalInformation;
+  user.propertyDetails = data.propertyDetails;
+  user.projectNeeds = data.projectNeeds;
+  user.specificArea = data.specificArea;
+  user.contractorPreferences = data.contractorPreferences;
+  user.additionalInformation = data.additionalInformation;
 
   if (data.password) {
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(data.password, salt);
-  }
-
-  if (imageUrl) {
-    user.imageUrl = imageUrl;
   }
 
   await user.save();
