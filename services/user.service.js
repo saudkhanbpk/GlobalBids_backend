@@ -58,12 +58,18 @@ export const updateHomeownerInfo = async (userId, reqData, files) => {
     user.imageUrl = fileUrl;
   }
 
-  user.personalInformation = data.personalInformation;
-  user.propertyDetails = data.propertyDetails;
-  user.projectNeeds = data.projectNeeds;
-  user.specificArea = data.specificArea;
-  user.contractorPreferences = data.contractorPreferences;
-  user.additionalInformation = data.additionalInformation;
+  user.personalInformation =
+    data.personalInformation || user.personalInformation;
+  user.propertyDetails = data.propertyDetails || user.propertyDetails;
+  user.projectNeeds = data.projectNeeds || user.projectNeeds;
+  user.specificArea = data.specificArea || user.specificArea;
+  user.contractorPreferences =
+    data.contractorPreferences || user.contractorPreferences;
+  user.additionalInformation =
+    data.additionalInformation || user.additionalInformation;
+  user.email = data.email || user.email;
+  user.phone = data.phone || user.phone;
+  user.fullName = data.fullName || user.fullName;
 
   if (data.password) {
     const salt = await bcrypt.genSalt(10);
@@ -81,8 +87,9 @@ export const updateContractorInfo = async (userId, reqData, files) => {
     throw new Error("User not found");
   }
 
-  user.company = data.company || user.company;
-  user.insurance = data.insurance || user.insurance;
+  user.company = { file: user.company.file, ...data.company } || user.company;
+  user.insurance =
+    { file: user?.insurance?.file, ...data.insurance } || user.insurance;
   user.business = data.business || user.business;
   user.services = data.services || user.services;
   user.experience = data.experience || user.experience;
@@ -92,9 +99,19 @@ export const updateContractorInfo = async (userId, reqData, files) => {
   if (files?.insuranceFile) {
     const fileUrl = await uploadFile(
       files.insuranceFile[0],
-      "contractor-insurance-files"
+      "contractor-company-files"
     );
     user.insurance.file = fileUrl;
+  }
+
+  if (files?.compensationFile) {
+    const fileUrl = await uploadFile(
+      files.compensationFile[0],
+      "contractor-company-files"
+    );
+    console.log(fileUrl);
+
+    user.company.file = fileUrl;
   }
 
   if (files?.profilePic) {

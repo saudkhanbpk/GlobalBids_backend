@@ -24,6 +24,7 @@ router.post(
   upload.fields([
     { name: "insuranceFile", maxCount: 1 },
     { name: "profilePic", maxCount: 1 },
+    { name: "compensationFile", maxCount: 1 },
   ]),
   authMiddleware,
   updateUserInfo

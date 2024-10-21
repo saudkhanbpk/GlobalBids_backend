@@ -110,7 +110,7 @@ export const loginController = async (req, res, next) => {
     return res.status(200).json({ user, token, success: true });
   } catch (error) {
     console.log(error);
-    
+
     return next(new InternalServerError());
   }
 };
@@ -224,8 +224,6 @@ export const updateUserInfo = async (req, res, next) => {
       message: "User info updated successfully!",
     });
   } catch (error) {
-    console.log(error);
-
     if (error.code === 415) {
       return next(new UnsupportedFileTypeError(error.message));
     }

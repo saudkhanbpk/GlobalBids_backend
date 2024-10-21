@@ -63,6 +63,7 @@ const userSchema = new mongoose.Schema(
       employerID: { type: String, trim: true },
       licenseNumber: { type: String, trim: true },
       workerCompensationStatus: { type: String, trim: true },
+      file: { type: String, trim: true },
     },
     business: {
       address: { type: String, trim: true },
