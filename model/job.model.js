@@ -41,11 +41,6 @@ const jobSchema = new mongoose.Schema(
       enum: ["open", "closed"],
       default: "open",
     },
-    jobType: {
-      type: String,
-      enum: ["project-based", "stages-based"],
-      required: true,
-    },
     stages: [
       {
         name: { type: String },
@@ -53,10 +48,9 @@ const jobSchema = new mongoose.Schema(
         estimatedCompletion: { type: String },
       },
     ],
-    projectDetails: {
-      deadline: { type: Date },
-      contractorNotes: { type: String },
-    },
+    contractorNotes: { type: String, required: true, trim: true },
+    completed: { type: Boolean, default: false },
+    HOA: { type: String, default: "no", required: true },
   },
   { timestamps: true }
 );
