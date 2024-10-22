@@ -25,13 +25,11 @@ export const createReminder = async (req, res) => {
     });
 
     await newReminder.save();
-    res
-      .status(201)
-      .json({
-        message: "Reminder created successfully",
-        reminder: newReminder,
-        success: true,
-      });
+    res.status(201).json({
+      message: "Reminder created successfully",
+      reminder: newReminder,
+      success: true,
+    });
   } catch (error) {
     res
       .status(500)
@@ -54,12 +52,10 @@ export const updateReminder = async (req, res) => {
       return res.status(404).json({ error: "Reminder not found" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Reminder updated successfully",
-        reminder: updatedReminder,
-      });
+    res.status(200).json({
+      message: "Reminder updated successfully",
+      reminder: updatedReminder,
+    });
   } catch (error) {
     res
       .status(500)
@@ -91,7 +87,7 @@ export const getAllReminders = async (req, res) => {
 
     const reminders = await Reminder.find({ user: userId });
 
-    res.status(200).json({ reminders });
+    res.status(200).json({ success: true, reminders });
   } catch (error) {
     res
       .status(500)

@@ -46,7 +46,7 @@ app.use("/api/chat/", chatRouter);
 app.use("/api/event/", eventRouter);
 app.use("/api/story/", storyRouter);
 app.use("/api/notifications/", notificationRouter);
-app.use("/api/reminder/", reminderRouter);
+app.use("/api/reminders/", reminderRouter);
 
 app.all("*", (req, res, next) => {
   const err = new RouteNotFoundError(
