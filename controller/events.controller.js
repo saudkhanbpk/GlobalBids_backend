@@ -26,8 +26,6 @@ export const createEvent = async (req, res, next) => {
       .status(200)
       .json({ success: true, event, message: "event has been added" });
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError("can't create event"));
   }
 };
@@ -65,12 +63,16 @@ export const deleteEvent = async (req, res, next) => {
   }
 };
 
-
 export const updateEvent = async (req, res, next) => {
   const id = req.params.id;
   const userId = req.user._id;
+
   try {
-    const event = await EventsModel.findOneAndUpdate({ _id: id, user: userId }, req.body, { new: true });
+    const event = await EventsModel.findOneAndUpdate(
+      { _id: id, user: userId },
+      req.body,
+      { new: true }
+    );
     if (!event) {
       return next(
         new NotFoundError(
@@ -82,4 +84,4 @@ export const updateEvent = async (req, res, next) => {
   } catch (error) {
     return next(new InternalServerError("Unable to update event"));
   }
-}
+};
