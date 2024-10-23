@@ -69,6 +69,8 @@ export const createBid = async (req, res, next) => {
       contractor: data.contractorId,
       jobId: data.jobId,
       comment: data.comment,
+      startDate: data.startDate,
+      projectDuration: data.projectDuration,
       attachments: attachments,
     });
 
@@ -149,39 +151,43 @@ export const changeBidStatus = async (req, res, next) => {
     return next(new BusinessLogicError());
   }
 
-  const { bidId, job, contractor } = req.body;
+  const { bidId, contractor } = req.body;
 
   try {
     const bid = await BidModel.findOne({
       _id: bidId,
       status: "pending",
-    }).populate("jobId");
+    });
     if (!bid) {
       return next(new NotFoundError("bid not found!"));
     }
 
-    const job = await Job.findById(bid.jobId._id);
-    job.job = "closed";
-    await job.save();
-    bid.status = job;
+    const job = await Job.findByIdAndUpdate(
+      bid.jobId._id,
+      { bidStatus: "closed" },
+      { new: true }
+    );
+
+    bid.status = req.body.bidStatus;
+
+    await bid.save();
 
     if (bid.status === "accepted") {
       const newProject = new ProjectModel({
         contractor,
-        title: bid.jobId.title,
+        title: job.title,
         owner: user._id,
-        jobId: bid.jobId._id,
-        images: [bid.jobId.file],
-        totalBudget: bid.jobId.budget,
+        jobId: bid.jobId,
+        images: [job.file],
+        totalBudget: job.budget,
+        stages: job.stages,
       });
       await newProject.save();
     }
 
-    await bid.save();
-
     return res
       .status(200)
-      .json({ success: true, message: `Bid is ${job}`, bid });
+      .json({ success: true, message: `Bid is ${req.body.bidStatus}`, bid });
   } catch (error) {
     return next(new InternalServerError("bid status can't be change"));
   }

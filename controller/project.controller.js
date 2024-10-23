@@ -17,14 +17,7 @@ export const getProjectsInProgress = async (req, res, next) => {
   const id = req.user._id;
 
   try {
-    const projects = await ProjectModel.find({
-      $and: [
-        { $or: [{ contractor: id }, { owner: id }] },
-        {
-          $or: [{ status: { $ne: "completed" } }, { progress: { $lt: "100" } }],
-        },
-      ],
-    })
+    const projects = await ProjectModel.find({ owner: id })
       .populate("contractor", "username")
       .populate("owner", "username");
 

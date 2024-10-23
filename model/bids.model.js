@@ -21,6 +21,8 @@ const BidSchema = new mongoose.Schema(
       default: "pending",
     },
     comment: { type: String, required: true },
+    startDate: { type: Date, required: true },
+    projectDuration: { type: String, required: true },
     attachments: [{ type: String }],
   },
   { timestamps: true }

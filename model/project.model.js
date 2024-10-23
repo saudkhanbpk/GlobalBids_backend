@@ -26,6 +26,13 @@ const projectSchema = new mongoose.Schema(
       enum: ["pending", "started", "completed"],
     },
     nextStage: { type: String },
+    stages: [
+      {
+        name: { type: String },
+        description: { type: String },
+        estimatedCompletion: { type: String },
+      },
+    ],
     totalBudget: { type: String },
     spent: { type: String },
     paymentMethod: { type: String },
