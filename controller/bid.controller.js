@@ -62,22 +62,13 @@ export const createBid = async (req, res, next) => {
       return next(new ValidationError(JSON.stringify(validateFields)));
     }
 
-    const comments = [
-      {
-        user: data.contractorId,
-        comment: req.body.comment,
-        userType: "Contractor",
-      },
-    ];
-
     const newBid = new BidModel({
       amount: data.amount,
       bidBreakdown: data.bidBreakdown,
       owner: data.ownerId,
       contractor: data.contractorId,
       jobId: data.jobId,
-
-      comments,
+      comment: data.comment,
       attachments: attachments,
     });
 

@@ -20,21 +20,7 @@ const BidSchema = new mongoose.Schema(
       enum: ["accepted", "rejected", "pending"],
       default: "pending",
     },
-    comments: [
-      {
-        comment: { type: String, required: true },
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          required: true,
-          refPath: "userType",
-        },
-        userType: {
-          type: String,
-          required: true,
-          enum: ["Homeowner", "Contractor"],
-        },
-      },
-    ],
+    comment: { type: String, required: true },
     attachments: [{ type: String }],
   },
   { timestamps: true }
