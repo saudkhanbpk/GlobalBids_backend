@@ -320,3 +320,21 @@ export const getUser = async (req, res, next) => {
     return next(new InternalServerError());
   }
 };
+
+export const markUsersAsFirstTimeLogin = async (req, res, next) => {
+  const { _id } = req.user._id;
+  try {
+    const user = await getUserById(_id);
+    if (!user) {
+      return next(new NotFoundError("User not found"));
+    }
+    user.isFirstLogin = false;
+    await user.save();
+    return res
+      .status(200)
+      .json({ success: true, message: "User marked as first time login" });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    return next(new InternalServerError("Failed to update user status"));
+  }
+};

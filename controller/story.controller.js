@@ -128,8 +128,6 @@ export const toggleLike = async (req, res, next) => {
       return res.status(201).json({ success: true, liked: true });
     }
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError());
   }
 };
