@@ -8,6 +8,6 @@ import authMiddleware from "../middleware/auth.middleware.js";
 const notificationRouter = express.Router();
 
 notificationRouter.get("", authMiddleware, getNotifications);
-notificationRouter.patch("/:id',", authMiddleware, markNotificationAsRead);
+notificationRouter.get("/:id", authMiddleware, markNotificationAsRead);
 
 export default notificationRouter;
