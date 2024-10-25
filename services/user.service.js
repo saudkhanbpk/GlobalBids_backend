@@ -45,83 +45,64 @@ export const updateUserVerificationStatus = async (userId) => {
 
 export const updateHomeownerInfo = async (userId, reqData, files) => {
   const data = JSON.parse(reqData.payload);
-  const user = await UserHomeOwnerModel.findById(userId);
-  if (!user) {
-    throw new NotFoundError("User not found");
-  }
-
-  if (files?.profilePic) {
-    const fileUrl = await uploadFile(
-      files.profilePic[0],
-      "contractor-profile-images"
-    );
-    user.imageUrl = fileUrl;
-  }
-
-  user.personalInformation =
-    data.personalInformation || user.personalInformation;
-  user.propertyDetails = data.propertyDetails || user.propertyDetails;
-  user.projectNeeds = data.projectNeeds || user.projectNeeds;
-  user.specificArea = data.specificArea || user.specificArea;
-  user.contractorPreferences =
-    data.contractorPreferences || user.contractorPreferences;
-  user.additionalInformation =
-    data.additionalInformation || user.additionalInformation;
-  user.email = data.email || user.email;
-  user.phone = data.phone || user.phone;
-  user.fullName = data.fullName || user.fullName;
+  const updateFields = {
+    ...data,
+    ...(files?.profilePic && {
+      imageUrl: await uploadFile(
+        files.profilePic[0],
+        "contractor-profile-images"
+      ),
+    }),
+  };
 
   if (data.password) {
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(data.password, salt);
+    updateFields.password = await bcrypt.hash(data.password, salt);
   }
+  const updatedUser = await UserHomeOwnerModel.findByIdAndUpdate(
+    userId,
+    updateFields,
+    { new: true }
+  );
+  if (!updatedUser) throw new NotFoundError("User not found");
 
-  await user.save();
-  return user;
+  return updatedUser;
 };
 
 export const updateContractorInfo = async (userId, reqData, files) => {
   const data = JSON.parse(reqData.payload);
-  const user = await UserContractorModel.findById(userId);
-  if (!user) {
-    throw new Error("User not found");
-  }
 
-  user.company = { file: user.company.file, ...data.company } || user.company;
-  user.insurance =
-    { file: user?.insurance?.file, ...data.insurance } || user.insurance;
-  user.business = data.business || user.business;
-  user.services = data.services || user.services;
-  user.experience = data.experience || user.experience;
-  user.expertise = data.expertise || user.expertise;
-  user.onlinePresence = data.onlinePresence || user.onlinePresence;
+  const updateFields = {
+    ...data,
+    ...(data.company && { company: { ...data.company } }),
+    ...(data.insurance && { insurance: { ...data.insurance } }),
+  };
 
   if (files?.insuranceFile) {
-    const fileUrl = await uploadFile(
+    updateFields["insurance.file"] = await uploadFile(
       files.insuranceFile[0],
       "contractor-company-files"
     );
-    user.insurance.file = fileUrl;
   }
-
   if (files?.compensationFile) {
-    const fileUrl = await uploadFile(
+    updateFields["company.file"] = await uploadFile(
       files.compensationFile[0],
       "contractor-company-files"
     );
-    console.log(fileUrl);
-
-    user.company.file = fileUrl;
   }
-
   if (files?.profilePic) {
-    const fileUrl = await uploadFile(
+    updateFields.imageUrl = await uploadFile(
       files.profilePic[0],
       "contractor-profile-images"
     );
-    user.imageUrl = fileUrl;
   }
 
-  await user.save();
-  return user;
+  const updatedUser = await UserContractorModel.findByIdAndUpdate(
+    userId,
+    { $set: updateFields },
+    { new: true }
+  );
+  if (!updatedUser) throw new Error("User not found");
+
+  return updatedUser;
 };
