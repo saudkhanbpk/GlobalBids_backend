@@ -22,6 +22,5 @@ export const uploadFile = async (file, directory) => {
     resource_type: file.mimetype === "video/mp4" ? "video" : "auto",
     chunk_size: 100 * 1024 * 1024,
   });
-
   return result.secure_url;
 };

@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 import UserContractorModel from "../model/user.contractor.model.js";
 import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
-
 import { NotFoundError } from "../error/AppError.js";
 import { uploadFile } from "./upload.files.media.service.js";
+import { removeEmptyFields } from "../utils/removeEmptyFields.js";
 
 export const getUserByEmail = async (email, select = "+password") => {
   const contractor = await UserContractorModel.findOne({ email }).select(
@@ -79,16 +79,26 @@ export const updateContractorInfo = async (userId, reqData, files) => {
   };
 
   if (files?.insuranceFile) {
-    updateFields["insurance.file"] = await uploadFile(
+    const uploadedFileUrl = await uploadFile(
       files.insuranceFile[0],
       "contractor-company-files"
     );
+    updateFields.insurance = {
+      ...updateFields.insurance,
+      file: uploadedFileUrl,
+    };
   }
+
   if (files?.compensationFile) {
-    updateFields["company.file"] = await uploadFile(
+    const uploadedFileUrl = await uploadFile(
       files.compensationFile[0],
       "contractor-company-files"
     );
+
+    updateFields.company = {
+      ...updateFields.company,
+      file: uploadedFileUrl,
+    };
   }
   if (files?.profilePic) {
     updateFields.imageUrl = await uploadFile(
@@ -96,7 +106,6 @@ export const updateContractorInfo = async (userId, reqData, files) => {
       "contractor-profile-images"
     );
   }
-
   const updatedUser = await UserContractorModel.findByIdAndUpdate(
     userId,
     { $set: updateFields },

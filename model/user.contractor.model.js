@@ -97,7 +97,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Pre-save hook for password hashing
 userSchema.pre("save", async function (next) {
   if (this.provider !== "credentials") {
     return next();
@@ -119,12 +118,10 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// Method to compare passwords
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcryptjs.compare(candidatePassword, this.password);
 };
 
-// Static method to find user by email
 userSchema.statics.findByEmail = async function (email) {
   return await this.findOne({ email }).select("+password");
 };
