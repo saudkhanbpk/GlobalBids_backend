@@ -26,13 +26,6 @@ const projectSchema = new mongoose.Schema(
       enum: ["pending", "started", "completed"],
     },
     nextStage: { type: String },
-    stages: [
-      {
-        name: { type: String },
-        description: { type: String },
-        estimatedCompletion: { type: String },
-      },
-    ],
     totalBudget: { type: String },
     spent: { type: String },
     paymentMethod: { type: String },
@@ -41,6 +34,6 @@ const projectSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const ProjectModel = mongoose.model("Projects", projectSchema);
+const ProjectModel = mongoose.model("Project", projectSchema);
 
 export default ProjectModel;

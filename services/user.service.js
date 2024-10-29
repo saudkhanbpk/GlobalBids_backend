@@ -100,12 +100,15 @@ export const updateContractorInfo = async (userId, reqData, files) => {
       file: uploadedFileUrl,
     };
   }
+
   if (files?.profilePic) {
-    updateFields.imageUrl = await uploadFile(
+    const uploadedFileUrl = await uploadFile(
       files.profilePic[0],
-      "contractor-profile-images"
+      "profile-images"
     );
+    updateFields.imageUrl = uploadedFileUrl;
   }
+
   const updatedUser = await UserContractorModel.findByIdAndUpdate(
     userId,
     { $set: updateFields },

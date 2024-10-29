@@ -13,7 +13,7 @@ const projectRouter = express.Router();
 projectRouter.get("/owner", authMiddleware, getOwnerProjects);
 projectRouter.get("/in-progress", authMiddleware, getProjectsInProgress);
 projectRouter.get(
-  "/contractor/projects",
+  "/contractor",
   authMiddleware,
   getAllContractorProjects
 );

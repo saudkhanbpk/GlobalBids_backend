@@ -6,19 +6,21 @@ import {
 import EventsModel from "../model/events.model.js";
 
 export const createEvent = async (req, res, next) => {
-  const { title, date, description, eventType } = req.body;
+  const { title, date, description, eventType, homeownerId, projectId } =
+    req.body;
   const userId = req.user._id;
-  const userType = req.user.role === "owner" ? "Homeowner" : "Contractor";
+
   try {
     if (!title || !date || !description || !eventType) {
       return next(new ValidationError("all fields are required"));
     }
     const event = new EventsModel({
-      user: userId,
+      homeowner: homeownerId,
+      project: projectId,
       title,
       date,
       description,
-      userType,
+      contractor: userId,
       eventType,
     });
     await event.save();
@@ -33,7 +35,12 @@ export const createEvent = async (req, res, next) => {
 export const getEvents = async (req, res, next) => {
   const id = req.user._id;
   try {
-    const events = await EventsModel.find({ user: id });
+    const events = await EventsModel.find({
+      $or: [{ homeowner: id }, { contractor: id }],
+    }).populate({
+      path: "project",
+      select: "title",
+    });
     if (!events) {
       return next(new NotFoundError("can't found user events"));
     }
@@ -69,7 +76,7 @@ export const updateEvent = async (req, res, next) => {
 
   try {
     const event = await EventsModel.findOneAndUpdate(
-      { _id: id, user: userId },
+      { _id: id, contractor: userId },
       req.body,
       { new: true }
     );

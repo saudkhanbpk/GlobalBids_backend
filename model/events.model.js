@@ -1,15 +1,20 @@
 import mongoose from "mongoose";
 
 const eventsSchema = new mongoose.Schema({
-  user: {
+  homeowner: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    refPath: "userType",
+    ref: "Homeowner",
   },
-  userType: {
-    type: String,
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
-    enum: ["Homeowner", "Contractor"],
+    ref: "Project",
+  },
+  contractor: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Contractor",
   },
   eventType: {
     type: String,
