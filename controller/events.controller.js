@@ -54,7 +54,7 @@ export const deleteEvent = async (req, res, next) => {
   const id = req.params.id;
   const userId = req.user._id;
   try {
-    const event = await EventsModel.findOneAndDelete({ _id: id, user: userId });
+    const event = await EventsModel.findOneAndDelete({ _id: id, contractor: userId });
 
     if (!event) {
       return next(

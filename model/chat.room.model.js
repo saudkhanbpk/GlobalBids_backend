@@ -16,6 +16,7 @@ const roomSchema = new mongoose.Schema(
         enum: ["Homeowner", "Contractor"],
       },
     ],
+    project: { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
     last_message: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
     unreadMessages: {
       type: Map,
