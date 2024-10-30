@@ -70,50 +70,56 @@ export const updateHomeownerInfo = async (userId, reqData, files) => {
 };
 
 export const updateContractorInfo = async (userId, reqData, files) => {
-  const data = JSON.parse(reqData.payload);
-  const updateFields = {
-    ...data,
-    ...(data.company && { company: { ...data.company } }),
-    ...(data.insurance && { insurance: { ...data.insurance } }),
-  };
+  try {
+    const data = JSON.parse(reqData.payload);
 
-  if (files?.insuranceFile) {
-    const uploadedFileUrl = await uploadFile(
-      files.insuranceFile[0],
-      "contractor-company-files"
-    );
-    updateFields.insurance = {
-      ...updateFields.insurance,
-      file: uploadedFileUrl,
+    const updateFields = {
+      ...data,
+      ...(data.company && { company: { ...data.company } }),
+      ...(data.insurance && { insurance: { ...data.insurance } }),
     };
-  }
 
-  if (files?.compensationFile) {
-    const uploadedFileUrl = await uploadFile(
-      files.compensationFile[0],
-      "contractor-company-files"
+    if (files?.insuranceFile) {
+      const uploadedFileUrl = await uploadFile(
+        files.insuranceFile[0],
+        "contractor-company-files"
+      );
+      updateFields.insurance = {
+        ...updateFields.insurance,
+        file: uploadedFileUrl,
+      };
+    }
+
+    if (files?.compensationFile) {
+      const uploadedFileUrl = await uploadFile(
+        files.compensationFile[0],
+        "contractor-company-files"
+      );
+
+      updateFields.company = {
+        ...updateFields.company,
+        file: uploadedFileUrl,
+      };
+    }
+
+    if (files?.profilePic) {
+      const uploadedFileUrl = await uploadFile(
+        files.profilePic[0],
+        "profile-images"
+      );
+      updateFields.imageUrl = uploadedFileUrl;
+    }
+
+    const updatedUser = await UserContractorModel.findByIdAndUpdate(
+      userId,
+      { $set: updateFields },
+      { new: true }
     );
 
-    updateFields.company = {
-      ...updateFields.company,
-      file: uploadedFileUrl,
-    };
+    if (!updatedUser) throw new Error("User not found");
+
+    return updatedUser;
+  } catch (error) {
+    console.log(error);
   }
-
-  if (files?.profilePic) {
-    const uploadedFileUrl = await uploadFile(
-      files.profilePic[0],
-      "profile-images"
-    );
-    updateFields.imageUrl = uploadedFileUrl;
-  }
-
-  const updatedUser = await UserContractorModel.findByIdAndUpdate(
-    userId,
-    { $set: updateFields },
-    { new: true }
-  );
-  if (!updatedUser) throw new Error("User not found");
-
-  return updatedUser;
 };

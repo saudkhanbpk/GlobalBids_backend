@@ -204,7 +204,7 @@ export const resendOtpController = async (req, res, next) => {
 
 export const updateUserInfo = async (req, res, next) => {
   const user = req.user;
-  
+
   try {
     let updatedUser = null;
 
@@ -225,9 +225,9 @@ export const updateUserInfo = async (req, res, next) => {
       message: "User info updated successfully!",
     });
   } catch (error) {
-    if (error.code === 415) {
-      return next(new UnsupportedFileTypeError(error.message));
-    }
+    // if (error.code === 415) {
+    //   return next(new UnsupportedFileTypeError(error.message));
+    // }
 
     return next(
       new InternalServerError(
