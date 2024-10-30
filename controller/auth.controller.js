@@ -204,6 +204,7 @@ export const resendOtpController = async (req, res, next) => {
 
 export const updateUserInfo = async (req, res, next) => {
   const user = req.user;
+  
   try {
     let updatedUser = null;
 

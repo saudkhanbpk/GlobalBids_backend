@@ -71,7 +71,6 @@ export const updateHomeownerInfo = async (userId, reqData, files) => {
 
 export const updateContractorInfo = async (userId, reqData, files) => {
   const data = JSON.parse(reqData.payload);
-
   const updateFields = {
     ...data,
     ...(data.company && { company: { ...data.company } }),
