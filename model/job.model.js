@@ -17,7 +17,7 @@ const jobSchema = new mongoose.Schema(
       trim: true,
     },
     budget: {
-      type: Number,
+      type: String,
       required: true,
       min: 0,
     },
@@ -41,13 +41,6 @@ const jobSchema = new mongoose.Schema(
       enum: ["open", "closed"],
       default: "open",
     },
-    stages: [
-      {
-        name: { type: String },
-        description: { type: String },
-        estimatedCompletion: { type: String },
-      },
-    ],
     contractorNotes: { type: String, required: true, trim: true },
     completed: { type: Boolean, default: false },
     HOA: { type: String, default: "no", required: true },

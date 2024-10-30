@@ -38,7 +38,6 @@ export const createJob = async (req, res, next) => {
     const jobData = {
       user: req.user._id,
       file: fileUrl,
-      stages: JSON.parse(stages),
       ...rest,
     };
 
@@ -47,9 +46,11 @@ export const createJob = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: "Job has been created!",
-      job: "savedJob",
+      job: savedJob,
     });
   } catch (error) {
+    console.log(error);
+    
     return next(new InternalServerError());
   }
 };

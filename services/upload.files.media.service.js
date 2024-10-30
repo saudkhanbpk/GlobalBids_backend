@@ -1,8 +1,6 @@
 import cloudinary from "../config/cloudinary.config.js";
 
 export const uploadFile = async (file, directory) => {
-  console.log(file);
-  
   try {
     const supportedFormats = [
       "image/jpeg",
