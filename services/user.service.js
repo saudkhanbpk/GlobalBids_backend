@@ -120,6 +120,6 @@ export const updateContractorInfo = async (userId, reqData, files) => {
 
     return updatedUser;
   } catch (error) {
-    console.log(error);
+    throw new Error("Can't update user");
   }
 };
