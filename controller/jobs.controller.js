@@ -8,27 +8,31 @@ import {
 } from "../error/AppError.js";
 import JobModel from "../model/job.model.js";
 import { uploadFile } from "../services/upload.files.media.service.js";
-// import { validateJobFields } from "../validators/jobs-validator.js";
+import { validateJobFields } from "../validators/jobs-validator.js";
 
 export const createJob = async (req, res, next) => {
-  const file = req.file;
+  const files = req.files;
   if (req.user.role !== "owner") {
     return next(new BusinessLogicError());
   }
-
-  if (!file) {
-    return next(new FileUploadError("File is required!"));
+  
+  if (!files) {
+    return next(
+      new FileUploadError("At least one video or image is required!")
+    );
   }
 
-  // const validate = validateJobFields(req.body);
-  // if (validate) {
-  //   return next(new ValidationError(JSON.stringify(validate)));
-  // }
+  const validate = validateJobFields(req.body);
+  if (validate) {
+    return next(new ValidationError(JSON.stringify(validate)));
+  }
 
-  let fileUrl = "";
+  let mediaUrls = [];
   try {
-    const fileRes = await uploadFile(file, JOB_DIRECTORY);
-    fileUrl = fileRes;
+    for (const file of files) {
+      const fileRes = await uploadFile(file, JOB_DIRECTORY);
+      mediaUrls.push(fileRes);
+    }
   } catch (error) {
     return next(new FileUploadError());
   }
@@ -37,7 +41,7 @@ export const createJob = async (req, res, next) => {
     const { stages, ...rest } = req.body;
     const jobData = {
       user: req.user._id,
-      file: fileUrl,
+      media: mediaUrls,
       ...rest,
     };
 
@@ -50,7 +54,7 @@ export const createJob = async (req, res, next) => {
     });
   } catch (error) {
     console.log(error);
-    
+
     return next(new InternalServerError());
   }
 };

@@ -1,50 +1,57 @@
 export const validateJobFields = (data) => {
   const errors = {};
-
-  if (!data?.title) {
-    errors.title = "Title is required";
-  } else if (typeof data.title !== "string") {
-    errors.title = "Title must be a string";
-  } else if (data.title.trim().length === 0) {
-    errors.title = "Title cannot be empty";
-  } else if (data.title.length > 100) {
-    errors.title = "Title cannot be more than 100 characters";
+  if (
+    !data.title ||
+    typeof data.title !== "string" ||
+    data.title.trim() === ""
+  ) {
+    errors.title = "Title is required and must be a non-empty string.";
   }
 
-  if (!data?.description) {
-    errors.description = "Description is required";
-  } else if (typeof data.description !== "string") {
-    errors.description = "Description must be a string";
-  } else if (data.description.trim().length === 0) {
-    errors.description = "Description cannot be empty";
-  } else if (data.description.length > 500) {
-    errors.description = "Description cannot be more than 500 characters";
+  if (
+    !data.description ||
+    typeof data.description !== "string" ||
+    data.description.trim() === ""
+  ) {
+    errors.description =
+      "Description is required and must be a non-empty string.";
   }
 
-  if (data.budget === undefined || data.budget === null) {
-    errors.budget = "Budget is required";
-  } else if (data.budget < 0) {
-    errors.budget = "Budget cannot be negative";
+  if (!data.budget) {
+    errors.budget = "Budget is required.";
   }
 
-  if (!data?.location) {
-    errors.location = "Location is required";
-  } else if (typeof data.location !== "string") {
-    errors.location = "Location must be a string";
-  } else if (data.location.trim().length === 0) {
-    errors.location = "Location cannot be empty";
-  } else if (data.location.length > 200) {
-    errors.location = "Location cannot be more than 200 characters";
+  if (
+    !data.location ||
+    typeof data.location !== "string" ||
+    data.location.trim() === ""
+  ) {
+    errors.location = "Location is required and must be a non-empty string.";
   }
 
-  if (!data?.category) {
-    errors.category = "Category is required";
-  } else if (typeof data.category !== "string") {
-    errors.category = "Category must be a string";
-  } else if (data.category.trim().length === 0) {
-    errors.category = "Category cannot be empty";
-  } else if (data.category.length > 100) {
-    errors.category = "Category cannot be more than 100 characters";
+  if (
+    !data.category ||
+    typeof data.category !== "string" ||
+    data.category.trim() === ""
+  ) {
+    errors.category = "Category is required and must be a non-empty string.";
+  }
+
+  if (data.bidStatus && !["open", "closed"].includes(data.bidStatus)) {
+    errors.bidStatus = "Bid status must be either 'open' or 'closed'.";
+  }
+
+  if (
+    !data.contractorNotes ||
+    typeof data.contractorNotes !== "string" ||
+    data.contractorNotes.trim() === ""
+  ) {
+    errors.contractorNotes =
+      "Contractor notes are required and must be a non-empty string.";
+  }
+
+  if (!["yes", "no"].includes(data.HOA)) {
+    errors.HOA = "HOA must be either 'yes' or 'no'.";
   }
 
   return Object.keys(errors).length > 0 ? errors : null;

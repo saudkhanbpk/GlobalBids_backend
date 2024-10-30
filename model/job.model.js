@@ -31,11 +31,12 @@ const jobSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    file: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    media: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
     bidStatus: {
       type: String,
       enum: ["open", "closed"],
