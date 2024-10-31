@@ -67,7 +67,7 @@ export const getCurrentUser = async (req, res, next) => {
   const { userId } = req.body;
 
   try {
-    const user = await getUserById(userId, "username imageUrl role");
+    const user = await getUserById(userId, "username avatarUrl role");
 
     if (!user) {
       return res
