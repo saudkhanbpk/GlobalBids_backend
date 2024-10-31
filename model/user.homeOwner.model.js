@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bcryptjs from "bcryptjs"
+import bcryptjs from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    imageUrl: {
+    avatarUrl: {
       type: String,
     },
     isFirstLogin: { type: Boolean, default: true, required: true },

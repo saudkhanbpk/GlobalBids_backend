@@ -20,9 +20,11 @@ import notificationRouter from "./routes/notifications.routes.js";
 import oAuthRoutes from "./routes/auth.google.routes.js";
 import passport from "./config/passport.config.js";
 import reminderRouter from "./routes/reminder.routes.js";
+import fileUploadRouter from "./routes/file.upload.routes.js";
 
 dotenv.config();
 const app = express();
+app.use(express.static("public"));
 connectDB();
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -47,6 +49,7 @@ app.use("/api/event/", eventRouter);
 app.use("/api/story/", storyRouter);
 app.use("/api/notifications/", notificationRouter);
 app.use("/api/reminders/", reminderRouter);
+app.use("/api/file/upload", fileUploadRouter)
 
 app.all("*", (req, res, next) => {
   const err = new RouteNotFoundError(

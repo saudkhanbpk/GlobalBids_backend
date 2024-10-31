@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    imageUrl: {
+    avatarUrl: {
       type: String,
     },
     googleId: { type: String, trim: true },

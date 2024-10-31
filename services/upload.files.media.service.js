@@ -1,5 +1,5 @@
 import cloudinary from "../config/cloudinary.config.js";
-
+import fs from "fs";
 export const uploadFile = async (file, directory) => {
   try {
     const supportedFormats = [
@@ -23,8 +23,10 @@ export const uploadFile = async (file, directory) => {
       resource_type: file.mimetype === "video/mp4" ? "video" : "auto",
       chunk_size: 100 * 1024 * 1024,
     });
+    fs.unlinkSync(file.path);
     return result.secure_url;
   } catch (error) {
+    fs.unlinkSync(file.path);
     throw new Error("Can't upload file.");
   }
 };

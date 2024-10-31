@@ -41,7 +41,7 @@ export const getStoryFeeds = async (_req, res, next) => {
     const stories = await StoryModel.find()
       .populate({
         path: "user",
-        select: "username imageUrl",
+        select: "username avatarUrl",
       })
       .sort({ createdAt: -1 });
 
