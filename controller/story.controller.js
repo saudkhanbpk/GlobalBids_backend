@@ -82,7 +82,7 @@ export const getStoryDetails = async (req, res, next) => {
   try {
     const comments = await CommentModel.find({ story: storyId }).populate({
       path: "user",
-      select: "username imageUrl",
+      select: "username avatarUrl",
     });
 
     const totalComments = await CommentModel.countDocuments({ story: storyId });
