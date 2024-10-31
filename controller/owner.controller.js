@@ -72,7 +72,7 @@ export const getSettings = async (req, res) => {
 export const getContractors = async (_req, res, next) => {
   try {
     const contractors = await UserContractorModel.find().select(
-      "username imageUrl label rating services professionalExperience"
+      "username avatarUrl label rating services professionalExperience"
     );
     const total = await UserContractorModel.countDocuments();
 
