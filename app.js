@@ -21,6 +21,7 @@ import oAuthRoutes from "./routes/auth.google.routes.js";
 import passport from "./config/passport.config.js";
 import reminderRouter from "./routes/reminder.routes.js";
 import fileUploadRouter from "./routes/file.upload.routes.js";
+import NotificationService from "./services/notification.service.js";
 
 dotenv.config();
 const app = express();
@@ -49,7 +50,7 @@ app.use("/api/event/", eventRouter);
 app.use("/api/story/", storyRouter);
 app.use("/api/notifications/", notificationRouter);
 app.use("/api/reminders/", reminderRouter);
-app.use("/api/file/upload", fileUploadRouter)
+app.use("/api/file/upload", fileUploadRouter);
 
 app.all("*", (req, res, next) => {
   const err = new RouteNotFoundError(
@@ -63,6 +64,10 @@ const port = process.env.PORT;
 const server = http.createServer(app);
 const io = initSocket(server);
 app.set("io", io);
+// creating notification instance so that it can send notifications to the users
+const notificationService = new NotificationService(io);
+app.set("notificationService", notificationService);
+
 server.listen(port, () => {
   console.log(`server is running on the port ${port}`);
 });

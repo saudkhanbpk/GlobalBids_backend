@@ -14,7 +14,7 @@ import { validateBidFields } from "../validators/bid-validators.js";
 import { uploadFile } from "../services/upload.files.media.service.js";
 
 export const createBid = async (req, res, next) => {
-  const io = req.app.get("io");
+  const notificationService = req.app.get("notificationService");
 
   const data = req.body;
   const files = req.files;
@@ -76,20 +76,15 @@ export const createBid = async (req, res, next) => {
 
     const savedBid = await newBid.save();
 
-    const notification = new NotificationModel({
+    await notificationService.sendNotification({
       recipientId: newBid.owner,
-      recipient: "Homeowner",
+      recipientType: "Homeowner",
       senderId: newBid.contractor,
-      senderModel: "Contractor",
+      senderType: "Contractor",
       message: `New bid submitted by contractor for Job ${req.body.jobTitle}`,
       type: "bid",
-      url: `/home-owner/jobs/job-details/${req.body.jobId}`,
+      url: `/home-owner/bids-and-quotes`,
     });
-
-    await notification.save();
-
-    io.to(connectedUsers[newBid.owner]).emit("notification", notification);
-
     return res.status(201).json({
       success: true,
       message: "Bid submitted successfully.",
@@ -111,7 +106,7 @@ export const getOwnerBids = async (req, res, next) => {
     })
       .populate({
         path: "contractor",
-        select: "username imageUrl label",
+        select: "username avatarUrl label",
       })
       .sort({ createdAt: -1 });
     return res.status(200).json({ success: true, bids });
@@ -146,6 +141,7 @@ export const getContractorBids = async (req, res, next) => {
 
 export const changeBidStatus = async (req, res, next) => {
   const user = req.user;
+  const notificationService = req.app.get("notificationService");
 
   if (user.role !== "owner") {
     return next(new BusinessLogicError());
@@ -178,12 +174,21 @@ export const changeBidStatus = async (req, res, next) => {
         title: job.title,
         owner: user._id,
         jobId: bid.jobId,
-        images: [job.file],
+        media: job.media,
         totalBudget: job.budget,
-        stages: job.stages,
       });
       await newProject.save();
     }
+
+    await notificationService.sendNotification({
+      recipientId: contractor,
+      recipientType: "Contractor",
+      senderId: user._id,
+      senderType: "Homeowner",
+      message: `Your bid for Job ${job.title} has been ${req.body.bidStatus}`,
+      type: "bidStatus",
+      url: `/contractor/my-bids`,
+    });
 
     return res
       .status(200)
@@ -199,7 +204,7 @@ export const getBid = async (req, res, next) => {
   try {
     const bid = await BidModel.findById(id).populate({
       path: "contractor",
-      select: "username imageUrl label",
+      select: "username avatarUrl label",
     });
 
     return res.status(200).json({ success: true, bid });

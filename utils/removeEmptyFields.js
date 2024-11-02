@@ -1,7 +1,8 @@
 export const removeEmptyFields = (obj) => {
+  if (!obj) {
+    return obj;
+  }
   if (Array.isArray(obj)) {
-    if (obj === null) {
-    }
     return obj
       .map(removeEmptyFields)
       .filter((item) => item != null && item !== "");
