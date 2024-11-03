@@ -36,7 +36,7 @@ export const getRooms = async (req, res, next) => {
       .populate({
         path: "users last_message",
         match: { _id: { $ne: userId } },
-        select: "username imageUrl message senderId",
+        select: "username avatarUrl message senderId",
       })
       .exec();
 
@@ -93,7 +93,7 @@ export const getNewRoomData = async (req, res, next) => {
       {
         path: "users",
         match: { _id: { $eq: receiverId } },
-        select: "username imageUrl",
+        select: "username avatarUrl",
       },
       {
         path: "last_message",
