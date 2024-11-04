@@ -44,6 +44,17 @@ const jobSchema = new mongoose.Schema(
     },
     contractorNotes: { type: String, required: true, trim: true },
     completed: { type: Boolean, default: false },
+    estimateCompletion: { type: Date },
+    progress: { type: String },
+    status: {
+      type: String,
+      enum: ["pending", "in-progress", "completed"],
+      default: "pending",
+    },
+    contractor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Contractor",
+    },
     HOA: { type: String, default: "no", required: true },
   },
   { timestamps: true }

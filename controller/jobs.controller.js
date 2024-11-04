@@ -12,10 +12,10 @@ import { validateJobFields } from "../validators/jobs-validator.js";
 
 export const createJob = async (req, res, next) => {
   const files = req.files;
-  if (req.user.role !== "owner") {
+  if (req.user.role !== "user") {
     return next(new BusinessLogicError());
   }
-  
+
   if (!files) {
     return next(
       new FileUploadError("At least one video or image is required!")
@@ -43,6 +43,8 @@ export const createJob = async (req, res, next) => {
       user: req.user._id,
       media: mediaUrls,
       ...rest,
+      status: "pending",
+      progress: "0",
     };
 
     const job = new JobModel(jobData);
@@ -53,8 +55,6 @@ export const createJob = async (req, res, next) => {
       job: savedJob,
     });
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError());
   }
 };
@@ -65,10 +65,8 @@ export const getAllJobs = async (_req, res, next) => {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const total = await JobModel.countDocuments();
-
-    const jobs = await JobModel.find({ createdAt: { $gt: thirtyDaysAgo } })
-      .sort({ createdAt: -1 })
-      .limit(50);
+    // const jobs = await JobModel.find({ createdAt: { $gt: thirtyDaysAgo } })
+    const jobs = await JobModel.find().sort({ createdAt: -1 }).limit(50);
 
     res.status(200).json({ success: true, total, jobs });
   } catch (error) {
@@ -78,7 +76,7 @@ export const getAllJobs = async (_req, res, next) => {
   }
 };
 
-export const getOwnerJobs = async (req, res, next) => {
+export const getUserJobs = async (req, res, next) => {
   const id = req.user._id;
   try {
     const jobs = await JobModel.find({ user: id }).sort({ createdAt: -1 });
@@ -99,5 +97,22 @@ export const getJobDetails = async (req, res, next) => {
     return res.status(200).json({ success: true, job: jobDetails });
   } catch (error) {
     return next(new InternalServerError());
+  }
+};
+
+export const getJobStatistics = async (req, res, next) => {
+  try {
+    const user = req.user._id;
+    const jobStatistics = await JobModel.aggregate([
+      { $match: { user: user } },
+      { $match: { status: { $ne: null } } },
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+      { $project: { _id: 0, status: "$_id", count: 1 } },
+    ]);
+
+    return res.status(200).json({ success: true, statistics: jobStatistics });
+  } catch (error) {
+    console.error("Error fetching job statistics:", error);
+    return next(new InternalServerError("Failed to fetch job statistics."));
   }
 };

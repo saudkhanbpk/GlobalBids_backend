@@ -7,8 +7,6 @@ import {
   ValidationError,
 } from "../error/AppError.js";
 import ProjectModel from "../model/project.model.js";
-import NotificationModel from "../model/notification.model.js";
-import { connectedUsers } from "../event/site-events.js";
 import Job from "../model/job.model.js";
 import { validateBidFields } from "../validators/bid-validators.js";
 import { uploadFile } from "../services/upload.files.media.service.js";
@@ -70,7 +68,7 @@ export const createBid = async (req, res, next) => {
       jobId: data.jobId,
       comment: data.comment,
       startDate: data.startDate,
-      projectDuration: data.projectDuration,
+      estimateCompletion: data.estimateCompletion,
       attachments: attachments,
     });
 
@@ -104,10 +102,16 @@ export const getOwnerBids = async (req, res, next) => {
       owner: ownerId,
       status: "pending",
     })
-      .populate({
-        path: "contractor",
-        select: "username avatarUrl label",
-      })
+      .populate([
+        {
+          path: "contractor",
+          select: "username avatarUrl label ",
+        },
+        {
+          path: "jobId",
+          select: "title budget",
+        },
+      ])
       .sort({ createdAt: -1 });
     return res.status(200).json({ success: true, bids });
   } catch (error) {
@@ -158,26 +162,21 @@ export const changeBidStatus = async (req, res, next) => {
       return next(new NotFoundError("bid not found!"));
     }
 
-    const job = await Job.findByIdAndUpdate(
-      bid.jobId._id,
-      { bidStatus: "closed" },
-      { new: true }
-    );
-
     bid.status = req.body.bidStatus;
-
     await bid.save();
-
+    let job = null;
     if (bid.status === "accepted") {
-      const newProject = new ProjectModel({
-        contractor,
-        title: job.title,
-        owner: user._id,
-        jobId: bid.jobId,
-        media: job.media,
-        totalBudget: job.budget,
-      });
-      await newProject.save();
+      job = await Job.findByIdAndUpdate(
+        bid.jobId._id,
+        {
+          bidStatus: "closed",
+          estimateCompletion: bid.estimateCompletion,
+          progress: "0",
+          status: "in-progress",
+          contractor,
+        },
+        { new: true }
+      );
     }
 
     await notificationService.sendNotification({
