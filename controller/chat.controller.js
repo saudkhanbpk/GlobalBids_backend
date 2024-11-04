@@ -5,17 +5,13 @@ import RoomModel from "../model/chat.room.model.js";
 import { getUserById } from "../services/user.service.js";
 
 export const getAllMessages = async (req, res, next) => {
-  const { receiverId } = req.body;
-  const userId = req.user._id;
+  const { roomId } = req.body;
   try {
-    const room = await RoomModel.findOne({
-      users: { $all: [userId, receiverId] },
-    });
-    if (!room._id) {
+    if (!roomId) {
       return res.status(400).json({ message: "roomId is required" });
     }
 
-    const messages = await MessageModel.find({ roomId: room._id }).sort({
+    const messages = await MessageModel.find({ roomId }).sort({
       timestamp: 1,
     });
 
@@ -36,7 +32,7 @@ export const getRooms = async (req, res, next) => {
       .populate({
         path: "users last_message",
         match: { _id: { $ne: userId } },
-        select: "username avatarUrl message senderId",
+        select: "username avatarUrl message senderId role",
       })
       .exec();
 
@@ -109,7 +105,8 @@ export const getNewRoomData = async (req, res, next) => {
 export const sendMessage = async (req, res, next) => {
   const user = req.user;
   const io = req.app.get("io");
-  const { receiverId, message, timestamp, timeZone } = req.body;
+  const { receiverId, message, timestamp, timeZone, roomId, senderId } =
+    req.body;
   let newRoom = false;
 
   const userType = user.role === "owner" ? "Homeowner" : "Contractor";
@@ -131,8 +128,8 @@ export const sendMessage = async (req, res, next) => {
     }
 
     const messageData = {
-      roomId: room._id,
-      senderId: user._id,
+      roomId,
+      senderId,
       receiverId,
       message,
       timestamp,
