@@ -231,3 +231,18 @@ export const getUnreadMessages = async (req, res, next) => {
     return next(new InternalServerError("Failed to fetch notifications"));
   }
 };
+
+export const getRoom = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const room = await RoomModel.findById(id).populate({
+      path: "users",
+      match: { _id: { $ne: req.user._id } },
+      select: "username avatarUrl",
+    });
+    return res.status(200).json({ success: true, room });
+  } catch (error) {
+    return next(new InternalServerError("can't get new room"));
+  }
+};

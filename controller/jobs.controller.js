@@ -79,7 +79,12 @@ export const getAllJobs = async (_req, res, next) => {
 export const getUserJobs = async (req, res, next) => {
   const id = req.user._id;
   try {
-    const jobs = await JobModel.find({ user: id }).sort({ createdAt: -1 });
+    const jobs = await JobModel.find({ user: id })
+      .populate({
+        path: "contractor",
+        select: "username",
+      })
+      .sort({ createdAt: -1 });
     return res.status(200).json({ success: true, jobs });
   } catch (error) {
     return next(new InternalServerError("can't get jobs"));
@@ -114,5 +119,18 @@ export const getJobStatistics = async (req, res, next) => {
   } catch (error) {
     console.error("Error fetching job statistics:", error);
     return next(new InternalServerError("Failed to fetch job statistics."));
+  }
+};
+
+export const getJob = async (req, res, next) => {
+  try {
+    const jobId = req.params.id;
+    const job = await JobModel.findById(jobId);
+    if (!job) {
+      return next(new NotFoundError("Job not found"));
+    }
+    return res.status(200).json({ success: true, job });
+  } catch (error) {
+    return next(new InternalServerError());
   }
 };

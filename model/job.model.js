@@ -46,6 +46,7 @@ const jobSchema = new mongoose.Schema(
     completed: { type: Boolean, default: false },
     estimateCompletion: { type: Date },
     progress: { type: String },
+    startDate: { type: Date },
     status: {
       type: String,
       enum: ["pending", "in-progress", "completed"],

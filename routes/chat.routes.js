@@ -8,6 +8,7 @@ import {
   getNewRoomData,
   markMessagesAsRead,
   getUnreadMessages,
+  getRoom,
 } from "../controller/chat.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
@@ -21,5 +22,6 @@ chatRouter.post("/send-message", authMiddleware, sendMessage);
 chatRouter.post("/mark-messages-as-read", authMiddleware, markMessagesAsRead);
 chatRouter.post("/new-room/:id", authMiddleware, getNewRoomData);
 chatRouter.get("/messages-notification", authMiddleware, getUnreadMessages);
+chatRouter.get("/room/:id", authMiddleware, getRoom);
 
 export default chatRouter;

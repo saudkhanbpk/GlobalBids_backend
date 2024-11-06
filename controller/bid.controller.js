@@ -174,6 +174,7 @@ export const changeBidStatus = async (req, res, next) => {
           progress: "0",
           status: "in-progress",
           contractor,
+          startDate: bid.startDate,
         },
         { new: true }
       );
