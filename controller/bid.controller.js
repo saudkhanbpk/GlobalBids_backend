@@ -6,7 +6,6 @@ import {
   NotFoundError,
   ValidationError,
 } from "../error/AppError.js";
-import ProjectModel from "../model/project.model.js";
 import Job from "../model/job.model.js";
 import { validateBidFields } from "../validators/bid-validators.js";
 import { uploadFile } from "../services/upload.files.media.service.js";

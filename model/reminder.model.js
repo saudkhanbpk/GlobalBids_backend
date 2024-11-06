@@ -7,7 +7,7 @@ const reminderSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    insuranceProvider: {
+    provider: {
       type: String,
       required: true,
       trim: true,
@@ -22,8 +22,8 @@ const reminderSchema = new mongoose.Schema(
       required: true,
     },
     policyAmount: {
-      type: Number,
-      min: 0,
+      type: String,
+      required: true,
     },
     renewalFrequency: {
       type: String,

@@ -4,7 +4,7 @@ export const createReminder = async (req, res) => {
   try {
     const {
       reminderName,
-      insuranceProvider,
+      provider,
       policyNumber,
       renewalDate,
       policyAmount,
@@ -15,7 +15,7 @@ export const createReminder = async (req, res) => {
 
     const newReminder = new Reminder({
       reminderName,
-      insuranceProvider,
+      provider,
       policyNumber,
       renewalDate,
       policyAmount,
