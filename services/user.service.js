@@ -43,19 +43,12 @@ export const updateUserVerificationStatus = async (userId) => {
   }
 };
 
-export const updateHomeownerInfo = async (userId, reqData, files) => {
-  const data = JSON.parse(reqData.payload);
+export const updateHomeownerInfo = async (userId, reqData) => {
   const updateFields = {
-    ...data,
-    ...(files?.profilePic && {
-      imageUrl: await uploadFile(
-        files.profilePic[0],
-        "contractor-profile-images"
-      ),
-    }),
+    ...reqData,
   };
 
-  if (data.password) {
+  if (reqData.password) {
     const salt = await bcrypt.genSalt(10);
     updateFields.password = await bcrypt.hash(data.password, salt);
   }
@@ -69,46 +62,13 @@ export const updateHomeownerInfo = async (userId, reqData, files) => {
   return updatedUser;
 };
 
-export const updateContractorInfo = async (userId, reqData, files) => {
+export const updateContractorInfo = async (userId, reqData) => {
   try {
-    const data = JSON.parse(reqData.payload);
-
     const updateFields = {
-      ...data,
-      ...(data.company && { company: { ...data.company } }),
-      ...(data.insurance && { insurance: { ...data.insurance } }),
+      ...reqData,
     };
 
-    if (files?.insuranceFile) {
-      const uploadedFileUrl = await uploadFile(
-        files.insuranceFile[0],
-        "contractor-company-files"
-      );
-      updateFields.insurance = {
-        ...updateFields.insurance,
-        file: uploadedFileUrl,
-      };
-    }
-
-    if (files?.compensationFile) {
-      const uploadedFileUrl = await uploadFile(
-        files.compensationFile[0],
-        "contractor-company-files"
-      );
-
-      updateFields.company = {
-        ...updateFields.company,
-        file: uploadedFileUrl,
-      };
-    }
-
-    if (files?.profilePic) {
-      const uploadedFileUrl = await uploadFile(
-        files.profilePic[0],
-        "profile-images"
-      );
-      updateFields.imageUrl = uploadedFileUrl;
-    }
+    console.log(updateFields);
 
     const updatedUser = await UserContractorModel.findByIdAndUpdate(
       userId,

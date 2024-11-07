@@ -56,15 +56,15 @@ const userSchema = new mongoose.Schema(
       insuranceNumber: { type: String, trim: true },
       insuranceProvider: { type: String, trim: true },
       insuranceExpiryDate: { type: Date },
-      file: { type: String, trim: true },
     },
     company: {
       name: { type: String, trim: true },
       employerID: { type: String, trim: true },
       licenseNumber: { type: String, trim: true },
       workerCompensationStatus: { type: String, trim: true },
-      file: { type: String, trim: true },
     },
+    insuranceFile: { type: String, trim: true },
+    compensationFile: { type: String, trim: true },
     business: {
       address: { type: String, trim: true },
       location: {

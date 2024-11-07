@@ -204,16 +204,15 @@ export const resendOtpController = async (req, res, next) => {
 
 export const updateUserInfo = async (req, res, next) => {
   const user = req.user;
-
   try {
     let updatedUser = null;
 
     switch (user.role) {
       case "owner":
-        updatedUser = await updateHomeownerInfo(user._id, req.body, req.files);
+        updatedUser = await updateHomeownerInfo(user._id, req.body);
         break;
       case "contractor":
-        updatedUser = await updateContractorInfo(user._id, req.body, req.files);
+        updatedUser = await updateContractorInfo(user._id, req.body);
         break;
       default:
         return next(new Error("Invalid user role"));
@@ -225,9 +224,7 @@ export const updateUserInfo = async (req, res, next) => {
       message: "User info updated successfully!",
     });
   } catch (error) {
-    // if (error.code === 415) {
-    //   return next(new UnsupportedFileTypeError(error.message));
-    // }
+    console.log(error);
 
     return next(
       new InternalServerError(

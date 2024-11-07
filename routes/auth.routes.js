@@ -9,7 +9,7 @@ import {
   verifyUserAndResetPassword,
   resetPassword,
   getUser,
-  markUsersAsFirstTimeLogin
+  markUsersAsFirstTimeLogin,
 } from "../controller/auth.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import upload from "../config/multer.config.js";
@@ -20,22 +20,12 @@ router.post("/register", signUpController);
 router.post("/login", loginController);
 router.post("/otp", otpController);
 router.post("/resend-otp", resendOtpController);
-router.post(
-  "/update-user-info",
-  upload.fields([
-    { name: "insuranceFile", maxCount: 1 },
-    { name: "profilePic", maxCount: 1 },
-    { name: "compensationFile", maxCount: 1 },
-  ]),
-  authMiddleware,
-  updateUserInfo
-);
+router.post("/update-user-info", authMiddleware, updateUserInfo);
 
 router.post("/find-user", findUser);
 router.post("/find-and-verify", verifyUserAndResetPassword);
 router.post("/reset-password", resetPassword);
 router.get("/login/success", authMiddleware, getUser);
 router.get("/is-first-time-login", authMiddleware, markUsersAsFirstTimeLogin);
-
 
 export default router;

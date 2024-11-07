@@ -38,7 +38,7 @@ passport.use(
         const userData = {
           email: user.email,
           username: user.name,
-          imageUrl: user.picture,
+          avatarUrl: user.picture,
           googleId: user.sub,
           isVerified: true,
           role: userRole,

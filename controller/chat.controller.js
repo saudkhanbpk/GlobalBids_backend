@@ -59,49 +59,6 @@ export const deleteRoom = async (req, res) => {
   }
 };
 
-export const getCurrentUser = async (req, res, next) => {
-  const { userId } = req.body;
-
-  try {
-    const user = await getUserById(userId, "username avatarUrl role");
-
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-
-    const isOnline = Boolean(connectedUsers[userId]);
-
-    return res
-      .status(200)
-      .json({ success: true, user: { ...user._doc, online: isOnline } });
-  } catch (error) {
-    return next(new InternalServerError("Failed to retrieve user"));
-  }
-};
-
-export const getNewRoomData = async (req, res, next) => {
-  const { id } = req.params;
-  const { receiverId } = req.body;
-  try {
-    const room = await RoomModel.findById(id).populate([
-      {
-        path: "users",
-        match: { _id: { $eq: receiverId } },
-        select: "username avatarUrl",
-      },
-      {
-        path: "last_message",
-        select: "message senderId",
-      },
-    ]);
-    return res.status(200).json({ success: true, room });
-  } catch (error) {
-    return next(new InternalServerError("can't get new room"));
-  }
-};
-
 export const sendMessage = async (req, res, next) => {
   const user = req.user;
   const io = req.app.get("io");
@@ -244,5 +201,36 @@ export const getRoom = async (req, res, next) => {
     return res.status(200).json({ success: true, room });
   } catch (error) {
     return next(new InternalServerError("can't get new room"));
+  }
+};
+
+export const recentInteractions = async (req, res, next) => {
+  const userId = req.user._id;
+  const lastMessage =
+    req.user.role === "owner"
+      ? "lastMessageContractor"
+      : "lastMessageHomeowner";
+
+  try {
+    const rooms = await RoomModel.find({
+      users: userId,
+    }).populate([
+      {
+        path: "job",
+        select: "title",
+      },
+      {
+        path: "users",
+        match: { _id: { $ne: userId } },
+        select: "username avatarUrl message senderId",
+      },
+      {
+        path: lastMessage,
+        select: "message senderId",
+      },
+    ]);
+    return res.status(200).json({ success: true, rooms });
+  } catch (error) {
+    console.log(error);
   }
 };

@@ -16,8 +16,16 @@ const roomSchema = new mongoose.Schema(
         enum: ["Homeowner", "Contractor"],
       },
     ],
-    project: { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
+    job: { type: mongoose.Schema.Types.ObjectId, ref: "Job" },
     last_message: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
+    lastMessageContractor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+    },
+    lastMessageHomeowner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+    },
     unreadMessages: {
       type: Map,
       of: Number,
