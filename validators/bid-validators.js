@@ -1,53 +1,45 @@
 export const validateBidFields = (data) => {
   const errors = {};
 
-  if (!data?.amount) {
-    errors.amount = "Amount is required";
-  } else if (isNaN(data.amount)) {
-    errors.amount = "Amount must be a number";
+  if (!data?.bidAmount?.trim()) {
+    errors.bidAmount = "Bid amount is required";
   }
 
-  if (!data?.ownerId) {
-    errors.ownerId = "Owner ID is required";
-  } else if (!isValidObjectId(data.ownerId)) {
-    errors.ownerId = "Owner ID is invalid";
+  if (!data?.estimatedTimeLine?.trim()) {
+    errors.estimatedTimeline = "Estimated timeline is required";
   }
 
-  if (!data?.contractorId) {
-    errors.contractorId = "Contractor ID is required";
-  } else if (!isValidObjectId(data.contractorId)) {
-    errors.contractorId = "Contractor ID is invalid";
+  if (!data?.scopeOfWork?.trim()) {
+    errors.scopeOfWork = "Scope of work is required";
   }
 
-  if (!data?.jobId) {
-    errors.jobId = "Job ID is required";
-  } else if (!isValidObjectId(data.jobId)) {
-    errors.jobId = "Job ID is invalid";
+  if (!data?.projectMilestones?.trim()) {
+    errors.projectMilestones = "Project milestones are required";
   }
 
-  if (!data?.bidBreakdown) {
-    errors.bidBreakdown = "Bid breakdown is required";
-  } else if (typeof data.bidBreakdown !== "string") {
-    errors.bidBreakdown = "Bid breakdown must be a string";
+  if (!data?.termsConditions?.trim()) {
+    errors.termsConditions = "Terms and conditions are required";
   }
 
-  if (!data?.jobTitle) {
+  if (!data?.additionalNotes?.trim()) {
+    errors.additionalNotes = "Additional notes are required";
+  }
+
+  if (!data?.homeowner?.trim()) {
+    errors.homeowner = "Owner ID is required";
+  }
+
+  if (!data?.contractor?.trim()) {
+    errors.contractor = "Contractor ID is required";
+  }
+
+  if (!data?.job?.trim()) {
+    errors.job = "Job ID is required";
+  }
+
+  if (!data?.jobTitle?.trim()) {
     errors.jobTitle = "Job title is required";
-  } else if (typeof data.jobTitle !== "string") {
-    errors.jobTitle = "Job title must be a string";
-  }
-
-  if (!data?.comment) {
-    errors.comment = "Comments you must provide an comment";
-  }
-
-  if (data?.attachments && !Array.isArray(data.attachments)) {
-    errors.attachments = "Attachments must be an array";
   }
 
   return Object.keys(errors).length > 0 ? errors : null;
-};
-
-const isValidObjectId = (id) => {
-  return /^[0-9a-fA-F]{24}$/.test(id);
 };

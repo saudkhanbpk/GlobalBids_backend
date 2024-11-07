@@ -12,7 +12,7 @@ import { validateJobFields } from "../validators/jobs-validator.js";
 
 export const createJob = async (req, res, next) => {
   const files = req.files;
-  if (req.user.role !== "user") {
+  if (req.user.role !== "owner") {
     return next(new BusinessLogicError());
   }
 

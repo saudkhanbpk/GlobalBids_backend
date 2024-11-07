@@ -8,17 +8,13 @@ import {
 } from "../error/AppError.js";
 import Job from "../model/job.model.js";
 import { validateBidFields } from "../validators/bid-validators.js";
-import { uploadFile } from "../services/upload.files.media.service.js";
 
 export const createBid = async (req, res, next) => {
   const notificationService = req.app.get("notificationService");
-
   const data = req.body;
-  const files = req.files;
-  let attachments = [];
-
+  let job = null;
   try {
-    const job = await Job.findOne({ _id: req.body.jobId });
+    job = await Job.findOne({ _id: data.job });
     if (!job) {
       return next(new NotFoundError("Job not found."));
     }
@@ -27,9 +23,9 @@ export const createBid = async (req, res, next) => {
     }
 
     const existingBid = await BidModel.findOne({
-      owner: req.body.ownerId,
-      contractor: req.body.contractorId,
-      jobId: req.body.jobId,
+      owner: data.homeowner,
+      contractor: data.contractor,
+      jobId: data.job,
     });
 
     if (existingBid) {
@@ -44,41 +40,21 @@ export const createBid = async (req, res, next) => {
   }
 
   try {
-    for (const file of files) {
-      const fileUrl = await uploadFile(file, "bids");
-      attachments.push(fileUrl);
-    }
-  } catch (error) {
-    return next(new FileUploadError());
-  }
-
-  try {
     const validateFields = validateBidFields(data);
-
     if (validateFields) {
-      return next(new ValidationError(JSON.stringify(validateFields)));
+      console.log(validateFields);
+
+      return next(new ValidationError("All the fields are required!"));
     }
-
-    const newBid = new BidModel({
-      amount: data.amount,
-      bidBreakdown: data.bidBreakdown,
-      owner: data.ownerId,
-      contractor: data.contractorId,
-      jobId: data.jobId,
-      comment: data.comment,
-      startDate: data.startDate,
-      estimateCompletion: data.estimateCompletion,
-      attachments: attachments,
-    });
-
+    const newBid = new BidModel(data);
     const savedBid = await newBid.save();
 
     await notificationService.sendNotification({
-      recipientId: newBid.owner,
+      recipientId: newBid.homeowner,
       recipientType: "Homeowner",
       senderId: newBid.contractor,
       senderType: "Contractor",
-      message: `New bid submitted by contractor for Job ${req.body.jobTitle}`,
+      message: `New bid submitted by contractor for Job ${job.title}`,
       type: "bid",
       url: `/home-owner/bids-and-quotes`,
     });
@@ -98,7 +74,7 @@ export const getOwnerBids = async (req, res, next) => {
   try {
     const ownerId = req.user._id;
     const bids = await BidModel.find({
-      owner: ownerId,
+      homeowner: ownerId,
       status: "pending",
     })
       .populate([
@@ -107,7 +83,7 @@ export const getOwnerBids = async (req, res, next) => {
           select: "username avatarUrl label ",
         },
         {
-          path: "jobId",
+          path: "job",
           select: "title budget",
         },
       ])
@@ -127,7 +103,7 @@ export const getContractorBids = async (req, res, next) => {
     const contractor = req.user._id;
     const bids = await BidModel.find({ contractor })
       .populate({
-        path: "jobId",
+        path: "job",
         select: "title",
       })
       .sort({ createdAt: -1 });
@@ -166,7 +142,7 @@ export const changeBidStatus = async (req, res, next) => {
     let job = null;
     if (bid.status === "accepted") {
       job = await Job.findByIdAndUpdate(
-        bid.jobId._id,
+        bid.job._id,
         {
           bidStatus: "closed",
           estimateCompletion: bid.estimateCompletion,
@@ -211,6 +187,3 @@ export const getBid = async (req, res, next) => {
     return next(new InternalServerError("Failed to fetch the bid"));
   }
 };
-
-
-

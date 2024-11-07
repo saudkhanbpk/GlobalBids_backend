@@ -2,8 +2,8 @@ import bcrypt from "bcryptjs";
 import UserContractorModel from "../model/user.contractor.model.js";
 import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
 import { NotFoundError } from "../error/AppError.js";
-import { uploadFile } from "./upload.files.media.service.js";
-import { removeEmptyFields } from "../utils/removeEmptyFields.js";
+// import { uploadFile } from "./upload.files.media.service.js";
+// import { removeEmptyFields } from "../utils/removeEmptyFields.js";
 
 export const getUserByEmail = async (email, select = "+password") => {
   const contractor = await UserContractorModel.findOne({ email }).select(

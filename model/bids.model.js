@@ -2,9 +2,32 @@ import mongoose from "mongoose";
 
 const BidSchema = new mongoose.Schema(
   {
-    amount: { type: String, required: true },
-    bidBreakdown: { type: String, required: true },
-    owner: {
+    bidAmount: { type: String, required: true },
+    estimatedTimeLine: {
+      type: String,
+      required: true,
+    },
+    scopeOfWork: { type: String, required: true },
+    ProjectMileStone: [
+      {
+        type: String,
+      },
+    ],
+    termsConditions: {
+      type: String,
+      required: true,
+    },
+    additionalNotes: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["accepted", "rejected", "pending"],
+      default: "pending",
+    },
+    job: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
+    homeowner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Homeowner",
       required: true,
@@ -14,16 +37,6 @@ const BidSchema = new mongoose.Schema(
       ref: "Contractor",
       required: true,
     },
-    jobId: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
-    status: {
-      type: String,
-      enum: ["accepted", "rejected", "pending"],
-      default: "pending",
-    },
-    comment: { type: String, required: true },
-    startDate: { type: Date, required: true },
-    estimateCompletion: { type: String, required: true },
-    attachments: [{ type: String }],
   },
   { timestamps: true }
 );
