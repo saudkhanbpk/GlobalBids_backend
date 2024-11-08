@@ -6,6 +6,8 @@ const jobSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Homeowner",
     },
+    startDate: { type: String },
+    targetDate: { type: String },
     title: {
       type: String,
       required: true,
@@ -42,9 +44,9 @@ const jobSchema = new mongoose.Schema(
       enum: ["open", "closed"],
       default: "open",
     },
-    contractorNotes: { type: String, required: true, trim: true },
+    contractorNotes: { type: String, trim: true },
     completed: { type: Boolean, default: false },
-    estimateCompletion: { type: Date },
+    estimateCompletion: { type: String },
     progress: { type: String },
     startDate: { type: Date },
     status: {

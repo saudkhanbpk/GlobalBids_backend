@@ -1,20 +1,20 @@
 import BidModel from "../model/bids.model.js";
 import {
   BusinessLogicError,
-  FileUploadError,
   InternalServerError,
   NotFoundError,
   ValidationError,
 } from "../error/AppError.js";
-import Job from "../model/job.model.js";
+import JobModel from "../model/job.model.js";
 import { validateBidFields } from "../validators/bid-validators.js";
+import { createRoom } from "../services/chat.room.service.js";
 
 export const createBid = async (req, res, next) => {
   const notificationService = req.app.get("notificationService");
   const data = req.body;
   let job = null;
   try {
-    job = await Job.findOne({ _id: data.job });
+    job = await JobModel.findOne({ _id: data.job });
     if (!job) {
       return next(new NotFoundError("Job not found."));
     }
@@ -23,9 +23,9 @@ export const createBid = async (req, res, next) => {
     }
 
     const existingBid = await BidModel.findOne({
-      owner: data.homeowner,
+      homeowner: data.homeowner,
       contractor: data.contractor,
-      jobId: data.job,
+      job: data.job,
     });
 
     if (existingBid) {
@@ -141,11 +141,11 @@ export const changeBidStatus = async (req, res, next) => {
     await bid.save();
     let job = null;
     if (bid.status === "accepted") {
-      job = await Job.findByIdAndUpdate(
-        bid.job._id,
+      job = await JobModel.findByIdAndUpdate(
+        bid.job,
         {
           bidStatus: "closed",
-          estimateCompletion: bid.estimateCompletion,
+          estimateCompletion: bid.estimatedTimeLine,
           progress: "0",
           status: "in-progress",
           contractor,
@@ -153,7 +153,10 @@ export const changeBidStatus = async (req, res, next) => {
         },
         { new: true }
       );
+      await createRoom([user._id, bid.contractor], bid.job);
     }
+
+    console.log(job);  
 
     await notificationService.sendNotification({
       recipientId: contractor,
@@ -187,3 +190,4 @@ export const getBid = async (req, res, next) => {
     return next(new InternalServerError("Failed to fetch the bid"));
   }
 };
+

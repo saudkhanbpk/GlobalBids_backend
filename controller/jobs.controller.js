@@ -38,7 +38,7 @@ export const createJob = async (req, res, next) => {
   }
 
   try {
-    const { stages, ...rest } = req.body;
+    const { ...rest } = req.body;
     const jobData = {
       user: req.user._id,
       media: mediaUrls,
@@ -132,5 +132,27 @@ export const getJob = async (req, res, next) => {
     return res.status(200).json({ success: true, job });
   } catch (error) {
     return next(new InternalServerError());
+  }
+};
+
+export const getContractorJobs = async (req, res, next) => {
+  const userId = req.user._id;
+  console.log(userId);
+
+  try {
+    const jobs = await JobModel.find({ contractor: userId }).populate({
+      path: "user",
+      select: "username",
+    });
+    if (!jobs) {
+      return next(new NotFoundError("Jobs not found!"));
+    }
+    return res.status(200).json({
+      success: true,
+      jobs,
+    });
+  } catch (error) {
+    console.log("contractor jobs", error);
+    // return next(new InternalServerError());
   }
 };

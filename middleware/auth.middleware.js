@@ -6,7 +6,7 @@ import UserContractorModel from "../model/user.contractor.model.js";
 dotenv.config();
 
 const authMiddleware = async (req, _res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
+  const token = req.header("Authorization")?.replace("Bearer ", "");  
   if (!token) {
     return next(new AuthenticationError("access denied"));
   }

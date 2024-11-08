@@ -12,7 +12,6 @@ import {
   markUsersAsFirstTimeLogin,
 } from "../controller/auth.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
-import upload from "../config/multer.config.js";
 
 const router = express.Router();
 

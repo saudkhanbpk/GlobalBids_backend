@@ -41,15 +41,6 @@ export const validateJobFields = (data) => {
     errors.bidStatus = "Bid status must be either 'open' or 'closed'.";
   }
 
-  if (
-    !data.contractorNotes ||
-    typeof data.contractorNotes !== "string" ||
-    data.contractorNotes.trim() === ""
-  ) {
-    errors.contractorNotes =
-      "Contractor notes are required and must be a non-empty string.";
-  }
-
   if (!["yes", "no"].includes(data.HOA)) {
     errors.HOA = "HOA must be either 'yes' or 'no'.";
   }
