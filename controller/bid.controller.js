@@ -156,7 +156,7 @@ export const changeBidStatus = async (req, res, next) => {
       await createRoom([user._id, bid.contractor], bid.job);
     }
 
-    console.log(job);  
+    console.log(job);
 
     await notificationService.sendNotification({
       recipientId: contractor,
@@ -180,14 +180,25 @@ export const getBid = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const bid = await BidModel.findById(id).populate({
-      path: "contractor",
-      select: "username avatarUrl label",
-    });
+    const bid = await BidModel.findById(id).populate([
+      {
+        path: "contractor",
+        select: "username avatarUrl label email phone",
+      },
+      {
+        path: "homeowner",
+        select: "username avatarUrl label email phone",
+      },
+      {
+        path:"job",
+        
+      }
+    ]);
+
+    console.log(bid);
 
     return res.status(200).json({ success: true, bid });
   } catch (error) {
     return next(new InternalServerError("Failed to fetch the bid"));
   }
 };
-
