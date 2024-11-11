@@ -2,7 +2,7 @@ import { InternalServerError } from "../error/AppError.js";
 import { connectedUsers } from "../event/site-events.js";
 import MessageModel from "../model/chat.message.model.js";
 import RoomModel from "../model/chat.room.model.js";
-import { getUserById } from "../services/user.service.js";
+import { getUserById, updateContractorInfo } from "../services/user.service.js";
 
 export const getAllMessages = async (req, res, next) => {
   const { roomId } = req.body;
@@ -64,25 +64,11 @@ export const sendMessage = async (req, res, next) => {
   const io = req.app.get("io");
   const { receiverId, message, timestamp, timeZone, roomId, senderId } =
     req.body;
-  let newRoom = false;
-
-  const userType = user.role === "owner" ? "Homeowner" : "Contractor";
-  const receiverType =
-    req.body.receiverType === "owner" ? "Homeowner" : "Contractor";
 
   try {
     let room = await RoomModel.findOne({
       users: { $all: [user._id, receiverId] },
     });
-
-    if (!room) {
-      room = new RoomModel({
-        users: [user._id, receiverId],
-        userTypes: [userType, receiverType],
-      });
-      await room.save();
-      newRoom = true;
-    }
 
     const messageData = {
       roomId,
@@ -94,6 +80,18 @@ export const sendMessage = async (req, res, next) => {
     };
 
     const newMessage = new MessageModel(messageData);
+    switch (user.role) {
+      case "contractor":
+        room.lastMessageContractor = newMessage._id;
+        break;
+      case "owner":
+        room.lastMessageHomeowner =  newMessage._id;
+        break;
+      default:
+        break;
+    }
+
+    await room.save();
     await newMessage.save();
 
     room.unreadMessages.set(
@@ -109,7 +107,7 @@ export const sendMessage = async (req, res, next) => {
       io.to(receiverSocketId).emit("message", newMessage);
     }
 
-    return res.status(201).json({ success: true, newRoom, newMessage });
+    return res.status(201).json({ success: true, newMessage });
   } catch (error) {
     return next(new InternalServerError("Can't send message"));
   }
@@ -206,7 +204,7 @@ export const getRoom = async (req, res, next) => {
 
 export const recentInteractions = async (req, res, next) => {
   const userId = req.user._id;
-  const lastMessage =
+  const lastMessageField =
     req.user.role === "owner"
       ? "lastMessageContractor"
       : "lastMessageHomeowner";
@@ -214,23 +212,31 @@ export const recentInteractions = async (req, res, next) => {
   try {
     const rooms = await RoomModel.find({
       users: userId,
-    }).populate([
-      {
-        path: "job",
-        select: "title",
-      },
-      {
-        path: "users",
-        match: { _id: { $ne: userId } },
-        select: "username avatarUrl message senderId",
-      },
-      {
-        path: lastMessage,
-        select: "message senderId",
-      },
-    ]);
+    })
+      .populate([
+        {
+          path: "job",
+          select: "title",
+        },
+        {
+          path: "users",
+          match: { _id: { $ne: userId } },
+          select: "username avatarUrl",
+        },
+        {
+          path: lastMessageField,
+          select: "message senderId",
+        },
+      ])
+      .sort({ updatedAt: -1 })
+      .limit(3);
+
     return res.status(200).json({ success: true, rooms });
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch recent interactions.",
+    });
   }
 };

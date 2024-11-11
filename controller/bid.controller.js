@@ -42,8 +42,6 @@ export const createBid = async (req, res, next) => {
   try {
     const validateFields = validateBidFields(data);
     if (validateFields) {
-      console.log(validateFields);
-
       return next(new ValidationError("All the fields are required!"));
     }
     const newBid = new BidModel(data);
@@ -145,7 +143,7 @@ export const changeBidStatus = async (req, res, next) => {
         bid.job,
         {
           bidStatus: "closed",
-          estimateCompletion: bid.estimatedTimeLine,
+          targetDate: bid.estimatedTimeLine,
           progress: "0",
           status: "in-progress",
           contractor,
@@ -190,13 +188,9 @@ export const getBid = async (req, res, next) => {
         select: "username avatarUrl label email phone",
       },
       {
-        path:"job",
-        
-      }
+        path: "job",
+      },
     ]);
-
-    console.log(bid);
-
     return res.status(200).json({ success: true, bid });
   } catch (error) {
     return next(new InternalServerError("Failed to fetch the bid"));

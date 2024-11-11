@@ -125,7 +125,10 @@ export const getJobStatistics = async (req, res, next) => {
 export const getJob = async (req, res, next) => {
   try {
     const jobId = req.params.id;
-    const job = await JobModel.findById(jobId);
+    const job = await JobModel.findById(jobId).populate({
+      path: "user contractor",
+      select: "username email phone",
+    });
     if (!job) {
       return next(new NotFoundError("Job not found"));
     }
@@ -152,7 +155,6 @@ export const getContractorJobs = async (req, res, next) => {
       jobs,
     });
   } catch (error) {
-    console.log("contractor jobs", error);
-    // return next(new InternalServerError());
+    return next(new InternalServerError());
   }
 };
