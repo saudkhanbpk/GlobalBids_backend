@@ -2,7 +2,6 @@ import { InternalServerError } from "../error/AppError.js";
 import { connectedUsers } from "../event/site-events.js";
 import MessageModel from "../model/chat.message.model.js";
 import RoomModel from "../model/chat.room.model.js";
-import { getUserById, updateContractorInfo } from "../services/user.service.js";
 
 export const getAllMessages = async (req, res, next) => {
   const { roomId } = req.body;
@@ -225,7 +224,7 @@ export const recentInteractions = async (req, res, next) => {
         },
         {
           path: lastMessageField,
-          select: "message senderId",
+          select: "message senderId timestamp",
         },
       ])
       .sort({ updatedAt: -1 })
