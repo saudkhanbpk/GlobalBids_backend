@@ -16,6 +16,7 @@ passport.use(
       passReqToCallback: true,
     },
     async function (req, _accessToken, _refreshToken, profile, cb) {
+      
       const userRole = req?.query?.state;
       const user = profile?._json;
       const provider = profile?.provider;

@@ -1,3 +1,4 @@
+import EventsModel from "../model/events.model.js";
 import Reminder from "../model/reminder.model.js";
 
 export const createReminder = async (req, res) => {
@@ -23,6 +24,16 @@ export const createReminder = async (req, res) => {
       notes,
       user: userId,
     });
+
+    const event = new EventsModel({
+      title: reminderName,
+      date: renewalDate,
+      description: notes,
+      eventType: "reminder",
+      homeowner: req.user._id,
+    });
+
+    await event.save();
 
     await newReminder.save();
     res.status(201).json({

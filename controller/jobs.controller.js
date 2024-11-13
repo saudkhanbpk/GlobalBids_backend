@@ -123,10 +123,11 @@ export const getJobStatistics = async (req, res, next) => {
 };
 
 export const getJob = async (req, res, next) => {
+  const popUser = req.user.role === "contractor" ? "user" : "contractor";
   try {
     const jobId = req.params.id;
     const job = await JobModel.findById(jobId).populate({
-      path: "user contractor",
+      path: popUser,
       select: "username email phone",
     });
     if (!job) {
@@ -140,8 +141,6 @@ export const getJob = async (req, res, next) => {
 
 export const getContractorJobs = async (req, res, next) => {
   const userId = req.user._id;
-  console.log(userId);
-
   try {
     const jobs = await JobModel.find({ contractor: userId }).populate({
       path: "user",

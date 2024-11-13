@@ -191,6 +191,8 @@ export const getBid = async (req, res, next) => {
         path: "job",
       },
     ]);
+    console.log(bid);
+    
     return res.status(200).json({ success: true, bid });
   } catch (error) {
     return next(new InternalServerError("Failed to fetch the bid"));

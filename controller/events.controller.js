@@ -6,7 +6,7 @@ import {
 import EventsModel from "../model/events.model.js";
 
 export const createEvent = async (req, res, next) => {
-  const { title, date, description, eventType, homeownerId, projectId } =
+  const { title, date, description, eventType, homeownerId, jobId } =
     req.body;
   const userId = req.user._id;
 
@@ -16,7 +16,7 @@ export const createEvent = async (req, res, next) => {
     }
     const event = new EventsModel({
       homeowner: homeownerId,
-      project: projectId,
+      project: jobId,
       title,
       date,
       description,
@@ -38,7 +38,7 @@ export const getEvents = async (req, res, next) => {
     const events = await EventsModel.find({
       $or: [{ homeowner: id }, { contractor: id }],
     }).populate({
-      path: "project",
+      path: "job",
       select: "title",
     });
     if (!events) {
@@ -91,4 +91,5 @@ export const updateEvent = async (req, res, next) => {
   } catch (error) {
     return next(new InternalServerError("Unable to update event"));
   }
+  
 };

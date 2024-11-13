@@ -1,30 +1,35 @@
 import mongoose from "mongoose";
 
-const eventsSchema = new mongoose.Schema({
-  homeowner: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "Homeowner",
+const eventsSchema = new mongoose.Schema(
+  {
+    homeowner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Homeowner",
+    },
+    job: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Job",
+    },
+    contractor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Contractor",
+    },
+    eventType: {
+      type: String,
+      required: true,
+      enum: ["installation", "general", "meetings", "reminder"],
+    },
+    title: { type: String, required: true },
+    date: { type: String, required: true },
+    description: { type: String },
+    reminderId: {
+      type: mongoose.Schema.Types.ObjectId,
+    },
   },
-  project: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "Project",
-  },
-  contractor: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "Contractor",
-  },
-  eventType: {
-    type: String,
-    required: true,
-    enum: ["installation", "general", "meetings"],
-  },
-  title: { type: String, required: true },
-  date: { type: String, required: true },
-  description: { type: String, required: true },
-});
+  {
+    timestamps: true,
+  }
+);
 
 const EventsModel = mongoose.model("Events", eventsSchema);
 export default EventsModel;

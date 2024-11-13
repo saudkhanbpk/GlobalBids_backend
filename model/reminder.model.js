@@ -27,7 +27,7 @@ const reminderSchema = new mongoose.Schema(
     },
     renewalFrequency: {
       type: String,
-      enum: ["Annually", "Semi-Annually", "Quarterly", "Monthly"],
+      enum: ["monthly", "quarterly", "annually", "one-time"],
       required: true,
     },
     notes: {
