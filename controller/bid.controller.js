@@ -12,6 +12,7 @@ import { createRoom } from "../services/chat.room.service.js";
 export const createBid = async (req, res, next) => {
   const notificationService = req.app.get("notificationService");
   const data = req.body;
+
   let job = null;
   try {
     job = await JobModel.findOne({ _id: data.job });
@@ -175,10 +176,11 @@ export const changeBidStatus = async (req, res, next) => {
 };
 
 export const getBid = async (req, res, next) => {
-  const { id } = req.params;
-
+  const id = req.user._id;
   try {
-    const bid = await BidModel.findById(id).populate([
+    const bids = await BidModel.find({
+      $or: [{ homeowner: id }, { contractor: id }],
+    }).populate([
       {
         path: "contractor",
         select: "username avatarUrl label email phone",
@@ -191,9 +193,7 @@ export const getBid = async (req, res, next) => {
         path: "job",
       },
     ]);
-    console.log(bid);
-    
-    return res.status(200).json({ success: true, bid });
+    return res.status(200).json({ success: true, bids });
   } catch (error) {
     return next(new InternalServerError("Failed to fetch the bid"));
   }

@@ -9,11 +9,7 @@ const BidSchema = new mongoose.Schema(
     },
     scopeOfWork: { type: String, required: true },
     startDate: { type: Date },
-    ProjectMileStone: [
-      {
-        type: String,
-      },
-    ],
+    ProjectMileStone: [],
     termsConditions: {
       type: String,
       required: true,

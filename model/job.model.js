@@ -23,11 +23,6 @@ const jobSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    location: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     category: {
       type: String,
       required: true,
@@ -49,6 +44,7 @@ const jobSchema = new mongoose.Schema(
     progress: { type: String },
     startDate: { type: Date },
     estimateCompletion: { type: Date },
+    bids: { type: mongoose.Schema.Types.ObjectId, ref: "Bid" },
     status: {
       type: String,
       enum: ["pending", "in-progress", "completed"],
@@ -61,6 +57,9 @@ const jobSchema = new mongoose.Schema(
     HOA: { type: String, default: "no", required: true },
     accessDetails: { type: String },
     materials: { type: String },
+    zipCode: { type: String },
+    provideMaterial: { type: String },
+    sizeAndScope: { type: String },
   },
   { timestamps: true }
 );

@@ -13,10 +13,6 @@ export const validateBidFields = (data) => {
     errors.scopeOfWork = "Scope of work is required";
   }
 
-  if (!data?.projectMilestones?.trim()) {
-    errors.projectMilestones = "Project milestones are required";
-  }
-
   if (!data?.termsConditions?.trim()) {
     errors.termsConditions = "Terms and conditions are required";
   }
