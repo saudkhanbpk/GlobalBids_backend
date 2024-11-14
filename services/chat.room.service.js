@@ -14,6 +14,13 @@ export const createRoom = async (users, jobId) => {
   }
 
   try {
+    const existingRoom = await RoomModel.findOne({
+      users: { $all: users, $size: users.length },
+    });
+
+    if (existingRoom) {
+      return existingRoom;
+    }
     // Create a new room document
     const newRoom = new RoomModel({
       users,
