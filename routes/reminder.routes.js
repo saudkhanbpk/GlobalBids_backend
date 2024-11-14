@@ -4,6 +4,7 @@ import {
   createReminder,
   updateReminder,
   deleteReminder,
+  getReminder
 } from "../controller/reminder.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
@@ -16,5 +17,6 @@ reminderRouter.post("/create", authMiddleware, createReminder);
 reminderRouter.put("/:id", authMiddleware, updateReminder);
 
 reminderRouter.delete("/:id", authMiddleware, deleteReminder);
+reminderRouter.get("/:id", authMiddleware, getReminder);
 
 export default reminderRouter;

@@ -1,3 +1,4 @@
+import { InternalServerError } from "../error/AppError.js";
 import EventsModel from "../model/events.model.js";
 import Reminder from "../model/reminder.model.js";
 
@@ -31,6 +32,7 @@ export const createReminder = async (req, res) => {
       description: notes,
       eventType: "reminder",
       homeowner: req.user._id,
+      reminderId: newReminder._id,
     });
 
     await event.save();
@@ -49,12 +51,13 @@ export const createReminder = async (req, res) => {
 };
 
 export const updateReminder = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updateData = req.body;
+  const { id } = req.params;
+  const updateData = req.body;
+  console.log(id);
 
+  try {
     const updatedReminder = await Reminder.findOneAndUpdate(
-      { _id: id, user: req.user._id },
+      { _id: id },
       updateData,
       { new: true }
     );
@@ -64,10 +67,12 @@ export const updateReminder = async (req, res) => {
     }
 
     res.status(200).json({
-      message: "Reminder updated successfully",
+      success: true,
       reminder: updatedReminder,
     });
   } catch (error) {
+    console.log(error);
+
     res
       .status(500)
       .json({ error: "Failed to update reminder", details: error.message });
@@ -84,8 +89,14 @@ export const deleteReminder = async (req, res) => {
       return res.status(404).json({ error: "Reminder not found" });
     }
 
-    res.status(200).json({ message: "Reminder deleted successfully" });
+    const event = await EventsModel.findOneAndDelete({
+      reminderId: id,
+    });
+
+    res.status(200).json({ success: true });
   } catch (error) {
+    console.log(error);
+
     res
       .status(500)
       .json({ error: "Failed to delete reminder", details: error.message });
@@ -103,5 +114,18 @@ export const getAllReminders = async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to fetch reminders", details: error.message });
+  }
+};
+
+export const getReminder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const reminder = await Reminder.findById(id);
+    if (!reminder) {
+      return res.status(404).json({ error: "Reminder not found" });
+    }
+    res.status(200).json({ success: true, reminder });
+  } catch (error) {
+    return next(new InternalServerError("can't fetch reminder"));
   }
 };
