@@ -4,10 +4,11 @@ import {
   getOwnerBids,
   getContractorBids,
   changeBidStatus,
+  getBids,
   getBid,
+  updateBid
 } from "../controller/bid.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
-import upload from "../config/multer.config.js";
 
 const bidRouter = express.Router();
 
@@ -20,6 +21,8 @@ bidRouter.get("/owner", authMiddleware, getOwnerBids);
 bidRouter.get("/contractor", authMiddleware, getContractorBids);
 
 bidRouter.post("/status", authMiddleware, changeBidStatus);
-bidRouter.get("/", authMiddleware, getBid);
+bidRouter.get("/", authMiddleware, getBids);
+bidRouter.get("/:id", authMiddleware, getBid)
+bidRouter.put("/:id", authMiddleware, updateBid);
 
 export default bidRouter;

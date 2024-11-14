@@ -175,7 +175,7 @@ export const changeBidStatus = async (req, res, next) => {
   }
 };
 
-export const getBid = async (req, res, next) => {
+export const getBids = async (req, res, next) => {
   const id = req.user._id;
   try {
     const bids = await BidModel.find({
@@ -196,5 +196,39 @@ export const getBid = async (req, res, next) => {
     return res.status(200).json({ success: true, bids });
   } catch (error) {
     return next(new InternalServerError("Failed to fetch the bid"));
+  }
+};
+
+export const getBid = async (req, res, next) => {
+  const bidId = req.params.id;
+  const user = req.user.role === "contractor" ? "homeowner" : "contractor";
+  try {
+    const bid = await BidModel.findById(bidId).populate([
+      {
+        path: user,
+        select: "username avatarUrl label email phone",
+      },
+      {
+        path: "job",
+        select: "title budget category",
+      },
+    ]);
+    return res.status(200).json({ success: true, bid });
+  } catch (error) {
+    return next(new InternalServerError("Failed to fetch the bid"));
+  }
+};
+
+export const updateBid = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const bid = await BidModel.findById(id);
+    if (!bid) {
+      return next(new NotFoundError("Bid not found"));
+    }
+    return res.status(200).json({ success: true, bid });
+  } catch (error) {
+    return next(new InternalServerError("Failed to update the bid"));
   }
 };
