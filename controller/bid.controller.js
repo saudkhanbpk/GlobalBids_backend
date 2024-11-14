@@ -221,9 +221,13 @@ export const getBid = async (req, res, next) => {
 
 export const updateBid = async (req, res, next) => {
   const { id } = req.params;
-
+  const { status, ...rest } = req.body;
   try {
-    const bid = await BidModel.findById(id);
+    const bid = await BidModel.findByIdAndUpdate(
+      id,
+      { $set: rest },
+      { new: true }
+    );
     if (!bid) {
       return next(new NotFoundError("Bid not found"));
     }
