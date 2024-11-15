@@ -131,7 +131,7 @@ export const changeBidStatus = async (req, res, next) => {
     const bid = await BidModel.findOne({
       _id: bidId,
       status: "pending",
-    });
+    }).populate({ path: "job", select: "title" });
     if (!bid) {
       return next(new NotFoundError("bid not found!"));
     }
@@ -160,7 +160,7 @@ export const changeBidStatus = async (req, res, next) => {
       recipientType: "Contractor",
       senderId: user._id,
       senderType: "Homeowner",
-      message: `Your bid for Job ${job.title} has been ${req.body.bidStatus}`,
+      message: `Your bid for Job ${bid.job.title} has been ${req.body.bidStatus}`,
       type: "bidStatus",
       url: `/contractor/my-bids`,
     });
@@ -170,7 +170,7 @@ export const changeBidStatus = async (req, res, next) => {
       .json({ success: true, message: `Bid is ${req.body.bidStatus}`, bid });
   } catch (error) {
     console.log(error);
-    
+
     return next(new InternalServerError("bid status can't be change"));
   }
 };
