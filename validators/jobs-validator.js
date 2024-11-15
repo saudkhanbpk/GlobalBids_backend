@@ -21,13 +21,13 @@ export const validateJobFields = (data) => {
     errors.budget = "Budget is required.";
   }
 
-  if (
-    !data.location ||
-    typeof data.location !== "string" ||
-    data.location.trim() === ""
-  ) {
-    errors.location = "Location is required and must be a non-empty string.";
-  }
+  // if (
+  //   !data.location ||
+  //   typeof data.location !== "string" ||
+  //   data.location.trim() === ""
+  // ) {
+  //   errors.location = "Location is required and must be a non-empty string.";
+  // }
 
   if (
     !data.category ||
