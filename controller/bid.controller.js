@@ -155,8 +155,6 @@ export const changeBidStatus = async (req, res, next) => {
       await createRoom([user._id, bid.contractor], bid.job);
     }
 
-    console.log(job);
-
     await notificationService.sendNotification({
       recipientId: contractor,
       recipientType: "Contractor",
@@ -171,6 +169,8 @@ export const changeBidStatus = async (req, res, next) => {
       .status(200)
       .json({ success: true, message: `Bid is ${req.body.bidStatus}`, bid });
   } catch (error) {
+    console.log(error);
+    
     return next(new InternalServerError("bid status can't be change"));
   }
 };
