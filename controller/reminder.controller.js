@@ -89,7 +89,7 @@ export const deleteReminder = async (req, res) => {
       return res.status(404).json({ error: "Reminder not found" });
     }
 
-    const event = await EventsModel.findOneAndDelete({
+    await EventsModel.findOneAndDelete({
       reminderId: id,
     });
 
