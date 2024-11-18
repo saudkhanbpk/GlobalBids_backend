@@ -1,5 +1,5 @@
 import { InternalServerError } from "../error/AppError.js";
-import { connectedUsers } from "../event/site-events.js";
+import { connectedRooms, connectedUsers } from "../event/site-events.js";
 import MessageModel from "../model/chat.message.model.js";
 import RoomModel from "../model/chat.room.model.js";
 
@@ -34,7 +34,6 @@ export const getRooms = async (req, res, next) => {
         select: "username avatarUrl message senderId role",
       })
       .exec();
-
     if (!rooms.length) {
       return res.status(404).json({ message: "No rooms found for this user" });
     }
@@ -61,8 +60,15 @@ export const deleteRoom = async (req, res) => {
 export const sendMessage = async (req, res, next) => {
   const user = req.user;
   const io = req.app.get("io");
-  const { receiverId, message, timestamp, timeZone, roomId, senderId } =
-    req.body;
+  const {
+    receiverId,
+    message,
+    timestamp,
+    timeZone,
+    roomId,
+    senderId,
+    socketId,
+  } = req.body;
 
   try {
     let room = await RoomModel.findOne({
@@ -84,27 +90,29 @@ export const sendMessage = async (req, res, next) => {
         room.lastMessageContractor = newMessage._id;
         break;
       case "owner":
-        room.lastMessageHomeowner =  newMessage._id;
+        room.lastMessageHomeowner = newMessage._id;
         break;
       default:
         break;
     }
 
-    await room.save();
+    if (connectedRooms[roomId]) {
+      connectedRooms[roomId].forEach(async (socket_id) => {
+        if (socket_id !== socketId) {
+          io.to(socket_id).emit("message", newMessage);
+        } else {
+          console.log("hello world!");
+
+          room.unreadMessages.set(
+            receiverId.toString(),
+            (room.unreadMessages.get(receiverId.toString()) || 0) + 1
+          );
+        }
+      });
+    }
     await newMessage.save();
-
-    room.unreadMessages.set(
-      receiverId.toString(),
-      (room.unreadMessages.get(receiverId.toString()) || 0) + 1
-    );
-
     room.last_message = newMessage._id;
     await room.save();
-
-    if (connectedUsers[receiverId]) {
-      const receiverSocketId = connectedUsers[receiverId];
-      io.to(receiverSocketId).emit("message", newMessage);
-    }
 
     return res.status(201).json({ success: true, newMessage });
   } catch (error) {
@@ -195,7 +203,12 @@ export const getRoom = async (req, res, next) => {
       match: { _id: { $ne: req.user._id } },
       select: "username avatarUrl",
     });
-    return res.status(200).json({ success: true, room });
+    const userStatus = {};
+    if (connectedUsers[room.users[0]._id]) {
+      userStatus["status"] = "online";
+      userStatus["userId"] = room.users[0]._id;
+    }
+    return res.status(200).json({ success: true, room, userStatus });
   } catch (error) {
     return next(new InternalServerError("can't get new room"));
   }
