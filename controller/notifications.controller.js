@@ -12,8 +12,8 @@ export const getNotifications = async (req, res, next) => {
 
     const totalDocs = await NotificationModel.countDocuments({
       recipientId: user._id,
+      read: false,
     });
-
     return res
       .status(200)
       .json({ success: true, notifications, unreadCount: totalDocs });
