@@ -10,30 +10,23 @@ export const contractorSettings = async (req, res, next) => {
   }
 
   try {
-    const existingSettings = await ContractorSettingsModel.findOne({
-      user: userId,
-    });
+    const updateSettings = await ContractorSettingsModel.findOneAndUpdate(
+      { user: userId },
+      req.body,
+      { new: true }
+    );
 
-    if (existingSettings) {
-      existingSettings.notifications =
-        req.body.notifications || existingSettings.notifications;
-
-      existingSettings.profileVisibility =
-        req.body.profileVisibility || existingSettings.profileVisibility;
-
-      await existingSettings.save();
-
+    if (updateSettings) {
       return res.status(200).json({
         success: true,
         message: "Settings updated successfully",
-        settings: existingSettings,
+        settings: updateSettings,
       });
     }
 
     const newSettings = new ContractorSettingsModel({
       user: userId,
-      notifications: req.body.notifications,
-      profileVisibility: req.body.profileVisibility,
+      ...req.boy,
     });
 
     await newSettings.save();
@@ -44,7 +37,6 @@ export const contractorSettings = async (req, res, next) => {
       settings: newSettings,
     });
   } catch (error) {
-    console.error(error);
     return next(new InternalServerError("Failed to update settings"));
   }
 };

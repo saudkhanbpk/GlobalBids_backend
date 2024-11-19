@@ -10,7 +10,7 @@ const ownerSettingSchema = mongoose.Schema({
 
   newBidsNotifications: { type: Boolean, default: true },
   newMessagesNotifications: { type: Boolean, default: true },
-
+  missedDeadlinesNotifications: { type: Boolean, default: true },
   sameDayProjectAlertsNotifications: { type: Boolean, default: true },
   sameDayProjectAlertsNotifications: { type: Boolean, default: true },
 });
