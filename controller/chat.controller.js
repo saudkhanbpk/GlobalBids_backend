@@ -60,6 +60,7 @@ export const deleteRoom = async (req, res) => {
 export const sendMessage = async (req, res, next) => {
   const user = req.user;
   const io = req.app.get("io");
+  const notificationService = req.app.get("notificationService");
   const {
     receiverId,
     message,
@@ -101,12 +102,21 @@ export const sendMessage = async (req, res, next) => {
         if (socket_id !== socketId) {
           io.to(socket_id).emit("message", newMessage);
         } else {
-          console.log("hello world!");
-
           room.unreadMessages.set(
             receiverId.toString(),
             (room.unreadMessages.get(receiverId.toString()) || 0) + 1
           );
+          await notificationService.sendNotification({
+            recipientId: receiverId,
+            recipientType: "Contractor",
+            senderId: user._id,
+            senderType: "Homeowner",
+            message: `New message from ${user.username}`,
+            type: "bidStatus",
+            url: `${
+              user.role === "contractor" ? "/home-owner" : "/contractor"
+            }/messages/${roomId}`,
+          });
         }
       });
     }
