@@ -53,12 +53,20 @@ export const createReminder = async (req, res) => {
 export const updateReminder = async (req, res) => {
   const { id } = req.params;
   const updateData = req.body;
-  console.log(id);
-
   try {
     const updatedReminder = await Reminder.findOneAndUpdate(
       { _id: id },
       updateData,
+      { new: true }
+    );
+
+    await EventsModel.findOneAndUpdate(
+      { reminderId: id },
+      {
+        title: updateData.reminderName,
+        date: updateData.renewalDate,
+        description: updateData.notes,
+      },
       { new: true }
     );
 
@@ -71,8 +79,6 @@ export const updateReminder = async (req, res) => {
       reminder: updatedReminder,
     });
   } catch (error) {
-    console.log(error);
-
     res
       .status(500)
       .json({ error: "Failed to update reminder", details: error.message });
