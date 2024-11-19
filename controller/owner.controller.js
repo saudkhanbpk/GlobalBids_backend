@@ -12,35 +12,17 @@ export const settings = async (req, res, next) => {
   }
 
   try {
-    const existSettings = await OwnerSettingModel.findOne({ user: userId });
+    const updateSettings = await OwnerSettingModel.findOneAndUpdate(
+      { user: userId },
+      req.body,
+      { new: true }
+    );
 
-    if (existSettings) {
-      existSettings.emailNotification =
-        req.body.emailNotification !== undefined
-          ? req.body.emailNotification
-          : existSettings.emailNotification;
-
-      existSettings.smsNotification =
-        req.body.smsNotification !== undefined
-          ? req.body.smsNotification
-          : existSettings.smsNotification;
-
-      existSettings.publicProfile =
-        req.body.publicProfile !== undefined
-          ? req.body.publicProfile
-          : existSettings.publicProfile;
-
-      existSettings.shareData =
-        req.body.shareData !== undefined
-          ? req.body.shareData
-          : existSettings.shareData;
-
-      await existSettings.save();
-
+    if (updateSettings) {
       return res.status(200).json({
         success: true,
         message: "settings updated successfully",
-        settings: existSettings,
+        settings: updateSettings,
       });
     }
 
