@@ -114,7 +114,7 @@ export const sendMessage = async (req, res, next) => {
             senderId: user._id,
             senderType: "Homeowner",
             message: `New message from ${user.username}`,
-            type: "bidStatus",
+            type: "message",
             url: `${
               user.role === "contractor" ? "/home-owner" : "/contractor"
             }/messages/${roomId}`,
