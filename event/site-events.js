@@ -21,12 +21,6 @@ const initSocket = (server) => {
     const userId = socket.decoded_token.id;
     connectedUsers[userId] = socket.id;
     io.emit("user_status", { userId, status: "online" });
-    // ============
-    // socket.on("join_room", (data) => {
-    //   const { roomId } = data;
-    //   socket.join(roomId);
-    //   connectedRooms[roomId] = socket.id;
-    // });
     socket.on("join_room", (data) => {
       const { roomId } = data;
       if (!connectedRooms[roomId]) {
@@ -38,7 +32,7 @@ const initSocket = (server) => {
       socket.join(roomId);
     });
     //===============
-    disconnectHandler(socket, connectedUsers, io);
+    disconnectHandler(socket, connectedUsers, connectedRooms, io);
   });
   return io;
 };

@@ -101,7 +101,9 @@ export const sendMessage = async (req, res, next) => {
       connectedRooms[roomId].forEach(async (socket_id) => {
         if (socket_id !== socketId) {
           io.to(socket_id).emit("message", newMessage);
-        } else {
+          console.log(socket_id);
+        }
+        if (connectedRooms[roomId].length === 1) {
           room.unreadMessages.set(
             receiverId.toString(),
             (room.unreadMessages.get(receiverId.toString()) || 0) + 1

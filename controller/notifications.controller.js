@@ -38,3 +38,20 @@ export const markNotificationAsRead = async (req, res, next) => {
     next(new InternalServerError("Failed to mark notification as read"));
   }
 };
+
+export const markAllMessagesAsRead = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const notifications = await NotificationModel.updateMany(
+      { recipientId: user._id },
+      { read: true }
+    );
+    return res.status(200).json({
+      message: "All notifications marked as read",
+      notifications,
+      success: true,
+    });
+  } catch (error) {
+    next(new InternalServerError("Failed to mark all notifications as read"));
+  }
+};
