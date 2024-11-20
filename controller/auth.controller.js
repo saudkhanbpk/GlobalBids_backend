@@ -337,3 +337,37 @@ export const markUsersAsFirstTimeLogin = async (req, res, next) => {
     return next(new InternalServerError("Failed to update user status"));
   }
 };
+
+export const changePassword = async (req, res, next) => {
+  const { currentPassword, newPassword, confirmNewPassword } = req.body;
+  const userId = req.user._id;
+  try {
+    const user = await getUserById(userId, "+password");
+
+    if (!user) {
+      return next(new NotFoundError("User not found"));
+    }
+
+    if (user.provider === "google") {
+      return next(new ValidationError("You can't change password"));
+    }
+
+    const isPasswordValid = await user.comparePassword(currentPassword);
+    if (!isPasswordValid) {
+      return next(new ValidationError("Invalid current password"));
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return next(new ValidationError("Passwords do not match"));
+    }
+
+    user.password = newPassword;
+    await user.save();
+    return res
+      .status(200)
+      .json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    return next(new InternalServerError("Failed to update password"));
+  }
+};
