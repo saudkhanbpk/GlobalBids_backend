@@ -213,6 +213,7 @@ export const getBid = async (req, res, next) => {
         select: "title budget category",
       },
     ]);
+    
     return res.status(200).json({ success: true, bid });
   } catch (error) {
     return next(new InternalServerError("Failed to fetch the bid"));
