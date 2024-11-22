@@ -6,14 +6,17 @@ const jobSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Homeowner",
     },
-    startDate: { type: String },
-    targetDate: { type: String },
     title: {
       type: String,
       required: true,
       trim: true,
     },
     description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    projectTimeLine: {
       type: String,
       required: true,
       trim: true,
@@ -39,11 +42,8 @@ const jobSchema = new mongoose.Schema(
       enum: ["open", "closed"],
       default: "open",
     },
-    contractorNotes: { type: String, trim: true },
     completed: { type: Boolean, default: false },
     progress: { type: String },
-    startDate: { type: Date },
-    estimateCompletion: { type: Date },
     bids: { type: mongoose.Schema.Types.ObjectId, ref: "Bid" },
     status: {
       type: String,
@@ -55,11 +55,7 @@ const jobSchema = new mongoose.Schema(
       ref: "Contractor",
     },
     HOA: { type: String, default: "no", required: true },
-    accessDetails: { type: String },
-    materials: { type: String },
     zipCode: { type: String },
-    provideMaterial: { type: String },
-    sizeAndScope: { type: String },
   },
   { timestamps: true }
 );

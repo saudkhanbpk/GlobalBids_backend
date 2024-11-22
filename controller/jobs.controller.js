@@ -15,7 +15,7 @@ export const createJob = async (req, res, next) => {
   if (req.user.role !== "owner") {
     return next(new BusinessLogicError());
   }
-  
+
   if (!files) {
     return next(
       new FileUploadError("At least one video or image is required!")
