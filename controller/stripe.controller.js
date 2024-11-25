@@ -1,46 +1,77 @@
-// import Stripe from 'stripe';
-
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// export const createPayment = async (req, res) => {
-//     const { amount } = req.body;
-//     try {
-//         const paymentIntent = await stripe.paymentIntents.create({
-//             amount,
-//             currency: 'usd',
-//         });
-//         res.send({
-//             clientSecret: paymentIntent.client_secret,
-//         });
-//     } catch (err) {
-//         res.status(500).send({ error: err.message });
-//     }
-// };
-
-
 import Stripe from 'stripe';
+import BidTransactionHistoryModel from '../model/transaction.model.js';
+import { InternalServerError } from '../error/AppError.js';
+import JobModel from "../model/job.model.js"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-export const createPayment = async (req, res) => {
-    const { amount } = req.body;
+export const createPayment = async (req, res, next) => {
+    const { amount, jobId, bidId, cardDigit, contractor, category } = req.body;
+    console.log(req.body);
 
     const amountInCents = Math.round(amount * 100);
 
-    const processingFee = Math.round(amountInCents * 0.05);
+    let leadPrice = 0;
+    let priceCategory = '';
 
-    const paymentIntent = await stripe.paymentIntents.create({
-        amount: processingFee,
-        currency: 'usd',
-    });
+    if (amount >= 0 && amount <= 999) {
+        leadPrice = 30; // Small
+        priceCategory = 'small';
+    } else if (amount >= 1000 && amount <= 9999) {
+        leadPrice = 50; // Medium
+        priceCategory = 'medium';
+    } else if (amount >= 10000) {
+        leadPrice = 100; // Large
+        priceCategory = 'large';
+    }
 
-    res.send({
-        clientSecret: paymentIntent.client_secret,
-        processingFee: processingFee / 100,
-        totalAmountCharegd: processingFee / 100,
-        originalAmount: amount,
-    });
+    try {
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amountInCents,
+            currency: 'usd',
+        });
+
+        const newTransaction = new BidTransactionHistoryModel({
+            job: jobId,
+            bid: bidId,
+            category: priceCategory,
+            amount: amount.toString(),
+            transactionDate: new Date().toISOString(),
+            status: 'pending',
+            cardDigit: cardDigit,
+            transactionId: paymentIntent.id,
+            leadPrice: leadPrice,
+        });
+
+        await newTransaction.save();
+
+        await JobModel.findByIdAndUpdate(
+            jobId,
+            {
+                bidStatus: "closed",
+                progress: "0",
+                status: "in-progress",
+                contractor: contractor,
+            },
+            { new: true }
+        );
+
+        const data = {
+            clientSecret: paymentIntent.client_secret,
+            totalAmountCharged: amount,
+            originalAmount: amount,
+            leadPrice: leadPrice,
+        };
+        return res.status(201).json(data);
+    } catch (error) {
+        console.error('Error processing payment:', error);
+        return next(new InternalServerError());
+    }
 };
+
+
+
+
 
 export const getTransactionHistory = async (req, res) => {
     try {

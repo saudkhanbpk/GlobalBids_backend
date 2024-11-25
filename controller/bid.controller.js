@@ -138,20 +138,8 @@ export const changeBidStatus = async (req, res, next) => {
 
     bid.status = req.body.bidStatus;
     await bid.save();
-    let job = null;
     if (bid.status === "accepted") {
-      job = await JobModel.findByIdAndUpdate(
-        bid.job,
-        {
-          bidStatus: "closed",
-          targetDate: bid.estimatedTimeLine,
-          progress: "0",
-          status: "in-progress",
-          contractor,
-          startDate: bid.startDate,
-        },
-        { new: true }
-      );
+    
       await createRoom([user._id, bid.contractor], bid.job);
     }
 
