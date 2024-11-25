@@ -7,8 +7,7 @@ import BidModel from '../model/bids.model.js';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const createPayment = async (req, res, next) => {
-    const { amount, jobId, bidId, cardDigit, contractor, category } = req.body;
-    console.log(req.body);
+    const { amount, jobId, bidId, cardDigit, contractor, category, leadprice } = req.body;
 
     const amountInCents = Math.round(amount * 100);
 
@@ -16,13 +15,13 @@ export const createPayment = async (req, res, next) => {
     let priceCategory = '';
 
     if (amount >= 0 && amount <= 999) {
-        leadPrice = 30; // Small
+        leadPrice = 30;
         priceCategory = 'small';
     } else if (amount >= 1000 && amount <= 9999) {
-        leadPrice = 50; // Medium
+        leadPrice = 50;
         priceCategory = 'medium';
     } else if (amount >= 10000) {
-        leadPrice = 100; // Large
+        leadPrice = 100;
         priceCategory = 'large';
     }
 
@@ -64,8 +63,10 @@ export const createPayment = async (req, res, next) => {
             totalAmountCharged: amount,
             originalAmount: amount,
             leadPrice: leadPrice,
+            category: priceCategory
         };
         return res.status(201).json(data);
+
     } catch (error) {
         console.error('Error processing payment:', error);
         return next(new InternalServerError());
