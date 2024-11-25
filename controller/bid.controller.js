@@ -192,6 +192,10 @@ export const getBid = async (req, res, next) => {
   try {
     const bid = await BidModel.findById(bidId).populate([
       {
+        match: { status: { $eq: "paid" } },
+        path: "bidTransaction",
+      },
+      {
         path: user,
         select: "username avatarUrl label email phone",
       },

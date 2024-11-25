@@ -37,7 +37,7 @@ export const createPayment = async (req, res, next) => {
             category: priceCategory,
             amount: amount.toString(),
             transactionDate: new Date().toISOString(),
-            status: 'pending',
+            status: 'paid',
             cardDigit: cardDigit,
             transactionId: paymentIntent.id,
             leadPrice: leadPrice,
