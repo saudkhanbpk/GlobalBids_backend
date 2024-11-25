@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import BidTransactionHistoryModel from '../model/transaction.model.js';
 import { InternalServerError } from '../error/AppError.js';
 import JobModel from "../model/job.model.js"
+import BidModel from '../model/bids.model.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -55,6 +56,8 @@ export const createPayment = async (req, res, next) => {
             },
             { new: true }
         );
+
+        await BidModel.findByIdAndUpdate(bidId, { bidTransaction: newTransaction })
 
         const data = {
             clientSecret: paymentIntent.client_secret,

@@ -34,7 +34,7 @@ const BidSchema = new mongoose.Schema(
       ref: "Contractor",
       required: true,
     },
-    BidTransaction: { type: mongoose.Schema.Types.ObjectId, ref: "BidTransactionHistory" }
+    bidTransaction: { type: mongoose.Schema.Types.ObjectId, ref: "BidTransactionHistory" }
   },
   { timestamps: true }
 );
