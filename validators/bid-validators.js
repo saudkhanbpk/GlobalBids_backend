@@ -17,10 +17,6 @@ export const validateBidFields = (data) => {
     errors.termsConditions = "Terms and conditions are required";
   }
 
-  if (!data?.additionalNotes?.trim()) {
-    errors.additionalNotes = "Additional notes are required";
-  }
-
   if (!data?.homeowner?.trim()) {
     errors.homeowner = "Owner ID is required";
   }
