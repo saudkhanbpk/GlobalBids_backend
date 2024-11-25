@@ -139,7 +139,6 @@ export const changeBidStatus = async (req, res, next) => {
     bid.status = req.body.bidStatus;
     await bid.save();
     if (bid.status === "accepted") {
-    
       await createRoom([user._id, bid.contractor], bid.job);
     }
 
@@ -201,7 +200,7 @@ export const getBid = async (req, res, next) => {
         select: "title budget category",
       },
     ]);
-    
+
     return res.status(200).json({ success: true, bid });
   } catch (error) {
     return next(new InternalServerError("Failed to fetch the bid"));
