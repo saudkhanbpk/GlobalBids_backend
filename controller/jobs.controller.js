@@ -9,7 +9,8 @@ import {
 import JobModel from "../model/job.model.js";
 import { uploadFile } from "../services/upload.files.media.service.js";
 import { validateJobFields } from "../validators/jobs-validator.js";
-
+import { extractPublicId } from "../utils/cloudinary.utils.js";
+import cloudinary from "../config/cloudinary.config.js";
 export const createJob = async (req, res, next) => {
   const files = req.files;
   if (req.user.role !== "owner") {
@@ -54,6 +55,60 @@ export const createJob = async (req, res, next) => {
       message: "Job has been created!",
       job: savedJob,
     });
+  } catch (error) {
+    return next(new InternalServerError());
+  }
+};
+
+export const editJob = async (req, res, next) => {
+  const files = req.files;
+  if (req.user.role !== "owner") {
+    return next(new BusinessLogicError());
+  }
+
+  if (!files && !req.body.media) {
+    return next(
+      new FileUploadError("At least one video or image is required!")
+    );
+  }
+
+  let mediaUrls = [];
+  try {
+    for (const file of files) {
+      const fileRes = await uploadFile(file, JOB_DIRECTORY);
+      mediaUrls.push(fileRes);
+    }
+  } catch (error) {
+    return next(new FileUploadError());
+  }
+
+  const media = JSON.parse(req.body.media);
+  const deleteMedia = JSON.parse(req.body.deletedFiles);
+
+  const allMedia = media.filter((m) => !deleteMedia.includes(m));
+
+  const updatedData = { ...req.body, media: [...mediaUrls, ...allMedia] };
+  try {
+    const jobUpdated = await JobModel.findByIdAndUpdate(
+      req.params.id,
+      updatedData,
+      { new: true }
+    );
+    const deletionPromises = deleteMedia.map(async (fileUrl) => {
+      try {
+        const publicId = extractPublicId(fileUrl);
+        const result = await cloudinary.uploader.destroy(publicId);
+        console.log(publicId, result);
+      } catch (err) {
+        console.error(`Failed to delete file: ${fileUrl}`, err);
+      }
+    });
+
+    await Promise.all(deletionPromises);
+
+    return res
+      .status(200)
+      .json({ jobUpdated, success: true, message: "Job has been updated!" });
   } catch (error) {
     return next(new InternalServerError());
   }
