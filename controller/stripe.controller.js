@@ -5,9 +5,8 @@ import JobModel from "../model/job.model.js";
 import BidModel from "../model/bids.model.js";
 import { invoiceMailOptions } from "../utils/mail-options.js";
 import { sendEmail } from "../utils/send-emails.js";
-
+import { createRoom } from "../services/chat.room.service.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
 export const createPayment = async (req, res, next) => {
   const { leadPrice } = req.body;
   const amountInCents = Math.round(leadPrice * 100);
@@ -63,7 +62,7 @@ export const updateBidPayment = async (req, res, next) => {
 
     await newTransaction.save();
 
-    await JobModel.findByIdAndUpdate(
+    const job = await JobModel.findByIdAndUpdate(
       jobId,
       {
         bidStatus: "closed",
@@ -77,6 +76,9 @@ export const updateBidPayment = async (req, res, next) => {
     await BidModel.findByIdAndUpdate(bidId, {
       bidTransaction: newTransaction._id,
     });
+    if (status === "succeeded") {
+      await createRoom([job.user, userId], jobId);
+    }
     const mailtOptions = invoiceMailOptions(newTransaction, req.user.email);
     await sendEmail(mailtOptions);
     return res.status(201).json({
