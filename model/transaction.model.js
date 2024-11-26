@@ -13,6 +13,8 @@ const bidTransactionHistorySchema = new mongoose.Schema(
     transactionId: { type: String },
     leadPrice: { type: String },
     contractor: { type: String },
+    title: { type: String },
+    homeownerName: { type: String },
   },
   { timestamps: true }
 );
