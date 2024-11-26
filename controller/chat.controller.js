@@ -32,8 +32,7 @@ export const getRooms = async (req, res, next) => {
         path: "users last_message",
         match: { _id: { $ne: userId } },
         select: "username avatarUrl message senderId role",
-      })
-      .exec();
+      })  
     if (!rooms.length) {
       return res.status(404).json({ message: "No rooms found for this user" });
     }
