@@ -2,15 +2,16 @@ import mongoose from "mongoose";
 
 const bidTransactionHistorySchema = new mongoose.Schema(
   {
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "Contractor" },
     job: { type: mongoose.Schema.Types.ObjectId, ref: "Job" },
     bid: { type: mongoose.Schema.Types.ObjectId, ref: "Bid" },
     amount: { type: String, required: true },
     transactionDate: { type: String },
-    status: { type: String, enum: ["paid", "pending"] },
+    status: { type: String },
     category: { type: String, enum: ["small", "medium", "large"] },
     cardDigit: { type: String },
     transactionId: { type: String },
-    leadprice: { type: String },
+    leadPrice: { type: String },
     contractor: { type: String },
   },
   { timestamps: true }

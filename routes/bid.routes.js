@@ -6,10 +6,11 @@ import {
   changeBidStatus,
   getBids,
   getBid,
-  updateBid
+  updateBid, 
+
 } from "../controller/bid.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
-import { createPayment, getTransactionHistory } from "../controller/stripe.controller.js";
+import { createPayment, getTransactionHistory, updateBidPayment } from "../controller/stripe.controller.js";
 
 const bidRouter = express.Router();
 
@@ -25,6 +26,7 @@ bidRouter.post('/create-payment-intent', createPayment)
 bidRouter.get('/transaction-history', authMiddleware, getTransactionHistory)
 bidRouter.post("/status", authMiddleware, changeBidStatus);
 bidRouter.get("/", authMiddleware, getBids);
+bidRouter.post("/update-bid-payment", authMiddleware, updateBidPayment);
 bidRouter.get("/:id", authMiddleware, getBid)
 bidRouter.put("/:id", authMiddleware, updateBid);
 
