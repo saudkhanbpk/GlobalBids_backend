@@ -8,21 +8,27 @@ import { sendEmail } from "../utils/send-emails.js";
 import { createRoom } from "../services/chat.room.service.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export const createPayment = async (req, res, next) => {
-  const { leadPrice } = req.body;
+  const { leadPrice, projectName, status } = req.body;
   const amountInCents = Math.round(leadPrice * 100);
+  const transactionDate = new Date().toISOString().split("T")[0];
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: "usd",
+      metadata: {
+        projectName,
+        leadPrice: leadPrice.toString(),
+        transactionDate,
+      },
     });
-
     const data = {
       clientSecret: paymentIntent.client_secret,
       originalAmount: leadPrice,
     };
     return res.status(201).json(data);
   } catch (error) {
+    console.log(error);
     return next(new InternalServerError());
   }
 };
@@ -104,11 +110,39 @@ export const getPaymentHistory = async (req, res, next) => {
   try {
     const transactions = await BidTransactionHistoryModel.find({
       user: userId,
-    }).sort({ transactionDate: -1 });
+    })
+      .select("transactionId ")
+      .sort({ transactionDate: -1 });
+
+    const enrichedTransactions = await Promise.all(
+      transactions.map(async (transaction) => {
+        if (transaction.transactionId) {
+          try {
+            const paymentIntent = await stripe.paymentIntents.retrieve(
+              transaction.transactionId
+            );
+            return {
+              ...transaction.toObject(),
+              metadata: paymentIntent || null,
+            };
+          } catch (stripeError) {
+            return {
+              ...transaction.toObject(),
+              metadata: null,
+            };
+          }
+        } else {
+          return {
+            ...transaction.toObject(),
+            metadata: null,
+          };
+        }
+      })
+    );
 
     return res.status(200).json({
       success: true,
-      transactions,
+      transactions: enrichedTransactions,
     });
   } catch (error) {
     return next(new InternalServerError("Failed to fetch payment history."));
