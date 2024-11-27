@@ -4,6 +4,7 @@ import {
   FileUploadError,
   InternalServerError,
   NotFoundError,
+  UnauthorizedError,
   ValidationError,
 } from "../error/AppError.js";
 import JobModel from "../model/job.model.js";
@@ -228,6 +229,23 @@ export const getContractorJobs = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
+    return next(new InternalServerError());
+  }
+};
+
+export const deleteJob = async (req, res, next) => {
+  const user = req.user;
+  if (user.role !== "owner") return next(new UnauthorizedError());
+  try {
+    const jobId = req.params.id;
+    const deletedJob = await JobModel.findByIdAndDelete(jobId);
+    if (!deletedJob) {
+      return next(new NotFoundError("Job Not Found"));
+    }
+    return res
+      .status(200)
+      .json({ success: true, message: "Job deleted successfully", deletedJob });
+  } catch (error) {
     return next(new InternalServerError());
   }
 };
