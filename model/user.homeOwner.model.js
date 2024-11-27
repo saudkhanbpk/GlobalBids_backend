@@ -58,6 +58,7 @@ const userSchema = new mongoose.Schema(
     zipCode: { type: String, trim: true },
 
     propertyDetails: {
+      address: { type: String, trim: true },
       propertyType: { type: String, trim: true },
       bedrooms: { type: Number },
       bathrooms: { type: Number },
