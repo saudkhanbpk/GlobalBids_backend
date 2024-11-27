@@ -178,13 +178,20 @@ export const getJobStatistics = async (req, res, next) => {
 };
 
 export const getJob = async (req, res, next) => {
-  const popUser = req.user.role === "contractor" ? "user" : "contractor";
+  // const popUser = req.user.role === "contractor" ? "user" : "contractor";
   try {
     const jobId = req.params.id;
-    const job = await JobModel.findById(jobId).populate({
-      path: popUser,
-      select: "username email phone",
-    });
+    const job = await JobModel.findById(jobId).populate([
+      {
+        path: "acceptedBid",
+        select: "bidTransaction contractor",
+        populate: {
+          path: "bidTransaction",
+          select: "status",
+        },
+      },
+    ]);
+
     if (!job) {
       return next(new NotFoundError("Job not found"));
     }
@@ -196,19 +203,31 @@ export const getJob = async (req, res, next) => {
 
 export const getContractorJobs = async (req, res, next) => {
   const userId = req.user._id;
+
   try {
-    const jobs = await JobModel.find({ contractor: userId }).populate({
-      path: "user",
-      select: "username",
-    });
+    const jobs = await JobModel.find({
+      contractor: userId,
+      status: "in-progress",
+    }).populate([
+      {
+        path: "user",
+        select: "username address email phone",
+      },
+      {
+        path: "acceptedBid",
+      },
+    ]);
+
     if (!jobs) {
       return next(new NotFoundError("Jobs not found!"));
     }
+
     return res.status(200).json({
       success: true,
       jobs,
     });
   } catch (error) {
+    console.error(error);
     return next(new InternalServerError());
   }
 };

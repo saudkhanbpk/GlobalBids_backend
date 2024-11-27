@@ -40,6 +40,7 @@ export const updateBidPayment = async (req, res, next) => {
     status,
     title,
     homeownerName,
+    homeownerId
   } = req.body;
 
   const userId = req.user._id;
@@ -62,6 +63,16 @@ export const updateBidPayment = async (req, res, next) => {
 
     await newTransaction.save();
 
+    await BidModel.findByIdAndUpdate(bidId, {
+      bidTransaction: newTransaction._id,
+    });
+
+    let room = null;
+
+    if (status === "succeeded") {
+      room = await createRoom([homeownerId, userId], jobId);
+    }
+
     const job = await JobModel.findByIdAndUpdate(
       jobId,
       {
@@ -69,16 +80,12 @@ export const updateBidPayment = async (req, res, next) => {
         progress: "0",
         status: "in-progress",
         contractor: contractor,
+        acceptedBid: bidId,
+        room: room._id,
       },
       { new: true }
     );
 
-    await BidModel.findByIdAndUpdate(bidId, {
-      bidTransaction: newTransaction._id,
-    });
-    if (status === "succeeded") {
-      await createRoom([job.user, userId], jobId);
-    }
     const mailtOptions = invoiceMailOptions(newTransaction, req.user.email);
     await sendEmail(mailtOptions);
     return res.status(201).json({
@@ -94,7 +101,6 @@ export const updateBidPayment = async (req, res, next) => {
 
 export const getPaymentHistory = async (req, res, next) => {
   const userId = req.user._id;
-
   try {
     const transactions = await BidTransactionHistoryModel.find({
       user: userId,

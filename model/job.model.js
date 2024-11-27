@@ -42,9 +42,11 @@ const jobSchema = new mongoose.Schema(
       enum: ["open", "closed"],
       default: "open",
     },
+    room: { type: mongoose.Schema.Types.ObjectId, ref: "Room" },
     completed: { type: Boolean, default: false },
     progress: { type: String },
     bids: { type: mongoose.Schema.Types.ObjectId, ref: "Bid" },
+    acceptedBid: { type: mongoose.Schema.Types.ObjectId, ref: "Bid" },
     status: {
       type: String,
       enum: ["pending", "in-progress", "completed"],
