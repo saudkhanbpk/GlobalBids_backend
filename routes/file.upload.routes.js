@@ -3,6 +3,7 @@ import upload from "../config/multer.config.js";
 import {
   uploadAvatar,
   uploadContractorDocumentsController,
+  uploadCoverPhoto,
 } from "../controller/file.upload.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
@@ -13,6 +14,13 @@ fileUploadRouter.post(
   upload.single("file"),
   authMiddleware,
   uploadAvatar
+);
+
+fileUploadRouter.post(
+  "/cover-photo",
+  authMiddleware,
+  upload.single("file"),
+  uploadCoverPhoto
 );
 
 fileUploadRouter.post(

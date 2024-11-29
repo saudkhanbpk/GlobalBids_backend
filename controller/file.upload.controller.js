@@ -19,6 +19,22 @@ export const uploadAvatar = async (req, res, next) => {
     return next(new InternalServerError("Can't upload user avatar"));
   }
 };
+export const uploadCoverPhoto = async (req, res, next) => {
+  const file = req.file;
+  const userId = req.user._id;
+  if (!file) {
+    return next(new FileUploadError("Please upload a file!"));
+  }
+  try {
+    const user = await getUserById(userId);
+    const coverPhoto = await uploadFile(file, "profile-images");
+    user.coverPhoto = coverPhoto;
+    await user.save();
+    return res.status(200).json({ success: true, coverPhoto });
+  } catch (error) {
+    return next(new InternalServerError("Can't upload user avatar"));
+  }
+};
 
 export const uploadContractorDocumentsController = async (req, res, next) => {
   const files = req.files;

@@ -86,6 +86,14 @@ const userSchema = new mongoose.Schema(
       required: true,
       enum: ["google", "credentials"],
     },
+    pageServices: [
+      {
+        title: { type: String, trim: true, required: true, unique: true },
+        description: { type: String, trim: true, required: true },
+      },
+    ],
+    coverPhoto: { type: String, trim: true },
+    about: { type: String, trim: true },
     profileCompleted: {
       type: Boolean,
       default: false,

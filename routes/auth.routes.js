@@ -10,7 +10,9 @@ import {
   resetPassword,
   getUser,
   markUsersAsFirstTimeLogin,
-  changePassword
+  changePassword,
+  deleteContractorServiceById,
+  getContractorPage,
 } from "../controller/auth.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
@@ -28,5 +30,11 @@ router.post("/reset-password", resetPassword);
 router.get("/login/success", authMiddleware, getUser);
 router.get("/is-first-time-login", authMiddleware, markUsersAsFirstTimeLogin);
 router.post("/change-password", authMiddleware, changePassword);
+router.delete(
+  "/delete-page-services/:id",
+  authMiddleware,
+  deleteContractorServiceById
+);
+router.get("/contractor-page/:id", authMiddleware, getContractorPage);
 
 export default router;

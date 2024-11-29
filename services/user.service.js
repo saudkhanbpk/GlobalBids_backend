@@ -68,8 +68,6 @@ export const updateContractorInfo = async (userId, reqData) => {
       ...reqData,
     };
 
-    console.log(updateFields);
-
     const updatedUser = await UserContractorModel.findByIdAndUpdate(
       userId,
       { $set: updateFields },

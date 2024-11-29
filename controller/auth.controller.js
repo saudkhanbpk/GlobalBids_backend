@@ -217,7 +217,6 @@ export const updateUserInfo = async (req, res, next) => {
       default:
         return next(new Error("Invalid user role"));
     }
-
     res.status(200).json({
       success: true,
       user: updatedUser,
@@ -369,5 +368,45 @@ export const changePassword = async (req, res, next) => {
   } catch (error) {
     console.error("Error updating password:", error);
     return next(new InternalServerError("Failed to update password"));
+  }
+};
+
+export const deleteContractorServiceById = async (req, res, next) => {
+  const contractorId = req.user._id;
+  const { id: serviceId } = req.params;
+
+  try {
+    const contractor = await UserContractorModel.findOneAndUpdate(
+      { _id: contractorId },
+      { $pull: { pageServices: { _id: serviceId } } },
+      { new: true }
+    );
+
+    if (!contractor) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Contractor not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Service deleted successfully",
+      pageServices: contractor.pageServices,
+    });
+  } catch (error) {
+    return next(new InternalServerError());
+  }
+};
+
+export const getContractorPage = async (req, res, next) => {
+  const { id } = req.params;
+  
+  try {
+    const contractorPage = await UserContractorModel.findOne({ _id: id }).select(
+      "username pageServices about avatarUrl experience coverPhoto rating"
+    );
+    return res.status(200).json({ success: true, contractorPage });
+  } catch (error) {
+    return next(new InternalServerError());
   }
 };
