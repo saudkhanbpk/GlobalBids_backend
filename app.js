@@ -9,7 +9,7 @@ import errorHandler from "./error/errorHandler.js";
 import { RouteNotFoundError } from "./error/AppError.js";
 import jobsRouter from "./routes/jobs.routes.js";
 import contractorRouter from "./routes/contractor.routes.js";
-import ownerRoutes from "./routes/owner.routes.js";
+import homeownerRoutes from "./routes/homeowner.routes.js";
 import bidRouter from "./routes/bid.routes.js";
 import storyRouter from "./routes/story.routes.js";
 import initSocket from "./event/site-events.js";
@@ -21,6 +21,8 @@ import passport from "./config/passport.config.js";
 import reminderRouter from "./routes/reminder.routes.js";
 import fileUploadRouter from "./routes/file.upload.routes.js";
 import NotificationService from "./services/notification.service.js";
+import "dotenv/config.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();
@@ -28,7 +30,8 @@ app.use(express.static("public"));
 connectDB();
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({ origin: true }));
+app.use(cookieParser());
+app.use(cors({ origin: true, credentials: true }));
 app.use(errorHandler);
 
 app.get("/", (_req, res) => {
@@ -41,7 +44,7 @@ app.use(oAuthRoutes);
 app.use("/api/auth/", authRoutes);
 app.use("/api/job/", jobsRouter);
 app.use("/api/contractor/", contractorRouter);
-app.use("/api/owner/", ownerRoutes);
+app.use("/api/homeowner/", homeownerRoutes);
 app.use("/api/bid/", bidRouter);
 app.use("/api/chat/", chatRouter);
 app.use("/api/event/", eventRouter);

@@ -23,12 +23,19 @@ router.get(
   }),
   async (req, res) => {
     const user = req.user;
-    const token = await generateAuthToken({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    });
-    res.redirect(`${process.env.REDIRECT_URL}/auth-redirect?token=${token}`);
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+    res
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .redirect(
+        `${process.env.REDIRECT_URL}/auth-redirect?accessToken=${accessToken}&refreshToken=${refreshToken}`
+      );
   }
 );
 

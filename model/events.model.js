@@ -4,7 +4,7 @@ const eventsSchema = new mongoose.Schema(
   {
     homeowner: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Homeowner",
+      ref: "Account",
     },
     job: {
       type: mongoose.Schema.Types.ObjectId,
@@ -12,7 +12,7 @@ const eventsSchema = new mongoose.Schema(
     },
     contractor: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Contractor",
+      ref: "Account",
     },
     eventType: {
       type: String,

@@ -1,12 +1,12 @@
 import express from "express";
 import {
   createBid,
-  getOwnerBids,
   getContractorBids,
   changeBidStatus,
   getBids,
   getBid,
   updateBid,
+  getHomeownerBids,
 } from "../controller/bid.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import {
@@ -19,8 +19,8 @@ const bidRouter = express.Router();
 
 bidRouter.post("/create", authMiddleware, createBid);
 
-// get owner bids
-bidRouter.get("/owner", authMiddleware, getOwnerBids);
+// get homeowner bids
+bidRouter.get("/homeowner", authMiddleware, getHomeownerBids);
 
 // get contractor bids
 bidRouter.get("/contractor", authMiddleware, getContractorBids);

@@ -27,12 +27,11 @@ export const getAllMessages = async (req, res, next) => {
 export const getRooms = async (req, res, next) => {
   const userId = req.user._id;
   try {
-    const rooms = await RoomModel.find({ users: userId })
-      .populate({
-        path: "users last_message",
-        match: { _id: { $ne: userId } },
-        select: "username avatarUrl message senderId role",
-      })  
+    const rooms = await RoomModel.find({ users: userId }).populate({
+      path: "users last_message",
+      match: { _id: { $ne: userId } },
+      select: "username avatarUrl message senderId role",
+    });
     if (!rooms.length) {
       return res.status(404).json({ message: "No rooms found for this user" });
     }
@@ -89,7 +88,7 @@ export const sendMessage = async (req, res, next) => {
       case "contractor":
         room.lastMessageContractor = newMessage._id;
         break;
-      case "owner":
+      case "homeowner":
         room.lastMessageHomeowner = newMessage._id;
         break;
       default:
@@ -100,7 +99,6 @@ export const sendMessage = async (req, res, next) => {
       connectedRooms[roomId].forEach(async (socket_id) => {
         if (socket_id !== socketId) {
           io.to(socket_id).emit("message", newMessage);
-          console.log(socket_id);
         }
         if (connectedRooms[roomId].length === 1) {
           room.unreadMessages.set(
@@ -127,6 +125,8 @@ export const sendMessage = async (req, res, next) => {
 
     return res.status(201).json({ success: true, newMessage });
   } catch (error) {
+    console.log(error);
+
     return next(new InternalServerError("Can't send message"));
   }
 };
@@ -228,10 +228,9 @@ export const getRoom = async (req, res, next) => {
 export const recentInteractions = async (req, res, next) => {
   const userId = req.user._id;
   const lastMessageField =
-    req.user.role === "owner"
+    req.user.role === "homeowner"
       ? "lastMessageContractor"
       : "lastMessageHomeowner";
-
   try {
     const rooms = await RoomModel.find({
       users: userId,
@@ -256,7 +255,6 @@ export const recentInteractions = async (req, res, next) => {
 
     return res.status(200).json({ success: true, rooms });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Failed to fetch recent interactions.",

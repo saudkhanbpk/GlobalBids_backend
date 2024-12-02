@@ -8,7 +8,7 @@ import { sendEmail } from "../utils/send-emails.js";
 import { createRoom } from "../services/chat.room.service.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export const createPayment = async (req, res, next) => {
-  const { leadPrice, projectName, status } = req.body;
+  const { leadPrice, projectName, bidId } = req.body;
   const amountInCents = Math.round(leadPrice * 100);
   const transactionDate = new Date().toISOString().split("T")[0];
 
@@ -17,6 +17,7 @@ export const createPayment = async (req, res, next) => {
       amount: amountInCents,
       currency: "usd",
       metadata: {
+        bidId,
         projectName,
         leadPrice: leadPrice.toString(),
         transactionDate,
@@ -28,7 +29,6 @@ export const createPayment = async (req, res, next) => {
     };
     return res.status(201).json(data);
   } catch (error) {
-    console.log(error);
     return next(new InternalServerError());
   }
 };
@@ -100,7 +100,6 @@ export const updateBidPayment = async (req, res, next) => {
       messages: "Transaction ",
     });
   } catch (error) {
-    console.log(error);
     return next(new InternalServerError());
   }
 };

@@ -4,9 +4,8 @@ import { otpMailOptions } from "../utils/mail-options.js";
 import { sendEmail } from "../utils/send-emails.js";
 
 export const sendOtpToUser = async (user) => {
-  const userType = user.role === "owner" ? "Homeowner" : "Contractor";
 
-  let otpRecord = await OtpModel.findOne({ userId: user._id, userType });
+  const otpRecord = await OtpModel.findOne({  });
 
   if (otpRecord && otpRecord.count < 3) {
     otpRecord.count += 1;

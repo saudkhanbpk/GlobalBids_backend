@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
-import UserContractorModel from "../model/user.contractor.model.js";
-import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
+import UserContractorModel from "../model/contractor.profile.model.js";
+import UserHomeOwnerModel from "../model/homeowner.profile.model.js";
 import { NotFoundError } from "../error/AppError.js";
 // import { uploadFile } from "./upload.files.media.service.js";
 // import { removeEmptyFields } from "../utils/removeEmptyFields.js";

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const contractorSettingsSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Account",
     required: true,
   },
   publicProfile: {

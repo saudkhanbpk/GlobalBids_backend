@@ -9,7 +9,7 @@ export const signUpValidate = (data) => {
     errors.email = "Please provide a valid email address";
   }
 
-  const validRoles = ["owner", "contractor", "guest", "admin"];
+  const validRoles = ["homeowner", "contractor", "guest", "admin"];
   if (!data?.role) {
     errors.workRole = "Role is required";
   } else if (!validRoles.includes(data?.role)) {

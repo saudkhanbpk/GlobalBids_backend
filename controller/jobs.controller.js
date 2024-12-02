@@ -10,11 +10,10 @@ import {
 import JobModel from "../model/job.model.js";
 import { uploadFile } from "../services/upload.files.media.service.js";
 import { validateJobFields } from "../validators/jobs-validator.js";
-import { extractPublicId } from "../utils/cloudinary.utils.js";
-import cloudinary from "../config/cloudinary.config.js";
+import { deleteFilesFromCloudinary } from "../utils/cloudinary.delete.files.js";
 export const createJob = async (req, res, next) => {
   const files = req.files;
-  if (req.user.role !== "owner") {
+  if (req.user.role !== "homeowner") {
     return next(new BusinessLogicError());
   }
 
@@ -57,6 +56,8 @@ export const createJob = async (req, res, next) => {
       job: savedJob,
     });
   } catch (error) {
+    console.log(error);
+
     return next(new InternalServerError());
   }
 };
@@ -95,18 +96,7 @@ export const editJob = async (req, res, next) => {
       updatedData,
       { new: true }
     );
-    const deletionPromises = deleteMedia.map(async (fileUrl) => {
-      try {
-        const publicId = extractPublicId(fileUrl);
-        const result = await cloudinary.uploader.destroy(publicId);
-        console.log(publicId, result);
-      } catch (err) {
-        console.error(`Failed to delete file: ${fileUrl}`, err);
-      }
-    });
-
-    await Promise.all(deletionPromises);
-
+    await deleteFilesFromCloudinary(deleteMedia);
     return res
       .status(200)
       .json({ jobUpdated, success: true, message: "Job has been updated!" });
@@ -235,10 +225,11 @@ export const getContractorJobs = async (req, res, next) => {
 
 export const deleteJob = async (req, res, next) => {
   const user = req.user;
-  if (user.role !== "owner") return next(new UnauthorizedError());
+  if (user.role !== "homeowner") return next(new UnauthorizedError());
   try {
     const jobId = req.params.id;
     const deletedJob = await JobModel.findByIdAndDelete(jobId);
+    await deleteFilesFromCloudinary(deletedJob.media);
     if (!deletedJob) {
       return next(new NotFoundError("Job Not Found"));
     }

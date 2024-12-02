@@ -8,7 +8,7 @@ import ShareModel from "../model/share.model.js";
 export const createStory = async (req, res, next) => {
   const { description } = req.body;
   const user = req.user;
-  const userType = user.role === "owner" ? "Homeowner" : "Contractor";
+
   let images = [];
   try {
     if (req.files && req.files.length > 0) {
@@ -19,7 +19,6 @@ export const createStory = async (req, res, next) => {
     }
     const newStory = new StoryModel({
       user: user._id,
-      userType,
       description,
       images,
     });
@@ -110,12 +109,9 @@ export const getStoryDetails = async (req, res, next) => {
 export const toggleLike = async (req, res, next) => {
   const { id } = req.params;
   const user = req.user;
-  const userType = user.role === "owner" ? "Homeowner" : "Contractor";
-
   try {
     const existingLike = await LikeModel.findOne({
       story: id,
-
       user: user._id,
     });
 
@@ -123,7 +119,7 @@ export const toggleLike = async (req, res, next) => {
       await LikeModel.deleteOne({ _id: existingLike._id });
       return res.status(200).json({ success: true, liked: false });
     } else {
-      const newLike = new LikeModel({ user: user._id, story: id, userType });
+      const newLike = new LikeModel({ user: user._id, story: id });
       await newLike.save();
       return res.status(201).json({ success: true, liked: true });
     }

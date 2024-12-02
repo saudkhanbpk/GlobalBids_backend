@@ -5,12 +5,7 @@ const LikeSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      refPath: "userType",
-    },
-    userType: {
-      type: String,
-      required: true,
-      enum: ["Homeowner", "Contractor"],
+      ref: "Account",
     },
     story: {
       type: mongoose.Schema.Types.ObjectId,

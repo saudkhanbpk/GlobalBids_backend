@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const bidTransactionHistorySchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "Contractor" },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
     job: { type: mongoose.Schema.Types.ObjectId, ref: "Job" },
     bid: { type: mongoose.Schema.Types.ObjectId, ref: "Bid" },
     amount: { type: String, required: true },

@@ -1,18 +1,19 @@
-import OwnerSettingModel from "../model/owner.settings.model.js";
+import HomeownerSettingModel from "../model/homeowner.settings.model.js";
 import { BusinessLogicError, InternalServerError } from "../error/AppError.js";
-import UserContractorModel from "../model/user.contractor.model.js";
 import EventsModel from "../model/events.model.js";
+import AccountModel from "../model/account.model.js";
+import HomeownerProfileModel from "../model/homeowner.profile.model.js";
 
 export const settings = async (req, res, next) => {
   const userId = req.user._id;
   const role = req.user.role;
 
-  if (role !== "owner") {
+  if (role !== "homeowner") {
     return next(new BusinessLogicError());
   }
 
   try {
-    const updateSettings = await OwnerSettingModel.findOneAndUpdate(
+    const updateSettings = await HomeownerSettingModel.findOneAndUpdate(
       { user: userId },
       req.body,
       { new: true }
@@ -21,19 +22,19 @@ export const settings = async (req, res, next) => {
     if (updateSettings) {
       return res.status(200).json({
         success: true,
-        message: "settings updated successfully",
+        message: "settings updated",
         settings: updateSettings,
       });
     }
 
-    const userSettings = new OwnerSettingModel({
+    const userSettings = new HomeownerSettingModel({
       user: userId,
       ...req.body,
     });
     await userSettings.save();
     return res.status(200).json({
       success: true,
-      message: "settings updated successfully",
+      message: "settings updated ",
       settings: userSettings,
     });
   } catch (error) {
@@ -44,7 +45,7 @@ export const settings = async (req, res, next) => {
 export const getSettings = async (req, res) => {
   const userId = req.user._id;
   try {
-    const settings = await OwnerSettingModel.findOne({ user: userId });
+    const settings = await HomeownerSettingModel.findOne({ user: userId });
     return res.status(200).json({ success: true, settings });
   } catch (error) {
     return next(new InternalServerError("can't get settings"));
@@ -53,17 +54,21 @@ export const getSettings = async (req, res) => {
 
 export const getContractors = async (_req, res, next) => {
   try {
-    const contractors = await UserContractorModel.find().select(
-      "username avatarUrl label rating services professionalExperience"
-    );
-    const total = await UserContractorModel.countDocuments();
-
+    const contractors = await AccountModel.find({ role: "contractor" })
+      .populate({
+        path: "profile",
+        select: "label rating services expertise experience",
+      })
+      .select("username avatarUrl profile profileType");
+    const total = await AccountModel.countDocuments({ role: "contractor" });
     return res.status(200).json({
       success: true,
       total,
       contractors,
     });
   } catch (error) {
+    console.log(error);
+
     return next(new InternalServerError());
   }
 };
@@ -77,5 +82,35 @@ export const getHomeMaintenanceReminders = async (req, res, next) => {
     return res.status(200).json({ success: true, reminders });
   } catch (error) {
     return next(new InternalServerError("can't get reminders"));
+  }
+};
+
+export const updateHomeownerProfile = async (req, res, next) => {
+  const userId = req.user._id;
+
+  try {
+    const homeownerProfile = await HomeownerProfileModel.findOneAndUpdate(
+      { user: userId },
+      req.body,
+      { new: true, upsert: true }
+    );
+
+    await AccountModel.findOneAndUpdate(
+      { _id: userId },
+      {
+        $set: {
+          profileType: "HomeownerProfile",
+          profile: homeownerProfile._id,
+        },
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      homeownerProfile,
+      message: "profile updated",
+    });
+  } catch (error) {
+    return next(new InternalServerError("can't update profile"));
   }
 };

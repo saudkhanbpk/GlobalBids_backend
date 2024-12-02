@@ -1,35 +1,21 @@
 import jwt from "jsonwebtoken";
 import { AuthenticationError } from "../error/AppError.js";
 import dotenv from "dotenv";
-import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
-import UserContractorModel from "../model/user.contractor.model.js";
+import AccountModel from "../model/account.model.js";
+
 dotenv.config();
 
 const authMiddleware = async (req, _res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");  
+  const token =
+    req.cookies?.accessToken ||
+    req.header("Authorization")?.replace("Bearer ", "");
   if (!token) {
     return next(new AuthenticationError("access denied"));
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    let user = null;
-
-    switch (decoded.role) {
-      case "owner":
-        user = await UserHomeOwnerModel.findById(decoded.id).select(
-          "-password"
-        );
-        break;
-      case "contractor":
-        user = await UserContractorModel.findById(decoded.id).select(
-          "-password"
-        );
-        break;
-      default:
-        user = null;
-        break;
-    }
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await AccountModel.findById(decoded._id);
 
     if (!user) {
       throw new AuthenticationError("User not found");

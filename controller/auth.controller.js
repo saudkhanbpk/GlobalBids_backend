@@ -3,15 +3,12 @@ import {
   InternalServerError,
   LoginError,
   NotFoundError,
-  UnsupportedFileTypeError,
 } from "../error/AppError.js";
-import generateAuthToken from "../utils/generate-auth-token.js";
 import {
   getUserByEmail,
   getUserById,
   updateContractorInfo,
   updateHomeownerInfo,
-  updateUserVerificationStatus,
 } from "../services/user.service.js";
 import { signUpValidate } from "../validators/sign-up-validators.js";
 import OtpModel from "../model/otp.model.js";
@@ -20,9 +17,9 @@ import { sendEmail } from "../utils/send-emails.js";
 import { otpMailOptions } from "../utils/mail-options.js";
 import { sendOtpToUser } from "../services/otp.service.js";
 import ResetPasswordModel from "../model/reset.password.js";
-import UserContractorModel from "../model/user.contractor.model.js";
-import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
+import UserContractorModel from "../model/contractor.profile.model.js";
 import crypto from "crypto";
+import AccountModel from "../model/account.model.js";
 
 export const signUpController = async (req, res, next) => {
   const userData = req.body;
@@ -33,39 +30,36 @@ export const signUpController = async (req, res, next) => {
   }
 
   try {
-    const existingOwner = await UserHomeOwnerModel.findOne({
-      email: userData.email,
-    });
-    const existingContractor = await UserContractorModel.findOne({
+    const existingUser = await AccountModel.findOne({
       email: userData.email,
     });
 
-    if (existingOwner || existingContractor) {
+    if (existingUser) {
       return next(new ValidationError("User with this email already exists"));
     }
 
     userData.provider = "credentials";
-    userData.profileCompleted = true;
     userData.isFirstLogin = true;
 
-    let newUser;
-    if (userData.role === "owner") {
-      newUser = new UserHomeOwnerModel(userData);
-    } else if (userData.role === "contractor") {
-      newUser = new UserContractorModel(userData);
-    } else {
-      return next(new ValidationError("Invalid user role"));
-    }
+    const newUser = new AccountModel(userData);
+    await newUser.save();
 
-    newUser = await newUser.save();
-
-    const otpResponse = await sendOtpToUser(newUser);
+    const otpExpiry = Date.now() + 5 * 60 * 1000;
+    const otpEntry = new OtpModel({
+      otp: generateOtp(),
+      accountId: newUser._id,
+      otpType: "verify-account",
+      expiresAt: otpExpiry,
+    });
+    otpEntry.save();
+    const mailOpt = otpMailOptions(otpEntry.otp, newUser.email);
+    await sendEmail(mailOpt);
 
     return res.status(201).json({
       success: true,
       message: "Please verify your account",
       userId: newUser.id,
-      otpId: otpResponse.otpId,
+      otpId: otpEntry.id,
     });
   } catch (error) {
     return next(new InternalServerError());
@@ -80,16 +74,28 @@ export const loginController = async (req, res, next) => {
   }
 
   try {
-    const user = await getUserByEmail(email);
+    const user = await AccountModel.findOne({ email }).select("+password");
+
     if (!user) {
       return next(new LoginError());
     }
+
     if (!user.isVerified) {
-      const otpResponse = await sendOtpToUser(user);
+      const otpExpiry = Date.now() + 5 * 60 * 1000;
+      const otpEntry = new OtpModel({
+        otp: generateOtp(),
+        accountId: user._id,
+        otpType: "verify-account",
+        expiresAt: otpExpiry,
+      });
+      otpEntry.save();
+
+      const mailOpt = otpMailOptions(otpEntry.otp, user.email);
+      await sendEmail(mailOpt);
       return res.status(200).json({
         success: true,
         user: { _id: user._id, isVerified: user.isVerified },
-        otpId: otpResponse.otpId,
+        otpId: otpEntry._id,
         message: "Please verify your account!",
       });
     }
@@ -99,105 +105,119 @@ export const loginController = async (req, res, next) => {
       return next(new LoginError());
     }
 
-    // user.isFirstLogin = false;
-    // await user.save();
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
 
-    const token = await generateAuthToken({
-      id: user._id,
-      email: user.email,
-      role: user.role,
-    });
-    return res.status(200).json({ user, token, success: true });
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json({ user, accessToken, refreshToken, success: true });
   } catch (error) {
     console.log(error);
-
     return next(new InternalServerError());
   }
 };
 
-export const otpController = async (req, res, next) => {
+export const verifyAccount = async (req, res, next) => {
   const { userId, otp, otpId } = req.body;
+
   try {
-    const user = await getUserById(userId);
-    const userOtp = await OtpModel.findById(otpId);
+    const otpEntry = await OtpModel.findOne({
+      _id: otpId,
+      accountId: userId,
+      otpType: "verify-account",
+      otp: Number(otp),
+      expiresAt: { $gte: new Date() },
+    });
 
-    if (!userOtp) {
-      return next(new ValidationError("Invalid Otp"));
+    if (!otpEntry) {
+      return next(new ValidationError("Invalid Otp or Expired"));
     }
 
-    if (userOtp.otp === otp) {
-      await updateUserVerificationStatus(user._id);
-      await OtpModel.deleteOne({ _id: otpId });
-      return res.status(200).json({
-        message: "Account verified successfully",
-        success: true,
-      });
-    }
+    const user = await AccountModel.findByIdAndUpdate(userId, {
+      isVerified: true,
+    });
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
 
-    return next(new ValidationError("Invalid Otp"));
+    return res.status(200).json({
+      success: true,
+      user,
+      accessToken,
+      refreshToken,
+      message: "Account verified successfully",
+    });
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError());
   }
 };
 
 export const resendOtpController = async (req, res, next) => {
   try {
-    const { otpId, userId, userRole } = req.body;
-    const userType = userRole === "owner" ? "Homeowner" : "Contractor";
+    const userId = req.body.id;
+    const now = new Date();
+    const otpType = req.query.type;
 
-    let otpRecord;
-
-    if (otpId) {
-      otpRecord = await OtpModel.findById(otpId).populate({
-        path: "userId",
-        select: "email",
-      });
-
-      if (otpRecord) {
-        if (otpRecord.count >= 3) {
-          return res.status(400).json({
-            success: false,
-            message: "You can't request OTP more than 3 times.",
-          });
-        }
-
-        otpRecord.otp = generateOtp();
-        otpRecord.count += 1;
-        await otpRecord.save();
-
-        const mailOpt = otpMailOptions(otpRecord.otp, otpRecord.userId.email);
-        await sendEmail(mailOpt);
-
-        return res.status(200).json({
-          success: true,
-          message: "OTP resent successfully.",
-        });
-      }
+    const user = await AccountModel.findById(userId);
+    if (!user) {
+      return next(new ValidationError("Invalid Request"));
     }
 
-    const user = await getUserById(userId);
-    const newOtp = generateOtp();
-    otpRecord = new OtpModel({
-      otp: newOtp,
-      userId,
-      userType,
-      count: 1,
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    const otpRequests = await OtpModel.find({
+      accountId: userId,
+      otpType,
+      createdAt: { $gte: oneHourAgo },
     });
-    await otpRecord.save();
 
-    const mailOpt = otpMailOptions(newOtp, user.email);
+    if (otpRequests.length >= 3) {
+      return next(
+        new ValidationError(
+          "You have reached the maximum number of OTP requests. Please try again later."
+        )
+      );
+    }
+
+    const activeOtp = await OtpModel.findOne({
+      accountId: userId,
+      otpType,
+      expiresAt: { $gte: now },
+    });
+
+    if (activeOtp) {
+      return next(
+        new ValidationError(
+          "An active OTP already exists. Please wait until it expires."
+        )
+      );
+    }
+
+    const otp = generateOtp();
+    const otpExpiresAt = new Date(now.getTime() + 5 * 60 * 1000);
+
+    const otpEntry = new OtpModel({
+      accountId: userId,
+      otp,
+      otpType,
+      expiresAt: otpExpiresAt,
+    });
+    await otpEntry.save();
+
+    const mailOpt = otpMailOptions(otp, req.body.email);
     await sendEmail(mailOpt);
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
-      message: "OTP sent to your email",
-      otpId: otpRecord._id,
+      message: "OTP sent successfully",
+      otpId: otpEntry._id,
     });
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError("Failed to resend OTP!"));
   }
 };
@@ -312,7 +332,9 @@ export const resetPassword = async (req, res, next) => {
 export const getUser = async (req, res, next) => {
   const userId = req.user;
   try {
-    const user = await getUserById(userId);
+    const user = await AccountModel.findById(userId).populate({
+      path: "profile",
+    });
     return res.status(200).json({ user, success: true });
   } catch (error) {
     return next(new InternalServerError());
@@ -322,7 +344,9 @@ export const getUser = async (req, res, next) => {
 export const markUsersAsFirstTimeLogin = async (req, res, next) => {
   const { _id } = req.user._id;
   try {
-    const user = await getUserById(_id);
+    const user = await AccountModel.findByIdAndUpdate(_id, {
+      isFirstLogin: true,
+    });
     if (!user) {
       return next(new NotFoundError("User not found"));
     }
@@ -371,42 +395,3 @@ export const changePassword = async (req, res, next) => {
   }
 };
 
-export const deleteContractorServiceById = async (req, res, next) => {
-  const contractorId = req.user._id;
-  const { id: serviceId } = req.params;
-
-  try {
-    const contractor = await UserContractorModel.findOneAndUpdate(
-      { _id: contractorId },
-      { $pull: { pageServices: { _id: serviceId } } },
-      { new: true }
-    );
-
-    if (!contractor) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Contractor not found" });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Service deleted successfully",
-      pageServices: contractor.pageServices,
-    });
-  } catch (error) {
-    return next(new InternalServerError());
-  }
-};
-
-export const getContractorPage = async (req, res, next) => {
-  const { id } = req.params;
-  
-  try {
-    const contractorPage = await UserContractorModel.findOne({ _id: id }).select(
-      "username pageServices about avatarUrl experience coverPhoto rating"
-    );
-    return res.status(200).json({ success: true, contractorPage });
-  } catch (error) {
-    return next(new InternalServerError());
-  }
-};

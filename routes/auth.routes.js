@@ -2,7 +2,6 @@ import express from "express";
 import {
   loginController,
   signUpController,
-  otpController,
   resendOtpController,
   updateUserInfo,
   findUser,
@@ -11,8 +10,7 @@ import {
   getUser,
   markUsersAsFirstTimeLogin,
   changePassword,
-  deleteContractorServiceById,
-  getContractorPage,
+  verifyAccount,
 } from "../controller/auth.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
@@ -20,7 +18,7 @@ const router = express.Router();
 
 router.post("/register", signUpController);
 router.post("/login", loginController);
-router.post("/otp", otpController);
+router.post("/otp/verify-account", verifyAccount);
 router.post("/resend-otp", resendOtpController);
 router.post("/update-user-info", authMiddleware, updateUserInfo);
 
@@ -29,12 +27,6 @@ router.post("/find-and-verify", verifyUserAndResetPassword);
 router.post("/reset-password", resetPassword);
 router.get("/login/success", authMiddleware, getUser);
 router.get("/is-first-time-login", authMiddleware, markUsersAsFirstTimeLogin);
-router.post("/change-password", authMiddleware, changePassword);
-router.delete(
-  "/delete-page-services/:id",
-  authMiddleware,
-  deleteContractorServiceById
-);
-router.get("/contractor-page/:id", authMiddleware, getContractorPage);
+router.post("/change-password", authMiddleware, changePassword)
 
 export default router;

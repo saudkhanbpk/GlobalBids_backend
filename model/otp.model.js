@@ -1,30 +1,20 @@
 import mongoose from "mongoose";
 
-const otpSchema = new mongoose.Schema(
-  {
-    otp: { type: String, required: true },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      refPath: "userType",
-    },
-    userType: {
-      type: String,
-      required: true,
-      enum: ["Homeowner", "Contractor"],
-    },
-    count: { type: Number, default: 1 },
+const OtpSchema = new mongoose.Schema({
+  accountId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Account",
+    required: true,
   },
-  {
-    timestamps: true,
-  }
-);
+  otp: { type: Number, required: true },
+  otpType: {
+    type: String,
+    required: true,
+    enum: ["verify-account", "login", "forgot-password"],
+  },
+  isVerified: { type: Boolean, default: false },
+  expiresAt: { type: Date, required: true },
+});
 
-otpSchema.index(
-  { createdAt: 1 },
-  { expireAfterSeconds: 300, partialFilterExpression: { state: "TMP" } }
-);
-
-const OtpModel = mongoose.model("verification-otp", otpSchema);
-
+const OtpModel = mongoose.model("Otp", OtpSchema);
 export default OtpModel;

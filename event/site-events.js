@@ -12,13 +12,13 @@ const initSocket = (server) => {
 
   io.use(
     socketioJwt.authorize({
-      secret: process.env.JWT_SECRET,
+      secret: process.env.ACCESS_TOKEN_SECRET,
       handshake: true,
     })
   );
 
-  io.on("connection", (socket) => {
-    const userId = socket.decoded_token.id;
+  io.on("connection", (socket) => {    
+    const userId = socket.decoded_token._id;
     connectedUsers[userId] = socket.id;
     io.emit("user_status", { userId, status: "online" });
     socket.on("join_room", (data) => {

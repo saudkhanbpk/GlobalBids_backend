@@ -6,14 +6,7 @@ const roomSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        refPath: "userTypes",
-      },
-    ],
-    userTypes: [
-      {
-        type: String,
-        required: true,
-        enum: ["Homeowner", "Contractor"],
+        ref:"Account",
       },
     ],
     job: { type: mongoose.Schema.Types.ObjectId, ref: "Job" },

@@ -1,51 +1,14 @@
 import mongoose from "mongoose";
-import bcryptjs from "bcryptjs";
 
-const userSchema = new mongoose.Schema(
+const homeOwnerProfileSchema = new mongoose.Schema(
   {
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      unique: true,
-      trim: true,
-      match: [
-        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-        "Please provide a valid email address",
-      ],
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "Account", required: true },
+    rating: {
+      type: Number,
+      default: 5,
+      min: [1, "Rating must be at least 1"],
+      max: [5, "Rating cannot exceed 5"],
     },
-    username: {
-      type: String,
-      trim: true,
-    },
-    role: {
-      type: String,
-      required: [true, "Work role is required"],
-      default: "owner",
-    },
-    password: {
-      type: String,
-      trim: true,
-      minlength: [8, "Password must be at least 8 characters long"],
-      select: false,
-      validate: {
-        validator: function (value) {
-          return this.provider === "google" || value?.length >= 8;
-        },
-        message: "Password is required and must be at least 8 characters long",
-      },
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-    avatarUrl: {
-      type: String,
-    },
-    isFirstLogin: { type: Boolean, default: true, required: true },
-    profileCompleted: { type: Boolean, default: false, required: true },
-    googleId: { type: String, trim: true },
-    rating: { type: String, trim: true, default: "5" },
-    provider: { type: String, required: true, enum: ["google", "credentials"] },
     fullName: { type: String, trim: true },
     phone: { type: String, trim: true },
     bestTimeToContact: {
@@ -56,7 +19,6 @@ const userSchema = new mongoose.Schema(
     city: { type: String, trim: true },
     state: { type: String, trim: true },
     zipCode: { type: String, trim: true },
-
     propertyDetails: {
       address: { type: String, trim: true },
       propertyType: { type: String, trim: true },
@@ -107,31 +69,9 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.pre("save", async function (next) {
-  if (this.provider === "google" || !this.isModified("password")) return next();
+const HomeownerProfileModel = mongoose.model(
+  "HomeownerProfile",
+  homeOwnerProfileSchema
+);
 
-  try {
-    const salt = await bcryptjs.genSalt(10);
-    this.password = await bcryptjs.hash(this.password, salt);
-  } catch (error) {
-    return next(new Error("Password hashing failed"));
-  }
-
-  if (!this.username) {
-    this.username = this.email.split("@")[0];
-  }
-
-  next();
-});
-
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  return await bcryptjs.compare(candidatePassword, this.password);
-};
-
-userSchema.statics.findByEmail = async function (email) {
-  return await this.findOne({ email }).select("+password");
-};
-
-const UserHomeOwnerModel = mongoose.model("Homeowner", userSchema);
-
-export default UserHomeOwnerModel;
+export default HomeownerProfileModel;

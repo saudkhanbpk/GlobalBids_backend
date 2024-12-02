@@ -4,7 +4,7 @@ const jobSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Homeowner",
+      ref: "Account",
     },
     title: {
       type: String,
@@ -54,7 +54,7 @@ const jobSchema = new mongoose.Schema(
     },
     contractor: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Contractor",
+      ref: "Account",
     },
     HOA: { type: String, default: "no", required: true },
     zipCode: { type: String },

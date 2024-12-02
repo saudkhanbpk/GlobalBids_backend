@@ -25,12 +25,12 @@ const BidSchema = new mongoose.Schema(
     job: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
     homeowner: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Homeowner",
+      ref: "Account",
       required: true,
     },
     contractor: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Contractor",
+      ref: "Account",
       required: true,
     },
     bidTransaction: { type: mongoose.Schema.Types.ObjectId, ref: "BidTransactionHistory" }

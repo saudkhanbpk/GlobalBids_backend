@@ -6,9 +6,9 @@ import {
 import EventsModel from "../model/events.model.js";
 
 export const createEvent = async (req, res, next) => {
-  const { title, date, description, eventType, homeownerId, jobId } =
-    req.body;
+  const { title, date, description, eventType, homeownerId, jobId } = req.body;
   const userId = req.user._id;
+  const notificationService = req.app.get("notificationService");
 
   try {
     if (!title || !date || !description || !eventType) {
@@ -24,10 +24,21 @@ export const createEvent = async (req, res, next) => {
       eventType,
     });
     await event.save();
+    await notificationService.sendNotification({
+      recipientId: homeownerId,
+      recipientType: "Homeowner",
+      senderId: userId,
+      senderType: "Contractor",
+      message: `You have a new ${eventType} event`,
+      type: "event",
+      url: `/home-owner/schedule`,
+    })
     return res
       .status(200)
       .json({ success: true, event, message: "event has been added" });
   } catch (error) {
+    console.log(error);
+    
     return next(new InternalServerError("can't create event"));
   }
 };
@@ -54,7 +65,10 @@ export const deleteEvent = async (req, res, next) => {
   const id = req.params.id;
   const userId = req.user._id;
   try {
-    const event = await EventsModel.findOneAndDelete({ _id: id, contractor: userId });
+    const event = await EventsModel.findOneAndDelete({
+      _id: id,
+      contractor: userId,
+    });
 
     if (!event) {
       return next(
@@ -91,5 +105,4 @@ export const updateEvent = async (req, res, next) => {
   } catch (error) {
     return next(new InternalServerError("Unable to update event"));
   }
-  
 };

@@ -4,12 +4,12 @@ const reviewSchema = new mongoose.Schema(
   {
     project: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Project",
+      ref: "Job",
       required: true,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Account",
       required: true,
     },
     rating: {
@@ -18,7 +18,7 @@ const reviewSchema = new mongoose.Schema(
       min: 1,
       max: 5,
     },
-    review: {
+    message: {
       type: String,
       required: true,
       trim: true,

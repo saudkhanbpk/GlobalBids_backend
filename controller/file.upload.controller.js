@@ -1,7 +1,7 @@
 import { FileUploadError, InternalServerError } from "../error/AppError.js";
-import UserContractorModel from "../model/user.contractor.model.js";
+import AccountModel from "../model/account.model.js";
+import ContractorProfileModel from "../model/contractor.profile.model.js";
 import { uploadFile } from "../services/upload.files.media.service.js";
-import { getUserById } from "../services/user.service.js";
 
 export const uploadAvatar = async (req, res, next) => {
   const file = req.file;
@@ -10,7 +10,7 @@ export const uploadAvatar = async (req, res, next) => {
     return next(new FileUploadError("Please upload a file!"));
   }
   try {
-    const user = await getUserById(userId);
+    const user = await AccountModel.findById(userId);
     const avatarUrl = await uploadFile(file, "profile-images");
     user.avatarUrl = avatarUrl;
     await user.save();
@@ -26,7 +26,7 @@ export const uploadCoverPhoto = async (req, res, next) => {
     return next(new FileUploadError("Please upload a file!"));
   }
   try {
-    const user = await getUserById(userId);
+    const user = await AccountModel.findById(userId);
     const coverPhoto = await uploadFile(file, "profile-images");
     user.coverPhoto = coverPhoto;
     await user.save();
@@ -62,10 +62,10 @@ export const uploadContractorDocumentsController = async (req, res, next) => {
       updateField.insuranceFile = fileUrl;
     }
 
-    const user = await UserContractorModel.findByIdAndUpdate(
-      userId,
+    const user = await ContractorProfileModel.findOneAndUpdate(
+      {user:userId},
       { $set: updateField },
-      { new: true }
+      { new: true, upsert: true }
     );
 
     res.status(200).json({

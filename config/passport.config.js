@@ -1,10 +1,6 @@
 import passport from "passport";
 import GoogleAuth from "passport-google-oauth20";
-import dotenv from "dotenv";
-import { getUserByEmail } from "../services/user.service.js";
-import UserContractorModel from "../model/user.contractor.model.js";
-import UserHomeOwnerModel from "../model/user.homeOwner.model.js";
-dotenv.config();
+import AccountModel from "../model/account.model.js";
 
 passport.use(
   new GoogleAuth.Strategy(
@@ -16,14 +12,12 @@ passport.use(
       passReqToCallback: true,
     },
     async function (req, _accessToken, _refreshToken, profile, cb) {
-      
       const userRole = req?.query?.state;
       const user = profile?._json;
       const provider = profile?.provider;
 
       try {
-        const existUser = await getUserByEmail(user.email);
-        
+        const existUser = await AccountModel.findOne({ email: user.email });
 
         if (existUser?.provider === "credentials") {
           req.res.redirect(
@@ -44,27 +38,21 @@ passport.use(
           isVerified: true,
           role: userRole,
           provider,
-          profileCompleted: false,
+
           isFirstLogin: true,
         };
 
-        let newUser = null;
+        const newUser = new AccountModel(userData);
+        await newUser.save();
 
-        switch (userRole) {
-          case "contractor":
-            newUser = await new UserContractorModel(userData).save();
-            break;
-          case "owner":
-            newUser = await new UserHomeOwnerModel(userData).save();
-            break;
-          default:
-            req.res.redirect(
-              `${process.env.REDIRECT_URL}/auth/login?error=404`
-            );
-            return;
+        if (!userRole) {
+          req.res.redirect(`${process.env.REDIRECT_URL}/auth/login?error=404`);
+          return;
         }
         return cb(null, newUser);
       } catch (error) {
+        console.log(error);
+
         req.res.redirect(`${process.env.REDIRECT_URL}/auth-redirect?error=400`);
         return;
       }
