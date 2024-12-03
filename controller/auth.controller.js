@@ -390,3 +390,15 @@ export const changePassword = async (req, res, next) => {
   }
 };
 
+export const logout = async (req, res, next) => {
+  // const userId = req.user._id;
+  try {
+    return res
+      .status(200)
+      .clearCookie("accessToken", defaultCookiesOptions)
+      .clearCookie("refreshToken", defaultCookiesOptions)
+      .json({ success: true, message: "Logout successful" });
+  } catch (error) {
+    return next(new InternalServerError("Logout failed"));
+  }
+};

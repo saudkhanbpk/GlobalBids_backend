@@ -83,8 +83,8 @@ class FileSizeLimitExceededError extends AppError {
 }
 
 class AuthenticationError extends AppError {
-  constructor(message = "Authentication failed") {
-    super(message, 401, true, "warn");
+  constructor(message = "Authentication failed", statusCode = 401) {
+    super(message, statusCode, true, "warn");
   }
 }
 class LoginError extends AppError {

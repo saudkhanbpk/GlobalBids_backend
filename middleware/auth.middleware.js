@@ -9,8 +9,9 @@ const authMiddleware = async (req, _res, next) => {
   const token =
     req.cookies?.accessToken ||
     req.header("Authorization")?.replace("Bearer ", "");
+
   if (!token) {
-    return next(new AuthenticationError("access denied"));
+    return next(new AuthenticationError("no authentication token provided."));
   }
 
   try {
@@ -18,7 +19,7 @@ const authMiddleware = async (req, _res, next) => {
     const user = await AccountModel.findById(decoded._id);
 
     if (!user) {
-      throw new AuthenticationError("User not found");
+      throw new AuthenticationError("access denied!");
     }
 
     req.user = user;

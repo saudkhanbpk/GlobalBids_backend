@@ -63,7 +63,7 @@ export const createBid = async (req, res, next) => {
     });
   } catch (error) {
     return next(
-      new InternalServerError("Failed to create bid. Please try again later.")
+      new InternalServerError("Failed to create bid.")
     );
   }
 };

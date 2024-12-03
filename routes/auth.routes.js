@@ -11,6 +11,7 @@ import {
   markUsersAsFirstTimeLogin,
   changePassword,
   verifyAccount,
+  logout
 } from "../controller/auth.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
@@ -28,5 +29,6 @@ router.post("/reset-password", resetPassword);
 router.get("/login/success", authMiddleware, getUser);
 router.get("/is-first-time-login", authMiddleware, markUsersAsFirstTimeLogin);
 router.post("/change-password", authMiddleware, changePassword)
+router.get("/logout", authMiddleware, logout)
 
 export default router;
