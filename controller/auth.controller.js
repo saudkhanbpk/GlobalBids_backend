@@ -17,9 +17,9 @@ import { sendEmail } from "../utils/send-emails.js";
 import { otpMailOptions } from "../utils/mail-options.js";
 import { sendOtpToUser } from "../services/otp.service.js";
 import ResetPasswordModel from "../model/reset.password.js";
-import UserContractorModel from "../model/contractor.profile.model.js";
 import crypto from "crypto";
 import AccountModel from "../model/account.model.js";
+import { defaultCookiesOptions } from "../constants/cookies.options.js";
 
 export const signUpController = async (req, res, next) => {
   const userData = req.body;
@@ -108,15 +108,10 @@ export const loginController = async (req, res, next) => {
     const accessToken = await user.generateAccessToken();
     const refreshToken = await user.generateRefreshToken();
 
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
-
     return res
       .status(200)
-      .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", refreshToken, options)
+      .cookie("accessToken", accessToken, defaultCookiesOptions)
+      .cookie("refreshToken", refreshToken, defaultCookiesOptions)
       .json({ user, accessToken, refreshToken, success: true });
   } catch (error) {
     console.log(error);

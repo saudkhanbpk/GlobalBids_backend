@@ -53,7 +53,7 @@ app.use("/api/notifications/", notificationRouter);
 app.use("/api/reminders/", reminderRouter);
 app.use("/api/file/upload", fileUploadRouter);
 
-app.all("*", (req, res, next) => {
+app.all("*", (req, _res, next) => {
   const err = new RouteNotFoundError(
     `Can't find ${req.originalUrl} on the server!`
   );

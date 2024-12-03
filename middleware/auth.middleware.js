@@ -9,8 +9,6 @@ const authMiddleware = async (req, _res, next) => {
   const token =
     req.cookies?.accessToken ||
     req.header("Authorization")?.replace("Bearer ", "");
-    console.log(req.cookies?.accessToken);
-    
   if (!token) {
     return next(new AuthenticationError("access denied"));
   }
@@ -26,8 +24,6 @@ const authMiddleware = async (req, _res, next) => {
     req.user = user;
     return next();
   } catch (err) {
-    console.log(err);
-
     if (err instanceof jwt.TokenExpiredError && err.message === "jwt expired") {
       return next(new AuthenticationError("Token has expired"));
     } else if (err instanceof jwt.JsonWebTokenError) {

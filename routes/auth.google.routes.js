@@ -1,7 +1,7 @@
 import express from "express";
 import passport from "../config/passport.config.js";
 import { InternalServerError } from "../error/AppError.js";
-import generateAuthToken from "../utils/generate-auth-token.js";
+import { defaultCookiesOptions } from "../constants/cookies.options.js";
 
 const router = express.Router();
 
@@ -26,13 +26,9 @@ router.get(
     const accessToken = await user.generateAccessToken();
     const refreshToken = await user.generateRefreshToken();
 
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
     res
-      .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", refreshToken, options)
+      .cookie("accessToken", accessToken, defaultCookiesOptions)
+      .cookie("refreshToken", refreshToken, defaultCookiesOptions)
       .redirect(
         `${process.env.REDIRECT_URL}/auth-redirect?accessToken=${accessToken}&refreshToken=${refreshToken}`
       );
