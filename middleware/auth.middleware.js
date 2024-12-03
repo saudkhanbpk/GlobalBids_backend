@@ -9,6 +9,8 @@ const authMiddleware = async (req, _res, next) => {
   const token =
     req.cookies?.accessToken ||
     req.header("Authorization")?.replace("Bearer ", "");
+    console.log(req.cookies?.accessToken);
+    
   if (!token) {
     return next(new AuthenticationError("access denied"));
   }
