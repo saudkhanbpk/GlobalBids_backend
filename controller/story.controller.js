@@ -24,13 +24,19 @@ export const createStory = async (req, res, next) => {
     });
 
     const savedStory = await newStory.save();
+    const populatedStory = await savedStory.populate({
+      path: "user",
+      select: "username avatarUrl",
+    })
 
     return res.status(201).json({
       success: true,
       message: "Story posted successfully",
-      story: savedStory,
+      story: populatedStory,
     });
   } catch (error) {
+    console.log(error);
+    
     return next(new InternalServerError("Can't post story"));
   }
 };

@@ -64,7 +64,7 @@ export const createJob = async (req, res, next) => {
 
 export const editJob = async (req, res, next) => {
   const files = req.files;
-  if (req.user.role !== "owner") {
+  if (req.user.role !== "homeowner") {
     return next(new BusinessLogicError());
   }
 
@@ -101,6 +101,7 @@ export const editJob = async (req, res, next) => {
       .status(200)
       .json({ jobUpdated, success: true, message: "Job has been updated!" });
   } catch (error) {
+    console.log(error);
     return next(new InternalServerError());
   }
 };

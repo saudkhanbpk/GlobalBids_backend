@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const resetPasswordSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
+  accountId: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
   token: { type: String },
 });
 

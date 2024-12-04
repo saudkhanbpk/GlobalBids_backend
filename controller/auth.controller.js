@@ -121,7 +121,6 @@ export const loginController = async (req, res, next) => {
 
 export const verifyAccount = async (req, res, next) => {
   const { userId, otp, otpId } = req.body;
-
   try {
     const otpEntry = await OtpModel.findOne({
       _id: otpId,
@@ -149,6 +148,8 @@ export const verifyAccount = async (req, res, next) => {
       message: "Account verified successfully",
     });
   } catch (error) {
+    console.log(error);
+    
     return next(new InternalServerError());
   }
 };
@@ -254,16 +255,27 @@ export const findUser = async (req, res, next) => {
     return next(new ValidationError("email is required"));
   }
   try {
-    const user = await getUserByEmail(email);
+    const user = await AccountModel.findOne({ email });
     if (!user) {
       return res
         .status(200)
         .json({ success: false, message: "user not found!" });
     }
-    const otpResponse = await sendOtpToUser(user);
+
+    const otpExpiry = Date.now() + 5 * 60 * 1000;
+    const otpEntry = new OtpModel({
+      otp: generateOtp(),
+      accountId: user._id,
+      otpType: "verify-account",
+      expiresAt: otpExpiry,
+    });
+    otpEntry.save();
+    const mailOpt = otpMailOptions(otpEntry.otp, user.email);
+    await sendEmail(mailOpt);
+
     return res.status(201).json({
       success: true,
-      otpId: otpResponse.otpId,
+      otpId: otpEntry._id,
       user: { _id: user._id },
       message: "Opt has been send to your email",
     });
@@ -274,28 +286,32 @@ export const findUser = async (req, res, next) => {
 };
 
 export const verifyUserAndResetPassword = async (req, res, next) => {
-  const { userId, otp } = req.body;
+  const { user, otp } = req.body;
+
+  console.log(user);
 
   try {
-    const otpDoc = await OtpModel.findOne({ userId });
+    const otpDoc = await OtpModel.findOne({
+      accountId: user._id,
+      expiresAt: { $gte: Date.now() },
+    });
+
     if (!otpDoc) {
-      return next(new NotFoundError("invalid credentials"));
+      return next(new ValidationError("invalid otp or expired"));
     }
     if (otp !== otpDoc.otp) {
       return next(new ValidationError("invalid otp"));
     }
 
-    await ResetPasswordModel.findOneAndDelete({ userId });
+    await ResetPasswordModel.findOneAndDelete({ accountId: user._id });
 
     const reset = new ResetPasswordModel({
-      userId: userId,
+      accountId: user._id,
       token: crypto.randomBytes(10).toString("hex"),
     });
     await reset.save();
     return res.status(200).json({ success: true, token: reset.token });
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError("can't verify otp"));
   }
 };
@@ -304,7 +320,7 @@ export const resetPassword = async (req, res, next) => {
   const { password, token, userId } = req.body;
 
   try {
-    const savedToken = await ResetPasswordModel.findOne({ userId });
+    const savedToken = await ResetPasswordModel.findOne({ accountId: userId });
     if (savedToken.token !== token) {
       return next(new ValidationError("some thing went wrong!"));
     }
