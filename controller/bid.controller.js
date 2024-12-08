@@ -122,7 +122,7 @@ export const changeBidStatus = async (req, res, next) => {
     return next(new BusinessLogicError());
   }
 
-  const { bidId, contractor } = req.body;
+  const { bidId } = req.body;
 
   try {
     const bid = await BidModel.findOne({
@@ -144,7 +144,7 @@ export const changeBidStatus = async (req, res, next) => {
     }
 
     await notificationService.sendNotification({
-      recipientId: contractor,
+      recipientId: bid.contractor,
       recipientType: "Contractor",
       senderId: user._id,
       senderType: "Homeowner",

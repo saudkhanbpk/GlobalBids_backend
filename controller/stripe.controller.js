@@ -122,6 +122,8 @@ export const getHomeownerContact = async (req, res, next) => {
         });
     }
   } catch (error) {
+    console.log(error);
+    
     return next(new InternalServerError("Failed to fetch homeowner contact."));
   }
 };
