@@ -33,7 +33,10 @@ const BidSchema = new mongoose.Schema(
       ref: "Account",
       required: true,
     },
-    bidTransaction: { type: mongoose.Schema.Types.ObjectId, ref: "BidTransactionHistory" }
+    bidTransaction: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BidTransactionHistory",
+    },
   },
   { timestamps: true }
 );

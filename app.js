@@ -23,11 +23,17 @@ import fileUploadRouter from "./routes/file.upload.routes.js";
 import NotificationService from "./services/notification.service.js";
 import "dotenv/config.js";
 import cookieParser from "cookie-parser";
+import { handleStripeWebhook } from "./controller/stripe.controller.js";
 
 dotenv.config();
 const app = express();
 app.use(express.static("public"));
 connectDB();
+app.post(
+  "/webhook",
+  bodyParser.raw({ type: "application/json" }),
+  handleStripeWebhook
+);
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -64,6 +70,7 @@ app.use(errorHandler);
 const port = process.env.PORT;
 const server = http.createServer(app);
 const io = initSocket(server);
+
 app.set("io", io);
 // creating notification instance so that it can send notifications to the users
 const notificationService = new NotificationService(io);

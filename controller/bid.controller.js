@@ -62,9 +62,7 @@ export const createBid = async (req, res, next) => {
       bid: savedBid,
     });
   } catch (error) {
-    return next(
-      new InternalServerError("Failed to create bid.")
-    );
+    return next(new InternalServerError("Failed to create bid."));
   }
 };
 
@@ -138,6 +136,13 @@ export const changeBidStatus = async (req, res, next) => {
     bid.status = req.body.bidStatus;
     await bid.save();
 
+    if (bid.status === "accepted") {
+      await JobModel.findOneAndUpdate(
+        { user: req.user._id, _id: bid.job },
+        { bidStatus: "closed", acceptedBid: bidId, contractor: bid.contractor }
+      );
+    }
+
     await notificationService.sendNotification({
       recipientId: contractor,
       recipientType: "Contractor",
@@ -186,20 +191,10 @@ export const getBids = async (req, res, next) => {
 
 export const getBid = async (req, res, next) => {
   const bidId = req.params.id;
-  const user = req.user.role === "contractor" ? "homeowner" : "contractor";
   try {
     const bid = await BidModel.findById(bidId).populate([
       {
-        match: { status: { $eq: "succeeded" } },
         path: "bidTransaction",
-      },
-      {
-        path: user,
-        select: "username avatarUrl label email profile",
-        populate: {
-          path: "profile",
-          select:"phone"
-        }
       },
       {
         path: "job",
@@ -225,7 +220,7 @@ export const updateBid = async (req, res, next) => {
     if (!bid) {
       return next(new NotFoundError("Bid not found"));
     }
-    
+
     // await notificationService.sendNotification({
     //   recipientId: bid.homeowner,
     //   recipientType: "Homeowner",

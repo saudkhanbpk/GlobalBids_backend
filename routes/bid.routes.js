@@ -12,7 +12,7 @@ import authMiddleware from "../middleware/auth.middleware.js";
 import {
   createPayment,
   getPaymentHistory,
-  updateBidPayment,
+  getHomeownerContact,
 } from "../controller/stripe.controller.js";
 
 const bidRouter = express.Router();
@@ -25,11 +25,11 @@ bidRouter.get("/homeowner", authMiddleware, getHomeownerBids);
 // get contractor bids
 bidRouter.get("/contractor", authMiddleware, getContractorBids);
 
-bidRouter.post("/create-payment-intent", createPayment);
+bidRouter.post("/create-payment-intent", authMiddleware, createPayment);
 bidRouter.get("/payment-history", authMiddleware, getPaymentHistory);
 bidRouter.post("/status", authMiddleware, changeBidStatus);
 bidRouter.get("/", authMiddleware, getBids);
-bidRouter.post("/update-bid-payment", authMiddleware, updateBidPayment);
+bidRouter.post("/homeowner-contact/:id", authMiddleware, getHomeownerContact);
 bidRouter.get("/:id", authMiddleware, getBid);
 bidRouter.put("/:id", authMiddleware, updateBid);
 

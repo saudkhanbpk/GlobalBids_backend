@@ -147,9 +147,7 @@ export const verifyAccount = async (req, res, next) => {
       refreshToken,
       message: "Account verified successfully",
     });
-  } catch (error) {
-    console.log(error);
-    
+  } catch (error) {   
     return next(new InternalServerError());
   }
 };

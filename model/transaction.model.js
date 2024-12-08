@@ -7,14 +7,11 @@ const bidTransactionHistorySchema = new mongoose.Schema(
     bid: { type: mongoose.Schema.Types.ObjectId, ref: "Bid" },
     amount: { type: String, required: true },
     transactionDate: { type: String },
-    status: { type: String },
+    status: { type: String, enum: ["pending", "succeeded", "in-complete"] },
     category: { type: String, enum: ["small", "medium", "large"] },
-    cardDigit: { type: String },
     transactionId: { type: String },
     leadPrice: { type: String },
-    contractor: { type: String },
-    title: { type: String },
-    homeownerName: { type: String },
+    homeowner: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
   },
   { timestamps: true }
 );
