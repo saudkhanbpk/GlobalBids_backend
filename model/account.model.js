@@ -29,6 +29,7 @@ const accountSchema = new mongoose.Schema(
         message: "Password is required and must be at least 8 characters long",
       },
     },
+    refreshToken: { type: String, select: false },
     isVerified: { type: Boolean, default: false },
     avatarUrl: { type: String },
     coverPhoto: { type: String },

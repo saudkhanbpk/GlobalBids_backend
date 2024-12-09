@@ -108,12 +108,10 @@ export const editJob = async (req, res, next) => {
 
 export const getAllJobs = async (_req, res, next) => {
   try {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const total = await JobModel.countDocuments();
-    // const jobs = await JobModel.find({ createdAt: { $gt: thirtyDaysAgo } })
-    const jobs = await JobModel.find().sort({ createdAt: -1 }).limit(50);
+    const total = await JobModel.countDocuments({ bidStatus: "open" });
+    const jobs = await JobModel.find({ bidStatus: "open" }).sort({
+      createdAt: -1,
+    });
 
     res.status(200).json({ success: true, total, jobs });
   } catch (error) {
@@ -237,6 +235,29 @@ export const deleteJob = async (req, res, next) => {
     return res
       .status(200)
       .json({ success: true, message: "Job deleted successfully", deletedJob });
+  } catch (error) {
+    return next(new InternalServerError());
+  }
+};
+
+export const repostJob = async (req, res, next) => {
+  const user = req.user;
+  if (user.role !== "homeowner") return next(new UnauthorizedError());
+  try {
+    const jobId = req.params.id;
+    const job = await JobModel.findById(jobId);
+    if (!job) {
+      return next(new NotFoundError("Job Not Found"));
+    }
+    job.bidStatus = "open";
+    job.room = null;
+    job.contractor = null;
+    job.acceptedBid = null;
+    job.status = "pending";
+    await job.save();
+    return res
+      .status(200)
+      .json({ success: true, message: "Job reposted", job });
   } catch (error) {
     return next(new InternalServerError());
   }

@@ -98,11 +98,19 @@ export const getContractorBids = async (req, res, next) => {
   try {
     const contractor = req.user._id;
     const bids = await BidModel.find({ contractor })
-      .populate({
-        path: "job",
-        select: "title",
-      })
+      .populate([
+        {
+          path: "job",
+          select: "title",
+        },
+        {
+          path: "bidTransaction",
+          select: "status amount",
+        },
+      ])
       .sort({ createdAt: -1 });
+
+    console.log();
 
     return res.status(200).json({ success: true, bids });
   } catch (error) {

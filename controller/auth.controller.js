@@ -3,9 +3,9 @@ import {
   InternalServerError,
   LoginError,
   NotFoundError,
+  AuthenticationError,
 } from "../error/AppError.js";
 import {
-  getUserByEmail,
   getUserById,
   updateContractorInfo,
   updateHomeownerInfo,
@@ -15,11 +15,11 @@ import OtpModel from "../model/otp.model.js";
 import { generateOtp } from "../utils/generate-otp.js";
 import { sendEmail } from "../utils/send-emails.js";
 import { otpMailOptions } from "../utils/mail-options.js";
-import { sendOtpToUser } from "../services/otp.service.js";
 import ResetPasswordModel from "../model/reset.password.js";
 import crypto from "crypto";
 import AccountModel from "../model/account.model.js";
 import { defaultCookiesOptions } from "../constants/cookies.options.js";
+import jwt from "jsonwebtoken";
 
 export const signUpController = async (req, res, next) => {
   const userData = req.body;
@@ -108,6 +108,8 @@ export const loginController = async (req, res, next) => {
     const accessToken = await user.generateAccessToken();
     const refreshToken = await user.generateRefreshToken();
 
+    user.refreshToken = refreshToken;
+    await user.save();
     return res
       .status(200)
       .cookie("accessToken", accessToken, defaultCookiesOptions)
@@ -147,7 +149,7 @@ export const verifyAccount = async (req, res, next) => {
       refreshToken,
       message: "Account verified successfully",
     });
-  } catch (error) {   
+  } catch (error) {
     return next(new InternalServerError());
   }
 };
@@ -414,5 +416,52 @@ export const logout = async (req, res, next) => {
       .json({ success: true, message: "Logout successful" });
   } catch (error) {
     return next(new InternalServerError("Logout failed"));
+  }
+};
+
+export const refreshAccessToken = async (req, res, next) => {
+  try {
+    const incomingRefreshToken =
+      req.cookies?.refreshToken ||
+      req.headers("Authorization")?.replace("Bearer ", "");
+    if (!incomingRefreshToken) {
+      return next(new AuthenticationError("Unauthorized request!"));
+    }
+
+    const decodedToken = await jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+    const user = await AccountModel.findById(decodedToken.id).select(
+      "-password +refreshToken"
+    );
+
+    if (!user) {
+      return next(AuthenticationError("Invalid refresh Token"));
+    }
+
+    if (incomingRefreshToken !== user?.refreshToken) {
+      return next(new AuthenticationError("Invalid refresh token", 440));
+    }
+
+    const accessToken = user.generateAccessToken();
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, defaultCookiesOptions)
+      .json({
+        success: true,
+        accessToken,
+        message: "Access token refreshed successfully!",
+      });
+  } catch (error) {
+    console.log(error);
+    
+    if (
+      error instanceof jwt.TokenExpiredError &&
+      error.message === "jwt expired"
+    ) {
+      return next(new AuthenticationError("Refresh token has expired", 440));
+    }
+    return next(new InternalServerError("can't refresh access token"));
   }
 };
