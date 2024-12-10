@@ -2,7 +2,11 @@ import mongoose from "mongoose";
 
 const ContractorProfileSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "Account", required: true },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Account",
+      required: true,
+    },
     fullName: { type: String, trim: true },
     phone: { type: String, trim: true },
     address: { type: String, trim: true },
@@ -44,10 +48,11 @@ const ContractorProfileSchema = new mongoose.Schema(
     },
     pageServices: [
       {
-        title: { type: String, trim: true,  },
-        description: { type: String, trim: true, },
+        title: { type: String, trim: true },
+        description: { type: String, trim: true },
       },
     ],
+    portfolioMedia: [{ type: String, trim: true }],
     coverPhoto: { type: String, trim: true },
     about: { type: String, trim: true },
   },
@@ -56,6 +61,9 @@ const ContractorProfileSchema = new mongoose.Schema(
   }
 );
 
-const ContractorProfileModel = mongoose.model("ContractorProfile", ContractorProfileSchema);
+const ContractorProfileModel = mongoose.model(
+  "ContractorProfile",
+  ContractorProfileSchema
+);
 
 export default ContractorProfileModel;

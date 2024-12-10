@@ -121,7 +121,7 @@ export const getContractorPage = async (req, res, next) => {
       _id: id,
     })
       .select("username  avatarUrl coverPhoto rating profile profileType")
-      .populate({ path: "profile", select: "pageServices about experience" });
+      .populate({ path: "profile", select: "pageServices about experience portfolioMedia" });
     return res.status(200).json({ success: true, contractorPage });
   } catch (error) {
     return next(new InternalServerError());

@@ -51,8 +51,6 @@ passport.use(
         }
         return cb(null, newUser);
       } catch (error) {
-        console.log(error);
-
         req.res.redirect(`${process.env.REDIRECT_URL}/auth-redirect?error=400`);
         return;
       }

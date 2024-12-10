@@ -4,6 +4,7 @@ import {
   uploadAvatar,
   uploadContractorDocumentsController,
   uploadCoverPhoto,
+  uploadPageMedia,
 } from "../controller/file.upload.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
@@ -31,6 +32,13 @@ fileUploadRouter.post(
     { name: "compensationFile", maxCount: 1 },
   ]),
   uploadContractorDocumentsController
+);
+
+fileUploadRouter.post(
+  "/contractor-portfolio-media",
+  authMiddleware,
+  upload.array("files", 10),
+  uploadPageMedia
 );
 
 export default fileUploadRouter;

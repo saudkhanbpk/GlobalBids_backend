@@ -2,7 +2,7 @@ import { AppError } from "./AppError.js";
 
 const errorHandler = (err, _req, res, _next) => {
   if (err instanceof AppError) {
-    // err.logError();
+    err.logError();
     res.status(err.statusCode).json({
       success: false,
       type: err.getErrorType(),
