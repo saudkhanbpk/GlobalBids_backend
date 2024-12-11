@@ -56,3 +56,33 @@ export const invoiceMailOptions = (transaction, email) => {
     `,
   };
 };
+
+export const notificationMailOptions = (notifications, email) => {
+  return {
+    to: email,
+    subject: "Notification",
+    html: `<div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4;">
+    <div style="background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); padding: 30px;">
+        <div style="background-color: #4a90e2; color: white; text-align: center; padding: 15px; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0; font-size: 24px;">${notifications.type}</h1>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <p style="margin-bottom: 15px;">Hello ${notifications.recipientId.username},</p>
+            
+            <div style="background-color: #f9f9f9; border-left: 4px solid #4a90e2; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0;">${notifications.message}</p>
+            </div>
+            <a href="${process.env.REDIRECT_URL}/${notifications.url}" style="display: block; width: 200px; margin: 20px auto; padding: 12px 20px; background-color: #4a90e2; color: white; text-decoration: none; text-align: center; border-radius: 5px; font-weight: bold;">View Details</a>
+            
+            <p style="margin-top: 20px;">Sent by: ${notifications.senderId.username}</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; color: #888; font-size: 12px;">
+            <p style="margin: 10px 0;">© {{2024}} Globalbids. All rights reserved.</p>
+            <p style="margin: 10px 0;">You received this email because you are a registered ${notifications.recipientId.username}.</p>
+        </div>
+    </div>
+</div>`,
+  };
+};

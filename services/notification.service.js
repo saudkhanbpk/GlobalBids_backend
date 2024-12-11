@@ -1,4 +1,5 @@
 import { connectedUsers } from "../event/site-events.js";
+import AccountModel from "../model/account.model.js";
 import NotificationModel from "../model/notification.model.js";
 class NotificationService {
   constructor(io) {
@@ -25,6 +26,8 @@ class NotificationService {
         url,
       });
       const savedNotification = await notification.save();
+
+      // const user = await AccountModel.findById(recipientId).populate("");
 
       if (this.io && connectedUsers[recipientId]) {
         this.io

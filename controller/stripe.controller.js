@@ -132,8 +132,6 @@ export const getHomeownerContact = async (req, res, next) => {
 export const handleStripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  console.log("webhook invoke!");
-
   try {
     const event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
 
