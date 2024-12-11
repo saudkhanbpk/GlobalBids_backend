@@ -7,6 +7,7 @@ import { invoiceMailOptions } from "../utils/mail-options.js";
 import { sendEmail } from "../utils/send-emails.js";
 import { createRoom } from "../services/chat.room.service.js";
 import AccountModel from "../model/account.model.js";
+import EventsModel from "../model/events.model.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export const createPayment = async (req, res, next) => {
   const { leadPrice } = req.body;
@@ -123,7 +124,7 @@ export const getHomeownerContact = async (req, res, next) => {
     }
   } catch (error) {
     console.log(error);
-    
+
     return next(new InternalServerError("Failed to fetch homeowner contact."));
   }
 };
@@ -142,7 +143,7 @@ export const handleStripeWebhook = async (req, res) => {
           event.data.object.metadata;
 
         const userData = await AccountModel.findById(user).select("email");
-
+        const bid = await BidModel.findById(bidId);
         const room = await createRoom([homeowner, user], projectId);
         await JobModel.findByIdAndUpdate(
           projectId,
@@ -161,6 +162,16 @@ export const handleStripeWebhook = async (req, res) => {
           },
           { new: true }
         );
+
+        await EventsModel.create({
+          homeowner: homeowner,
+          job: projectId,
+          contractor: user,
+          eventType: "general",
+          title: "Job started",
+          date: bid.startDate,
+        });
+
         const mailOptions = invoiceMailOptions(transaction, userData.email);
         await sendEmail(mailOptions);
         break;
