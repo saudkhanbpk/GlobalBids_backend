@@ -8,6 +8,7 @@ import {
   ValidationError,
 } from "../error/AppError.js";
 import JobModel from "../model/job.model.js";
+import JobInviteModel from "../model/job.invite.model.js";
 import { uploadFile } from "../services/upload.files.media.service.js";
 import { validateJobFields } from "../validators/jobs-validator.js";
 import { deleteFilesFromCloudinary } from "../utils/cloudinary.delete.files.js";
@@ -121,7 +122,7 @@ export const getAllJobs = async (_req, res, next) => {
   }
 };
 
-export const getUserJobs = async (req, res, next) => {
+export const getHomeownerJobs = async (req, res, next) => {
   const id = req.user._id;
   try {
     const jobs = await JobModel.find({ user: id })
@@ -258,6 +259,55 @@ export const repostJob = async (req, res, next) => {
     return res
       .status(200)
       .json({ success: true, message: "Job reposted", job });
+  } catch (error) {
+    return next(new InternalServerError());
+  }
+};
+
+export const inviteContractorToJob = async (req, res, next) => {
+  const user = req.user;
+  const notificationService = req.app.get("notificationService");
+  if (user.role !== "homeowner") return next(new UnauthorizedError());
+
+  try {
+    const jobId = req.params.id;
+    const job = await JobModel.findById(jobId);
+    if (!job) {
+      return next(new NotFoundError("Job Not Found"));
+    }
+
+    const existInvite = await JobInviteModel.findOne({
+      homeowner: user._id,
+      job: jobId,
+      contractor: req.body.contractor,
+    });
+    if (existInvite) {
+      return next(
+        new BusinessLogicError(
+          "You have already invited this contractor to this job."
+        )
+      );
+    }
+
+    const jobInvite = await JobInviteModel.create({
+      homeowner: user._id,
+      job: jobId,
+      contractor: req.body.contractor,
+    });
+
+    await notificationService.sendNotification({
+      recipientId: req.body.contractor,
+      recipientType: "Contractor",
+      senderId: user._id,
+      senderType: "Homeowner",
+      message: `You have been invited to bid on ${job.title} by ${user.username}`,
+      type: "bidStatus",
+      url: `/contractor/project-detail/${jobId}`,
+    });
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Contractor invited", jobInvite });
   } catch (error) {
     return next(new InternalServerError());
   }

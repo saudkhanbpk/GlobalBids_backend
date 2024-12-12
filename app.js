@@ -77,5 +77,5 @@ const notificationService = new NotificationService(io);
 app.set("notificationService", notificationService);
 
 server.listen(port, () => {
-  console.log(`server is running on the port ${port}`);
+  console.log(`\nserver is running on the port ${port}`);
 });
