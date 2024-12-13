@@ -94,7 +94,8 @@ export const loginController = async (req, res, next) => {
       await sendEmail(mailOpt);
       return res.status(200).json({
         success: true,
-        user: { _id: user._id, isVerified: user.isVerified },
+        userId: user._id,
+        isVerified: user.isVerified,
         otpId: otpEntry._id,
         message: "Please verify your account!",
       });
@@ -123,6 +124,7 @@ export const loginController = async (req, res, next) => {
 
 export const verifyAccount = async (req, res, next) => {
   const { userId, otp, otpId } = req.body;
+
   try {
     const otpEntry = await OtpModel.findOne({
       _id: otpId,
@@ -205,7 +207,7 @@ export const resendOtpController = async (req, res, next) => {
     });
     await otpEntry.save();
 
-    const mailOpt = otpMailOptions(otp, req.body.email);
+    const mailOpt = otpMailOptions(otp, user.email);
     await sendEmail(mailOpt);
 
     return res.status(200).json({
@@ -266,7 +268,7 @@ export const findUser = async (req, res, next) => {
     const otpEntry = new OtpModel({
       otp: generateOtp(),
       accountId: user._id,
-      otpType: "verify-account",
+      otpType: "forgot-password",
       expiresAt: otpExpiry,
     });
     otpEntry.save();
@@ -276,55 +278,53 @@ export const findUser = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       otpId: otpEntry._id,
-      user: { _id: user._id },
+      userId: user._id,
       message: "Opt has been send to your email",
     });
   } catch (error) {
-    console.log(error);
     return next(new InternalServerError("can't find user"));
   }
 };
 
 export const verifyUserAndResetPassword = async (req, res, next) => {
-  const { user, otp } = req.body;
-
-  console.log(user);
-
+  const { userId, otp, otpId } = req.body;
   try {
     const otpDoc = await OtpModel.findOne({
-      accountId: user._id,
-      expiresAt: { $gte: Date.now() },
+      accountId: userId,
+      _id: otpId,
+      otpType: "forgot-password",
+      isVerified: false,
+      otp: Number(otp),
+      expiresAt: { $gte: new Date() },
     });
 
     if (!otpDoc) {
       return next(new ValidationError("invalid otp or expired"));
     }
-    if (otp !== otpDoc.otp) {
-      return next(new ValidationError("invalid otp"));
-    }
 
-    await ResetPasswordModel.findOneAndDelete({ accountId: user._id });
+    await ResetPasswordModel.findOneAndDelete({ accountId: userId });
 
     const reset = new ResetPasswordModel({
-      accountId: user._id,
+      accountId: userId,
       token: crypto.randomBytes(10).toString("hex"),
     });
     await reset.save();
     return res.status(200).json({ success: true, token: reset.token });
   } catch (error) {
+    console.log(error);
+    
     return next(new InternalServerError("can't verify otp"));
   }
 };
 
 export const resetPassword = async (req, res, next) => {
   const { password, token, userId } = req.body;
-
   try {
     const savedToken = await ResetPasswordModel.findOne({ accountId: userId });
     if (savedToken.token !== token) {
       return next(new ValidationError("some thing went wrong!"));
     }
-    const user = await UserModel.findById(userId);
+    const user = await AccountModel.findById(userId);
     if (!user) {
       return next(new NotFoundError("User not found"));
     }
@@ -455,7 +455,7 @@ export const refreshAccessToken = async (req, res, next) => {
       });
   } catch (error) {
     console.log(error);
-    
+
     if (
       error instanceof jwt.TokenExpiredError &&
       error.message === "jwt expired"

@@ -23,6 +23,7 @@ export async function sendEmail(mailOptions) {
       ...mailOptions,
     });
   } catch (error) {
+    console.warn("Error in sending email:\t", error);
     return;
   }
 }
