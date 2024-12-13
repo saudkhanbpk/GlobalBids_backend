@@ -11,6 +11,7 @@ import {
   deleteJob,
   repostJob,
   inviteContractorToJob,
+  findJobs
 } from "../controller/jobs.controller.js";
 import upload from "../config/multer.config.js";
 import authMiddleware from "../middleware/auth.middleware.js";
@@ -26,6 +27,7 @@ router.get("/re-post/:id", authMiddleware, repostJob);
 router.delete("/delete/:id", authMiddleware, deleteJob);
 router.post("/invite/:id", authMiddleware, inviteContractorToJob);
 router.get("/", authMiddleware, getAllJobs);
+router.get("/find", authMiddleware, findJobs);
 router.get("/:id", authMiddleware, getJob);
 
 export default router;

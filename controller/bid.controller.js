@@ -47,6 +47,9 @@ export const createBid = async (req, res, next) => {
     const newBid = new BidModel(data);
     const savedBid = await newBid.save();
 
+    job.bids.push(savedBid._id);
+    await job.save();
+
     await notificationService.sendNotification({
       recipientId: newBid.homeowner,
       recipientType: "Homeowner",
@@ -101,7 +104,7 @@ export const getContractorBids = async (req, res, next) => {
       .populate([
         {
           path: "job",
-          select: "title",
+          select: "title room",
         },
         {
           path: "bidTransaction",
@@ -109,8 +112,6 @@ export const getContractorBids = async (req, res, next) => {
         },
       ])
       .sort({ createdAt: -1 });
-
-    console.log();
 
     return res.status(200).json({ success: true, bids });
   } catch (error) {
@@ -167,8 +168,6 @@ export const changeBidStatus = async (req, res, next) => {
       bid,
     });
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError("bid status can't be change"));
   }
 };
@@ -206,7 +205,7 @@ export const getBid = async (req, res, next) => {
       },
       {
         path: "job",
-        select: "title budget category",
+        select: "title budget category room",
       },
     ]);
     return res.status(200).json({ success: true, bid });

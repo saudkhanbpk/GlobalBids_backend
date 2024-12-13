@@ -121,6 +121,25 @@ export const getAllJobs = async (_req, res, next) => {
     );
   }
 };
+export const findJobs = async (_req, res, next) => {
+  try {
+    const total = await JobModel.countDocuments({ bidStatus: "open" });
+    const jobs = await JobModel.find({ bidStatus: "open" })
+      .sort({
+        createdAt: -1,
+      })
+      .populate({
+        path: "bids",
+        select: "contractor",
+      });
+
+    res.status(200).json({ success: true, total, jobs });
+  } catch (error) {
+    return next(
+      new InternalServerError("An error occurred while fetching jobs")
+    );
+  }
+};
 
 export const getHomeownerJobs = async (req, res, next) => {
   const id = req.user._id;
@@ -180,6 +199,10 @@ export const getJob = async (req, res, next) => {
           path: "bidTransaction",
           select: "status",
         },
+      },
+      {
+        path: "bids",
+        select: "contractor",
       },
     ]);
 

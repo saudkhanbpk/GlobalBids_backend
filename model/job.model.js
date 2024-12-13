@@ -45,7 +45,7 @@ const jobSchema = new mongoose.Schema(
     room: { type: mongoose.Schema.Types.ObjectId, ref: "Room" },
     completed: { type: Boolean, default: false },
     progress: { type: String },
-    bids: { type: mongoose.Schema.Types.ObjectId, ref: "Bid" },
+    bids: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bid" }],
     acceptedBid: { type: mongoose.Schema.Types.ObjectId, ref: "Bid" },
     status: {
       type: String,
