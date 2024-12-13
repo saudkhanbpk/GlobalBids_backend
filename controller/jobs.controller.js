@@ -63,46 +63,88 @@ export const createJob = async (req, res, next) => {
   }
 };
 
+// export const editJob = async (req, res, next) => {
+//   const files = req.files;
+//   if (req.user.role !== "homeowner") {
+//     return next(new BusinessLogicError());
+//   }
+//   if (!files && !req.body.media) {
+//     return next(
+//       new FileUploadError("At least one video or image is required!")
+//     );
+//   }
+
+//   let mediaUrls = [];
+//   try {
+//     for (const file of files) {
+//       const fileRes = await uploadFile(file, JOB_DIRECTORY);
+//       mediaUrls.push(fileRes);
+//     }
+//   } catch (error) {
+//     return next(new FileUploadError());
+//   }
+
+//   const media = JSON.parse(req.body.media);
+//   const deleteMedia = JSON.parse(req.body.deletedFiles);
+
+//   const allMedia = media.filter((m) => !deleteMedia.includes(m));
+
+//   const updatedData = { ...req.body, media: [...mediaUrls, ...allMedia] };
+//   try {
+//     const jobUpdated = await JobModel.findByIdAndUpdate(
+//       req.params.id,
+//       updatedData,
+//       { new: true }
+//     );
+//     await deleteFilesFromCloudinary(deleteMedia);
+//     return res
+//       .status(200)
+//       .json({ jobUpdated, success: true, message: "Job has been updated!" });
+//   } catch (error) {
+//     console.log(error);
+//     return next(new InternalServerError());
+//   }
+// };
+
 export const editJob = async (req, res, next) => {
-  const files = req.files;
-  if (req.user.role !== "homeowner") {
-    return next(new BusinessLogicError());
-  }
-
-  if (!files && !req.body.media) {
-    return next(
-      new FileUploadError("At least one video or image is required!")
-    );
-  }
-
-  let mediaUrls = [];
   try {
-    for (const file of files) {
-      const fileRes = await uploadFile(file, JOB_DIRECTORY);
-      mediaUrls.push(fileRes);
+    if (req.user.role !== "homeowner") {
+      return next(new BusinessLogicError());
     }
-  } catch (error) {
-    return next(new FileUploadError());
-  }
 
-  const media = JSON.parse(req.body.media);
-  const deleteMedia = JSON.parse(req.body.deletedFiles);
+    const { media: mediaBody, deletedFiles } = req.body;
+    const files = req.files;
 
-  const allMedia = media.filter((m) => !deleteMedia.includes(m));
+    // if (!files?.length && !mediaBody) {
+    //   throw new FileUploadError("At least one video or image is required!");
+    // }
 
-  const updatedData = { ...req.body, media: [...mediaUrls, ...allMedia] };
-  try {
+    const media = JSON.parse(mediaBody || "[]");
+    const deleteMedia = JSON.parse(deletedFiles || "[]");
+
+    const mediaUrls = await Promise.all(
+      files?.map((file) => uploadFile(file, JOB_DIRECTORY)) || []
+    );
+
+    const allMedia = media.filter((m) => !deleteMedia.includes(m));
+    const updatedMedia = [...mediaUrls, ...allMedia];
+
+    const updatedData = { ...req.body, media: updatedMedia };
+
     const jobUpdated = await JobModel.findByIdAndUpdate(
       req.params.id,
       updatedData,
       { new: true }
     );
     await deleteFilesFromCloudinary(deleteMedia);
-    return res
-      .status(200)
-      .json({ jobUpdated, success: true, message: "Job has been updated!" });
+
+    return res.status(200).json({
+      jobUpdated,
+      success: true,
+      message: "Job has been updated!",
+    });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return next(new InternalServerError());
   }
 };
