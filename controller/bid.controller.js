@@ -86,7 +86,7 @@ export const getHomeownerBids = async (req, res, next) => {
           select: "title budget",
         },
       ])
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: 1 });
     return res.status(200).json({ success: true, bids });
   } catch (error) {
     return next(
@@ -177,19 +177,21 @@ export const getBids = async (req, res, next) => {
   try {
     const bids = await BidModel.find({
       $or: [{ homeowner: id }, { contractor: id }],
-    }).populate([
-      {
-        path: "contractor",
-        select: "username avatarUrl label email phone",
-      },
-      {
-        path: "homeowner",
-        select: "username avatarUrl label email phone",
-      },
-      {
-        path: "job",
-      },
-    ]);
+    })
+      .populate([
+        {
+          path: "contractor",
+          select: "username avatarUrl label email phone",
+        },
+        {
+          path: "homeowner",
+          select: "username avatarUrl label email phone",
+        },
+        {
+          path: "job",
+        },
+      ])
+      .sort({ createdAt: -1 });
     return res.status(200).json({ success: true, bids });
   } catch (error) {
     return next(new InternalServerError("Failed to fetch the bid"));
@@ -241,5 +243,65 @@ export const updateBid = async (req, res, next) => {
     return res.status(200).json({ success: true, bid, message: "Bid updated" });
   } catch (error) {
     return next(new InternalServerError("Failed to update the bid"));
+  }
+};
+
+export const bidEarningOverview = async (req, res, next) => {
+  const userId = req.user._id;
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+
+  try {
+    const [results] = await BidModel.aggregate([
+      {
+        $match: {
+          status: "accepted",
+          contractor: userId,
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          totalEarnings: { $sum: { $toDouble: "$bidAmount" } },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          monthlyEarnings: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $eq: ["$_id.year", currentYear] },
+                    { $eq: ["$_id.month", currentMonth] },
+                  ],
+                },
+                "$totalEarnings",
+                0,
+              ],
+            },
+          },
+          yearlyEarnings: {
+            $sum: {
+              $cond: [{ $eq: ["$_id.year", currentYear] }, "$totalEarnings", 0],
+            },
+          },
+        },
+      },
+    ]);
+    res.status(200).json({
+      success: true,
+      data: {
+        monthlyEarnings: results?.monthlyEarnings || 0,
+        yearlyEarnings: results?.yearlyEarnings || 0,
+      },
+    });
+  } catch (error) {
+    return next(new InternalServerError());
   }
 };

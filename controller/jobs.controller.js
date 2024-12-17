@@ -63,49 +63,6 @@ export const createJob = async (req, res, next) => {
   }
 };
 
-// export const editJob = async (req, res, next) => {
-//   const files = req.files;
-//   if (req.user.role !== "homeowner") {
-//     return next(new BusinessLogicError());
-//   }
-//   if (!files && !req.body.media) {
-//     return next(
-//       new FileUploadError("At least one video or image is required!")
-//     );
-//   }
-
-//   let mediaUrls = [];
-//   try {
-//     for (const file of files) {
-//       const fileRes = await uploadFile(file, JOB_DIRECTORY);
-//       mediaUrls.push(fileRes);
-//     }
-//   } catch (error) {
-//     return next(new FileUploadError());
-//   }
-
-//   const media = JSON.parse(req.body.media);
-//   const deleteMedia = JSON.parse(req.body.deletedFiles);
-
-//   const allMedia = media.filter((m) => !deleteMedia.includes(m));
-
-//   const updatedData = { ...req.body, media: [...mediaUrls, ...allMedia] };
-//   try {
-//     const jobUpdated = await JobModel.findByIdAndUpdate(
-//       req.params.id,
-//       updatedData,
-//       { new: true }
-//     );
-//     await deleteFilesFromCloudinary(deleteMedia);
-//     return res
-//       .status(200)
-//       .json({ jobUpdated, success: true, message: "Job has been updated!" });
-//   } catch (error) {
-//     console.log(error);
-//     return next(new InternalServerError());
-//   }
-// };
-
 export const editJob = async (req, res, next) => {
   try {
     if (req.user.role !== "homeowner") {
@@ -294,10 +251,10 @@ export const deleteJob = async (req, res, next) => {
   try {
     const jobId = req.params.id;
     const deletedJob = await JobModel.findByIdAndDelete(jobId);
-    await deleteFilesFromCloudinary(deletedJob.media);
     if (!deletedJob) {
       return next(new NotFoundError("Job Not Found"));
     }
+    await deleteFilesFromCloudinary(deletedJob.media);
     return res
       .status(200)
       .json({ success: true, message: "Job deleted successfully", deletedJob });
@@ -377,3 +334,5 @@ export const inviteContractorToJob = async (req, res, next) => {
     return next(new InternalServerError());
   }
 };
+
+

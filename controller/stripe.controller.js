@@ -72,12 +72,14 @@ export const getPaymentHistory = async (req, res, next) => {
   try {
     const transactions = await BidTransactionHistoryModel.find({
       user: userId,
-    }).populate([
-      {
-        path: "job",
-        select: "title",
-      },
-    ]);
+    })
+      .populate([
+        {
+          path: "job",
+          select: "title",
+        },
+      ])
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
@@ -100,11 +102,10 @@ export const getHomeownerContact = async (req, res, next) => {
         homeowner = await AccountModel.findById(
           paymentIntent.metadata.homeowner
         )
-          .select("email username profile")
+          .select("email username profile profileType")
           .populate({
             path: "profile",
-            model: "HomeownerProfile",
-            select: "phone",
+            select: "phone propertyDetails.address",
           });
         return res.status(200).json({
           success: true,
@@ -123,8 +124,6 @@ export const getHomeownerContact = async (req, res, next) => {
         });
     }
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError("Failed to fetch homeowner contact."));
   }
 };

@@ -312,7 +312,7 @@ export const verifyUserAndResetPassword = async (req, res, next) => {
     return res.status(200).json({ success: true, token: reset.token });
   } catch (error) {
     console.log(error);
-    
+
     return next(new InternalServerError("can't verify otp"));
   }
 };
@@ -345,6 +345,9 @@ export const getUser = async (req, res, next) => {
   try {
     const user = await AccountModel.findById(userId).populate({
       path: "profile",
+      populate: {
+        path: "weeklySchedule",
+      },
     });
     return res.status(200).json({ user, success: true });
   } catch (error) {

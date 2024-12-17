@@ -7,6 +7,7 @@ import {
   getBid,
   updateBid,
   getHomeownerBids,
+  bidEarningOverview,
 } from "../controller/bid.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import {
@@ -30,6 +31,9 @@ bidRouter.get("/payment-history", authMiddleware, getPaymentHistory);
 bidRouter.post("/status", authMiddleware, changeBidStatus);
 bidRouter.get("/", authMiddleware, getBids);
 bidRouter.post("/homeowner-contact/:id", authMiddleware, getHomeownerContact);
+bidRouter.get("/earnings", authMiddleware, bidEarningOverview)
+
+// ! these two routes will be end of these routes don't put new routes below these routes it will give you error 
 bidRouter.get("/:id", authMiddleware, getBid);
 bidRouter.put("/:id", authMiddleware, updateBid);
 

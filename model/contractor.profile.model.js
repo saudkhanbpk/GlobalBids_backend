@@ -55,6 +55,10 @@ const ContractorProfileSchema = new mongoose.Schema(
     portfolioMedia: [{ type: String, trim: true }],
     coverPhoto: { type: String, trim: true },
     about: { type: String, trim: true },
+    weeklySchedule: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "WeeklySchedule",
+    },
   },
   {
     timestamps: true,

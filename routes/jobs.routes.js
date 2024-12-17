@@ -15,8 +15,8 @@ import {
 } from "../controller/jobs.controller.js";
 import upload from "../config/multer.config.js";
 import authMiddleware from "../middleware/auth.middleware.js";
-const router = express.Router();
 
+const router = express.Router();
 router.post("/create", upload.array("files", 6), authMiddleware, createJob);
 router.get("/homeowner", authMiddleware, getHomeownerJobs);
 router.get("/job-details/:id", authMiddleware, getJobDetails);

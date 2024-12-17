@@ -5,6 +5,7 @@ import {
   getContractorPage,
   getContractorSettings,
   updateContractorProfile,
+  weeklySchedule,
 } from "../controller/contractor.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
@@ -20,5 +21,7 @@ contractorRouter.delete(
 );
 // this route is for homeowner to view contractor page
 contractorRouter.get("/page/:id", authMiddleware, getContractorPage);
+
+contractorRouter.post("/page/weekly-schedule", authMiddleware, weeklySchedule);
 
 export default contractorRouter;

@@ -2,6 +2,8 @@ import { BusinessLogicError, InternalServerError } from "../error/AppError.js";
 import AccountModel from "../model/account.model.js";
 import ContractorProfileModel from "../model/contractor.profile.model.js";
 import ContractorSettingsModel from "../model/contractor.settings.model.js";
+import WeeklyScheduleModel from "../model/contractor.weekly.schedule.model.js";
+import WeeklySchedule from "../model/contractor.weekly.schedule.model.js";
 
 export const contractorSettings = async (req, res, next) => {
   const userId = req.user._id;
@@ -121,8 +123,42 @@ export const getContractorPage = async (req, res, next) => {
       _id: id,
     })
       .select("username  avatarUrl coverPhoto rating profile profileType")
-      .populate({ path: "profile", model: "ContractorProfile", select: "pageServices services about experience portfolioMedia" });
+      .populate({
+        path: "profile",
+        model: "ContractorProfile",
+        select:
+          "pageServices services about experience portfolioMedia weeklySchedule",
+        populate: "weeklySchedule",
+      });
     return res.status(200).json({ success: true, contractorPage });
+  } catch (error) {
+    return next(new InternalServerError());
+  }
+};
+
+export const weeklySchedule = async (req, res, next) => {
+  const userId = req.user._id;
+  const data = req.body;
+
+  try {
+    const weeklySchedule = await WeeklyScheduleModel.findOneAndUpdate(
+      { account: userId },
+      { $set: data },
+      { new: true, upsert: true, runValidators: true }
+    );
+    await ContractorProfileModel.findOneAndUpdate(
+      {
+        user: userId,
+      },
+      {
+        weeklySchedule: weeklySchedule._id,
+      }
+    );
+    res.status(200).json({
+      success: true,
+      message: "Weekly schedule updated successfully",
+      data: weeklySchedule,
+    });
   } catch (error) {
     return next(new InternalServerError());
   }
