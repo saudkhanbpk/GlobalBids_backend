@@ -1,4 +1,7 @@
-import { JOB_DIRECTORY } from "../constants/directory.constants.js";
+import {
+  Feedback_DIRECTORY,
+  JOB_DIRECTORY,
+} from "../constants/directory.constants.js";
 import {
   BusinessLogicError,
   FileUploadError,
@@ -12,6 +15,7 @@ import JobInviteModel from "../model/job.invite.model.js";
 import { uploadFile } from "../services/upload.files.media.service.js";
 import { validateJobFields } from "../validators/jobs-validator.js";
 import { deleteFilesFromCloudinary } from "../utils/cloudinary.delete.files.js";
+import FeedbackModel from "../model/feedback.model.js";
 export const createJob = async (req, res, next) => {
   const files = req.files;
   if (req.user.role !== "homeowner") {
@@ -187,7 +191,6 @@ export const getJobStatistics = async (req, res, next) => {
 };
 
 export const getJob = async (req, res, next) => {
-  // const popUser = req.user.role === "contractor" ? "user" : "contractor";
   try {
     const jobId = req.params.id;
     const job = await JobModel.findById(jobId).populate([
@@ -220,7 +223,7 @@ export const getContractorJobs = async (req, res, next) => {
   try {
     const jobs = await JobModel.find({
       contractor: userId,
-      status: "in-progress",
+      status: { $in: ["in-progress", "completed"] },
     }).populate([
       {
         path: "user",
@@ -240,7 +243,6 @@ export const getContractorJobs = async (req, res, next) => {
       jobs,
     });
   } catch (error) {
-    console.error(error);
     return next(new InternalServerError());
   }
 };
@@ -335,4 +337,82 @@ export const inviteContractorToJob = async (req, res, next) => {
   }
 };
 
+export const markJobComplete = async (req, res, next) => {
+  const jobId = req.params.id;
 
+  try {
+    const job = await JobModel.findByIdAndUpdate(
+      jobId,
+      {
+        status: "completed",
+      },
+      { new: true }
+    ).populate([
+      {
+        path: "acceptedBid",
+        select: "bidTransaction contractor",
+        populate: {
+          path: "bidTransaction",
+          select: "status",
+        },
+      },
+      {
+        path: "bids",
+        select: "contractor",
+      },
+    ]);
+
+    return res
+      .status(200)
+      .json({ success: true, job, message: "Job mark completed" });
+  } catch (error) {
+    return next(new InternalServerError());
+  }
+};
+
+export const jobFeedback = async (req, res, next) => {
+  const userId = req.user._id;
+  const files = req.files;
+
+  const { message, contractor, jobId } = req.body;
+  if (!message && !contractor && !jobId && !files) {
+    return next(new ValidationError("all fields are required"));
+  }
+  try {
+    let mediaUrl = [];
+    for (const file of files) {
+      const fileRes = await uploadFile(file, Feedback_DIRECTORY);
+      mediaUrl.push(fileRes);
+    }
+    const data = {
+      message,
+      contractor,
+      homeowner: userId,
+      job: jobId,
+      media: mediaUrl,
+    };
+    const feedback = await FeedbackModel.create(data);
+    return res
+      .status(200)
+      .json({ success: true, feedback, message: "feedback submitted" });
+  } catch (error) {
+    console.log(error);
+
+    return next(new InternalServerError());
+  }
+};
+
+export const getJobFeedback = async (req, res, next) => {
+  const userId = req.user._id;
+  try {
+    const feedbacks = await FeedbackModel.find({
+      homeowner: userId,
+    }).sort({ createdAt: -1 });
+    return res.status(200).json({
+      success: true,
+      feedbacks,
+    });
+  } catch (error) {
+    return next(new InternalServerError());
+  }
+};

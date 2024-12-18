@@ -341,14 +341,14 @@ export const resetPassword = async (req, res, next) => {
 };
 
 export const getUser = async (req, res, next) => {
-  const userId = req.user;
+  const userId = req.user._id;
+  const role = req.user.role;
   try {
-    const user = await AccountModel.findById(userId).populate({
-      path: "profile",
-      populate: {
-        path: "weeklySchedule",
-      },
-    });
+    const populateOptions = { path: "profile" };
+    if (role === "contractor") {
+      populateOptions.populate = { path: "weeklySchedule" };
+    }
+    const user = await AccountModel.findById(userId).populate(populateOptions);
     return res.status(200).json({ user, success: true });
   } catch (error) {
     return next(new InternalServerError());

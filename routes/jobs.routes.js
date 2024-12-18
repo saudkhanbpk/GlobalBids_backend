@@ -11,7 +11,10 @@ import {
   deleteJob,
   repostJob,
   inviteContractorToJob,
-  findJobs
+  findJobs,
+  markJobComplete,
+  jobFeedback,
+  getJobFeedback,
 } from "../controller/jobs.controller.js";
 import upload from "../config/multer.config.js";
 import authMiddleware from "../middleware/auth.middleware.js";
@@ -28,6 +31,9 @@ router.delete("/delete/:id", authMiddleware, deleteJob);
 router.post("/invite/:id", authMiddleware, inviteContractorToJob);
 router.get("/", authMiddleware, getAllJobs);
 router.get("/find", authMiddleware, findJobs);
+router.get("/mark-as-complete/:id", authMiddleware, markJobComplete);
+router.post("/feedback", authMiddleware, upload.array("files", 4), jobFeedback);
+router.get("/feedback", authMiddleware, getJobFeedback);
 router.get("/:id", authMiddleware, getJob);
 
 export default router;
