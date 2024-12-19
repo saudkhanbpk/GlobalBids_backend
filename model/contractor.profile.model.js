@@ -12,9 +12,9 @@ const ContractorProfileSchema = new mongoose.Schema(
     address: { type: String, trim: true },
     rating: {
       type: Number,
-      default: 5,
-      min: [1, "Rating must be at least 1"],
-      max: [5, "Rating cannot exceed 5"],
+      default: 5.0,
+      min: [1.0, "Rating must be at least 1"],
+      max: [5.0, "Rating cannot exceed 5"],
     },
     label: { type: String, trim: true },
     insurance: {

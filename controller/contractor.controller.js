@@ -122,14 +122,14 @@ export const getContractorPage = async (req, res, next) => {
     const contractorPage = await AccountModel.findOne({
       _id: id,
     })
-      .select("username  avatarUrl coverPhoto rating profile profileType")
+      .select("username  avatarUrl coverPhoto rating profile profileType rating")
       .populate({
         path: "profile",
         model: "ContractorProfile",
         select:
-          "pageServices services about experience portfolioMedia weeklySchedule",
+          "pageServices services about experience portfolioMedia weeklySchedule rating",
         populate: "weeklySchedule",
-      });
+      });      
     return res.status(200).json({ success: true, contractorPage });
   } catch (error) {
     return next(new InternalServerError());

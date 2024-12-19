@@ -16,6 +16,7 @@ import { uploadFile } from "../services/upload.files.media.service.js";
 import { validateJobFields } from "../validators/jobs-validator.js";
 import { deleteFilesFromCloudinary } from "../utils/cloudinary.delete.files.js";
 import FeedbackModel from "../model/feedback.model.js";
+import AccountModel from "../model/account.model.js";
 export const createJob = async (req, res, next) => {
   const files = req.files;
   if (req.user.role !== "homeowner") {
@@ -379,6 +380,20 @@ export const jobFeedback = async (req, res, next) => {
     return next(new ValidationError("all fields are required"));
   }
   try {
+    const contractorAccount = await AccountModel.findById(contractor).populate(
+      "profile"
+    );
+
+    const profile = contractorAccount.profile;
+    const feedbackLength = await FeedbackModel.countDocuments({ contractor });
+    // const newRating =
+    //   ((profile.rating * feedbackLength) + rating) / (feedbackLength + 1);
+
+    // console.log(newRating, feedbackLength, profile.rating);
+    // profile.rating = newRating;
+
+    // await profile.save();
+
     let mediaUrl = [];
     for (const file of files) {
       const fileRes = await uploadFile(file, Feedback_DIRECTORY);
@@ -411,6 +426,28 @@ export const getHomeownerJobFeedback = async (req, res, next) => {
     })
       .populate([
         { path: "contractor", select: "username" },
+        {
+          path: "job",
+          select: "title",
+        },
+      ])
+      .sort({ createdAt: -1 });
+    return res.status(200).json({
+      success: true,
+      feedbacks,
+    });
+  } catch (error) {
+    return next(new InternalServerError());
+  }
+};
+export const getContractorJobFeedback = async (req, res, next) => {
+  const userId = req.params.id;
+  try {
+    const feedbacks = await FeedbackModel.find({
+      contractor: userId,
+    })
+      .populate([
+        { path: "contractor", select: "username avatarUrl" },
         {
           path: "job",
           select: "title",
