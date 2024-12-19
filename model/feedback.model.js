@@ -19,6 +19,7 @@ const feedbackSchema = new mongoose.Schema(
       ref: "Job",
       required: true,
     },
+    rating: { type: Number, required: true },
   },
   {
     timestamps: true,

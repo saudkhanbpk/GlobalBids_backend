@@ -374,8 +374,8 @@ export const jobFeedback = async (req, res, next) => {
   const userId = req.user._id;
   const files = req.files;
 
-  const { message, contractor, jobId } = req.body;
-  if (!message && !contractor && !jobId && !files) {
+  const { message, contractor, jobId, rating } = req.body;
+  if (!message && !contractor && !jobId && !files && !rating) {
     return next(new ValidationError("all fields are required"));
   }
   try {
@@ -390,6 +390,7 @@ export const jobFeedback = async (req, res, next) => {
       homeowner: userId,
       job: jobId,
       media: mediaUrl,
+      rating,
     };
     const feedback = await FeedbackModel.create(data);
     return res
@@ -402,12 +403,20 @@ export const jobFeedback = async (req, res, next) => {
   }
 };
 
-export const getJobFeedback = async (req, res, next) => {
+export const getHomeownerJobFeedback = async (req, res, next) => {
   const userId = req.user._id;
   try {
     const feedbacks = await FeedbackModel.find({
       homeowner: userId,
-    }).sort({ createdAt: -1 });
+    })
+      .populate([
+        { path: "contractor", select: "username" },
+        {
+          path: "job",
+          select: "title",
+        },
+      ])
+      .sort({ createdAt: -1 });
     return res.status(200).json({
       success: true,
       feedbacks,
