@@ -16,7 +16,9 @@ import {
   jobFeedback,
   getHomeownerJobFeedback,
   getContractorJobFeedback,
-  requestFeedback
+  requestFeedback,
+  editJobFeedback,
+  deleteFeedbackJobById
 } from "../controller/jobs.controller.js";
 import upload from "../config/multer.config.js";
 import authMiddleware from "../middleware/auth.middleware.js";
@@ -35,6 +37,8 @@ router.get("/", authMiddleware, getAllJobs);
 router.get("/find", authMiddleware, findJobs);
 router.get("/mark-as-complete/:id", authMiddleware, markJobComplete);
 router.post("/feedback", authMiddleware, upload.array("files", 4), jobFeedback);
+router.put("/feedback/:id", authMiddleware, upload.array("files", 4), editJobFeedback);
+router.delete("/feedback/:id", authMiddleware, deleteFeedbackJobById);
 router.get("/homeowner/feedback", authMiddleware, getHomeownerJobFeedback);
 router.get("/contractor/feedback/:id", authMiddleware, getContractorJobFeedback);
 router.post("/request-feedback", authMiddleware, requestFeedback)

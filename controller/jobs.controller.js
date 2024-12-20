@@ -17,6 +17,7 @@ import { validateJobFields } from "../validators/jobs-validator.js";
 import { deleteFilesFromCloudinary } from "../utils/cloudinary.delete.files.js";
 import FeedbackModel from "../model/feedback.model.js";
 import AccountModel from "../model/account.model.js";
+
 export const createJob = async (req, res, next) => {
   const files = req.files;
   if (req.user.role !== "homeowner") {
@@ -488,7 +489,72 @@ export const requestFeedback = async (req, res, next) => {
       .json({ message: "Feedback request sent", success: true });
   } catch (error) {
     console.log(error);
-    
+
+    return next(new InternalServerError());
+  }
+};
+
+export const editJobFeedback = async (req, res, next) => {
+  const feedbackId = req.params.id;
+  const { removedFiles, oldMedia, contractorId, message, rating } = req.body;
+  const parsedOldMedia = JSON.parse(oldMedia || "[]");
+  const parsedRemovedFiles = JSON.parse(removedFiles || "[]");
+  let allMedia = [];
+  try {
+    allMedia = parsedOldMedia.filter(
+      (media) => !parsedRemovedFiles.includes(media)
+    );
+    const contractorAccount = await AccountModel.findById(
+      contractorId
+    ).populate("profile");
+
+    for (const file of req.files) {
+      const fileRes = await uploadFile(file, Feedback_DIRECTORY);
+      allMedia.push(fileRes);
+    }
+    if (parsedRemovedFiles) {
+      await deleteFilesFromCloudinary(parsedRemovedFiles);
+    }
+
+    const newFeedback = await FeedbackModel.findByIdAndUpdate(
+      feedbackId,
+      {
+        message,
+        rating: Number(rating),
+        media: allMedia,
+      },
+      { new: true }
+    );
+
+    const profile = contractorAccount.profile;
+    const feedbackLength = await FeedbackModel.countDocuments({
+      contractor: contractorId,
+    });
+    const newRating =
+      (profile.rating * feedbackLength + Number(rating)) / (feedbackLength + 1);
+    profile.rating = newRating;
+    await profile.save();
+    return res
+      .status(200)
+      .json({ success: true, message: "Feedback updated", newFeedback });
+  } catch (error) {
+    console.log(error);
+    return next(new InternalServerError());
+  }
+};
+
+export const deleteFeedbackJobById = async (req, res, next) => {
+  const feedbackId = req.params.id;
+  try {
+    const feedback = await FeedbackModel.findByIdAndDelete(feedbackId);
+    if (!feedback) {
+      return next(new NotFoundError("Feedback not found"));
+    }
+    await deleteFilesFromCloudinary(feedback.media);
+    return res
+      .status(200)
+      .json({ success: true, message: "Feedback deleted", feedback });
+  } catch (error) {
     return next(new InternalServerError());
   }
 };

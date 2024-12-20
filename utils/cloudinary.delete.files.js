@@ -1,6 +1,12 @@
 import { extractPublicId } from "cloudinary-build-url";
 import cloudinary from "../config/cloudinary.config.js";
 
+/**
+ * Deletes files from Cloudinary.
+ *
+ * @param {string[]} files - An array of file URLs to be deleted from Cloudinary.
+ * @returns {Promise<Object[]>} A promise that resolves to an array of results from the deletion operations.
+ */
 export const deleteFilesFromCloudinary = async (files) => {
   const deletionPromises = files.map(async (fileUrl) => {
     try {
