@@ -374,9 +374,10 @@ export const markJobComplete = async (req, res, next) => {
 export const jobFeedback = async (req, res, next) => {
   const userId = req.user._id;
   const files = req.files;
+  const notificationService = req.app.get("notificationService");
 
-  const { message, contractor, jobId, rating } = req.body;
-  if (!message && !contractor && !jobId && !files && !rating) {
+  const { message, contractor, jobId, rating, jobTitle } = req.body;
+  if (!message && !contractor && !jobId && !files && !rating && !jobTitle) {
     return next(new ValidationError("all fields are required"));
   }
   try {
@@ -386,13 +387,10 @@ export const jobFeedback = async (req, res, next) => {
 
     const profile = contractorAccount.profile;
     const feedbackLength = await FeedbackModel.countDocuments({ contractor });
-    // const newRating =
-    //   ((profile.rating * feedbackLength) + rating) / (feedbackLength + 1);
-
-    // console.log(newRating, feedbackLength, profile.rating);
-    // profile.rating = newRating;
-
-    // await profile.save();
+    const newRating =
+      (profile.rating * feedbackLength + Number(rating)) / (feedbackLength + 1);
+    profile.rating = newRating;
+    await profile.save();
 
     let mediaUrl = [];
     for (const file of files) {
@@ -408,12 +406,19 @@ export const jobFeedback = async (req, res, next) => {
       rating,
     };
     const feedback = await FeedbackModel.create(data);
+    await notificationService.sendNotification({
+      recipientId: contractor,
+      recipientType: "Contractor",
+      senderId: userId,
+      senderType: "Homeowner",
+      message: `Homeowner ${req.user.username} leave a feedback on job ${jobTitle} `,
+      type: "Feedback",
+      url: `/contractor/project-detail/${jobId}`,
+    });
     return res
       .status(200)
       .json({ success: true, feedback, message: "feedback submitted" });
   } catch (error) {
-    console.log(error);
-
     return next(new InternalServerError());
   }
 };
@@ -440,6 +445,7 @@ export const getHomeownerJobFeedback = async (req, res, next) => {
     return next(new InternalServerError());
   }
 };
+
 export const getContractorJobFeedback = async (req, res, next) => {
   const userId = req.params.id;
   try {
@@ -459,6 +465,30 @@ export const getContractorJobFeedback = async (req, res, next) => {
       feedbacks,
     });
   } catch (error) {
+    return next(new InternalServerError());
+  }
+};
+
+export const requestFeedback = async (req, res, next) => {
+  const userId = req.user._id;
+  const notificationService = req.app.get("notificationService");
+  const { jobId, homeownerId, jobTitle } = req.body;
+  try {
+    await notificationService.sendNotification({
+      recipientId: homeownerId,
+      recipientType: "Homeowner",
+      senderId: userId,
+      senderType: "Contractor",
+      message: `Contractor ${req.user.username} request feedback on job ${jobTitle} `,
+      type: "Feedback",
+      url: `/home-owner/project-detail/${jobId}`,
+    });
+    return res
+      .status(200)
+      .json({ message: "Feedback request sent", success: true });
+  } catch (error) {
+    console.log(error);
+    
     return next(new InternalServerError());
   }
 };

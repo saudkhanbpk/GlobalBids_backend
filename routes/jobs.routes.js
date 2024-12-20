@@ -15,7 +15,8 @@ import {
   markJobComplete,
   jobFeedback,
   getHomeownerJobFeedback,
-  getContractorJobFeedback
+  getContractorJobFeedback,
+  requestFeedback
 } from "../controller/jobs.controller.js";
 import upload from "../config/multer.config.js";
 import authMiddleware from "../middleware/auth.middleware.js";
@@ -36,6 +37,7 @@ router.get("/mark-as-complete/:id", authMiddleware, markJobComplete);
 router.post("/feedback", authMiddleware, upload.array("files", 4), jobFeedback);
 router.get("/homeowner/feedback", authMiddleware, getHomeownerJobFeedback);
 router.get("/contractor/feedback/:id", authMiddleware, getContractorJobFeedback);
+router.post("/request-feedback", authMiddleware, requestFeedback)
 router.get("/:id", authMiddleware, getJob);
 
 export default router;
