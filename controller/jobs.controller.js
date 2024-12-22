@@ -17,6 +17,7 @@ import { validateJobFields } from "../validators/jobs-validator.js";
 import { deleteFilesFromCloudinary } from "../utils/cloudinary.delete.files.js";
 import FeedbackModel from "../model/feedback.model.js";
 import AccountModel from "../model/account.model.js";
+import sendJobNotifications from "../services/send.job.notification.service.js";
 
 export const createJob = async (req, res, next) => {
   const files = req.files;
@@ -62,9 +63,10 @@ export const createJob = async (req, res, next) => {
       message: "Job has been created!",
       job: savedJob,
     });
-  } catch (error) {
-    console.log(error);
 
+    const notificationService = req.app.get("notificationService");
+    await sendJobNotifications(savedJob, notificationService);
+  } catch (error) {
     return next(new InternalServerError());
   }
 };
