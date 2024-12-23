@@ -142,7 +142,7 @@ export const handleStripeWebhook = async (req, res) => {
         const userData = await AccountModel.findById(user).select("email");
         const bid = await BidModel.findById(bidId);
         const room = await createRoom([homeowner, user], projectId);
-        await JobModel.findByIdAndUpdate(
+        const job = await JobModel.findByIdAndUpdate(
           projectId,
           {
             bidStatus: "closed",
@@ -160,13 +160,16 @@ export const handleStripeWebhook = async (req, res) => {
           { new: true }
         );
 
+        const isoStartDate = new Date(bid.startDate).toISOString();
+
         await EventsModel.create({
           homeowner: homeowner,
           job: projectId,
           contractor: user,
           eventType: "general",
-          title: "Job started",
-          date: bid.startDate,
+          title: job.title,
+          description: `The project "${job.title}" is set to begin.`,
+          date: isoStartDate,
         });
 
         const mailOptions = invoiceMailOptions(transaction, userData.email);

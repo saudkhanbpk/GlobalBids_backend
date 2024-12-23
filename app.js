@@ -24,6 +24,7 @@ import NotificationService from "./services/notification.service.js";
 import "dotenv/config.js";
 import cookieParser from "cookie-parser";
 import { handleStripeWebhook } from "./controller/stripe.controller.js";
+import sendOverdueNotifications from "./services/sendOverdueNotification.service.js";
 
 dotenv.config();
 const app = express();
@@ -70,6 +71,8 @@ app.use(errorHandler);
 const port = process.env.PORT;
 const server = http.createServer(app);
 const io = initSocket(server);
+
+sendOverdueNotifications(io);
 
 app.set("io", io);
 // creating notification instance so that it can send notifications to the users
