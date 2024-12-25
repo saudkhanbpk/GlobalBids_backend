@@ -13,6 +13,7 @@ const sendOverdueNotifications = (io) => {
     const now = new Date();
     const userEvents = await EventsModel.find({
       date: { $lt: now.toISOString() },
+      notified: false,
     });
 
     for (const event of userEvents) {
