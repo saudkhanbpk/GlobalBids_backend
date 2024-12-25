@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import BidTransactionHistoryModel from "../model/transaction.model.js";
-import { InternalServerError } from "../error/AppError.js";
+import { InternalServerError, ValidationError } from "../error/AppError.js";
 import JobModel from "../model/job.model.js";
 import BidModel from "../model/bids.model.js";
 import { invoiceMailOptions } from "../utils/mail-options.js";
@@ -9,8 +9,79 @@ import { createRoom } from "../services/chat.room.service.js";
 import AccountModel from "../model/account.model.js";
 import EventsModel from "../model/events.model.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// export const createPayment = async (req, res, next) => {
+//   const { leadPrice } = req.body;
+//   const amountInCents = Math.round(leadPrice * 100);
+//   const transactionDate = new Date().toISOString().split("T")[0];
+
+//   try {
+//     const paymentIntent = await stripe.paymentIntents.create({
+//       amount: amountInCents,
+//       currency: "usd",
+//       metadata: {
+//         user: req.user._id.toString(),
+//         project: req.body.project.toString(),
+//         bidId: req.body.bidId.toString(),
+//         leadPrice: leadPrice.toString(),
+//         projectId: req.body.jobId.toString(),
+//         category: req.body.category.toString(),
+//         homeowner: req.body.homeownerId,
+//       },
+//     });
+
+//     const newTransaction = await BidTransactionHistoryModel.create({
+//       user: req.user._id,
+//       job: req.body.jobId,
+//       bid: req.body.bidId,
+//       amount: req.body.leadPrice.toString(),
+//       transactionDate,
+//       status: "pending",
+//       category: req.body.category,
+//       transactionId: paymentIntent.id,
+//       leadPrice: leadPrice.toString(),
+//       homeowner: req.body.homeownerId,
+//     });
+//     const bid = await BidModel.findByIdAndUpdate(
+//       req.body.bidId,
+//       {
+//         bidTransaction: newTransaction._id,
+//       },
+//       {
+//         new: true,
+//       }
+//     ).populate([
+//       {
+//         path: "job",
+//         select: "title budget category",
+//       },
+//     ]);
+
+//     const data = {
+//       clientSecret: paymentIntent.client_secret,
+//       originalAmount: leadPrice,
+//       bid,
+//     };
+//     return res.status(201).json(data);
+//   } catch (error) {
+//     console.log(error);
+
+//     return next(new InternalServerError());
+//   }
+// };
+
 export const createPayment = async (req, res, next) => {
-  const { leadPrice } = req.body;
+  const { leadPrice, project, bidId, jobId, category, homeownerId } = req.body;
+
+  if (!leadPrice || !project || !bidId || !jobId || !category || !homeownerId) {
+    return next(new ValidationError("Missing required fields"));
+  }
+
+  const job = await JobModel.findById(jobId);
+
+  if (!job) {
+    return next(new ValidationError("Job not found"));
+  }
+
   const amountInCents = Math.round(leadPrice * 100);
   const transactionDate = new Date().toISOString().split("T")[0];
 
@@ -19,36 +90,33 @@ export const createPayment = async (req, res, next) => {
       amount: amountInCents,
       currency: "usd",
       metadata: {
-        user: req.user._id.toString(),
-        project: req.body.project.toString(),
-        bidId: req.body.bidId.toString(),
+        user: req.user._id?.toString() || "Unknown",
+        project: project.toString(),
+        bidId: bidId.toString(),
         leadPrice: leadPrice.toString(),
-        projectId: req.body.jobId.toString(),
-        category: req.body.category.toString(),
-        homeowner: req.body.homeownerId,
+        projectId: jobId.toString(),
+        category: category.toString(),
+        homeowner: homeownerId.toString(),
       },
     });
 
     const newTransaction = await BidTransactionHistoryModel.create({
       user: req.user._id,
-      job: req.body.jobId,
-      bid: req.body.bidId,
-      amount: req.body.leadPrice.toString(),
+      job: jobId,
+      bid: bidId,
+      amount: leadPrice.toString(),
       transactionDate,
       status: "pending",
-      category: req.body.category,
+      category,
       transactionId: paymentIntent.id,
       leadPrice: leadPrice.toString(),
-      homeowner: req.body.homeownerId,
+      homeowner: homeownerId,
     });
+
     const bid = await BidModel.findByIdAndUpdate(
-      req.body.bidId,
-      {
-        bidTransaction: newTransaction._id,
-      },
-      {
-        new: true,
-      }
+      bidId,
+      { bidTransaction: newTransaction._id },
+      { new: true }
     ).populate([
       {
         path: "job",
@@ -61,8 +129,10 @@ export const createPayment = async (req, res, next) => {
       originalAmount: leadPrice,
       bid,
     };
+
     return res.status(201).json(data);
   } catch (error) {
+    console.error("Error in createPayment:", error);
     return next(new InternalServerError());
   }
 };
