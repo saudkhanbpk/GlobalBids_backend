@@ -39,6 +39,10 @@ const sendOverdueNotifications = (io) => {
           url: "/contractor/schedule",
         });
       }
+      
+      // update the record in the database that user is notified
+      event.notified = true;
+      await event.save();
     }
   });
 };
