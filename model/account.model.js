@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import validator from "validator";
+
 const accountSchema = new mongoose.Schema(
   {
     email: {
@@ -8,10 +10,12 @@ const accountSchema = new mongoose.Schema(
       required: [true, "Email is required"],
       unique: true,
       trim: true,
-      match: [
-        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-        "Please provide a valid email address",
-      ],
+      validate: {
+        validator: function (value) {
+          return validator.isEmail(value);
+        },
+        message: "Invalid email address",
+      },
     },
     username: {
       type: String,
