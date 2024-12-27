@@ -456,7 +456,7 @@ export const getContractorJobFeedback = async (req, res, next) => {
       contractor: userId,
     })
       .populate([
-        { path: "contractor", select: "username avatarUrl" },
+        { path: "homeowner", select: "username avatarUrl" },
         {
           path: "job",
           select: "title",

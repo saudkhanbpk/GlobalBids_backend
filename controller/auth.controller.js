@@ -377,7 +377,7 @@ export const markUsersAsFirstTimeLogin = async (req, res, next) => {
 
 export const changePassword = async (req, res, next) => {
   const { currentPassword, newPassword, confirmNewPassword } = req.body;
-  const userId = req.user._id;
+  const userId = req.user._id;  
   try {
     const user = await AccountModel.findById(userId).select("+password");
 
