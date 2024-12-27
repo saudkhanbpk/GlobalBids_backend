@@ -25,6 +25,7 @@ import "dotenv/config.js";
 import cookieParser from "cookie-parser";
 import { handleStripeWebhook } from "./controller/stripe.controller.js";
 import sendOverdueNotifications from "./services/sendOverdueNotification.service.js";
+import chatbotRouter from "./routes/chatbot.routes.js";
 
 dotenv.config();
 const app = express();
@@ -58,7 +59,8 @@ app.use("/api/event/", eventRouter);
 app.use("/api/story/", storyRouter);
 app.use("/api/notifications/", notificationRouter);
 app.use("/api/reminders/", reminderRouter);
-app.use("/api/file/upload", fileUploadRouter);
+app.use("/api/file/upload/", fileUploadRouter);
+app.use("/api/chatbot/", chatbotRouter);
 
 app.all("*", (req, _res, next) => {
   const err = new RouteNotFoundError(

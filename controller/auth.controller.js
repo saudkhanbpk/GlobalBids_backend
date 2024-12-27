@@ -379,7 +379,7 @@ export const changePassword = async (req, res, next) => {
   const { currentPassword, newPassword, confirmNewPassword } = req.body;
   const userId = req.user._id;
   try {
-    const user = await getUserById(userId, "+password");
+    const user = await AccountModel.findById(userId).select("+password");
 
     if (!user) {
       return next(new NotFoundError("User not found"));
