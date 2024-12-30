@@ -8,251 +8,175 @@ import { sendEmail } from "../utils/send-emails.js";
 import { createRoom } from "../services/chat.room.service.js";
 import AccountModel from "../model/account.model.js";
 import EventsModel from "../model/events.model.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-// export const createPayment = async (req, res, next) => {
-//   const { leadPrice } = req.body;
-//   const amountInCents = Math.round(leadPrice * 100);
-//   const transactionDate = new Date().toISOString().split("T")[0];
 
-//   try {
-//     const paymentIntent = await stripe.paymentIntents.create({
-//       amount: amountInCents,
-//       currency: "usd",
-//       metadata: {
-//         user: req.user._id.toString(),
-//         project: req.body.project.toString(),
-//         bidId: req.body.bidId.toString(),
-//         leadPrice: leadPrice.toString(),
-//         projectId: req.body.jobId.toString(),
-//         category: req.body.category.toString(),
-//         homeowner: req.body.homeownerId,
-//       },
-//     });
-
-//     const newTransaction = await BidTransactionHistoryModel.create({
-//       user: req.user._id,
-//       job: req.body.jobId,
-//       bid: req.body.bidId,
-//       amount: req.body.leadPrice.toString(),
-//       transactionDate,
-//       status: "pending",
-//       category: req.body.category,
-//       transactionId: paymentIntent.id,
-//       leadPrice: leadPrice.toString(),
-//       homeowner: req.body.homeownerId,
-//     });
-//     const bid = await BidModel.findByIdAndUpdate(
-//       req.body.bidId,
-//       {
-//         bidTransaction: newTransaction._id,
-//       },
-//       {
-//         new: true,
-//       }
-//     ).populate([
-//       {
-//         path: "job",
-//         select: "title budget category",
-//       },
-//     ]);
-
-//     const data = {
-//       clientSecret: paymentIntent.client_secret,
-//       originalAmount: leadPrice,
-//       bid,
-//     };
-//     return res.status(201).json(data);
-//   } catch (error) {
-//     console.log(error);
-
-//     return next(new InternalServerError());
-//   }
-// };
-
-export const createPayment = async (req, res, next) => {
+export const createPayment = asyncHandler(async (req, res, next) => {
   const { leadPrice, project, bidId, jobId, category, homeownerId } = req.body;
 
   if (!leadPrice || !project || !bidId || !jobId || !category || !homeownerId) {
-    return next(new ValidationError("Missing required fields"));
+    throw new ValidationError("Missing required fields");
   }
 
   const job = await JobModel.findById(jobId);
 
   if (!job) {
-    return next(new ValidationError("Job not found"));
+    throw new ValidationError("Job not found");
   }
 
   const amountInCents = Math.round(leadPrice * 100);
   const transactionDate = new Date().toISOString().split("T")[0];
 
-  try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amountInCents,
-      currency: "usd",
-      metadata: {
-        user: req.user._id?.toString() || "Unknown",
-        project: project.toString(),
-        bidId: bidId.toString(),
-        leadPrice: leadPrice.toString(),
-        projectId: jobId.toString(),
-        category: category.toString(),
-        homeowner: homeownerId.toString(),
-      },
-    });
-
-    const newTransaction = await BidTransactionHistoryModel.create({
-      user: req.user._id,
-      job: jobId,
-      bid: bidId,
-      amount: leadPrice.toString(),
-      transactionDate,
-      status: "pending",
-      category,
-      transactionId: paymentIntent.id,
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: amountInCents,
+    currency: "usd",
+    metadata: {
+      user: req.user._id?.toString() || "Unknown",
+      project: project.toString(),
+      bidId: bidId.toString(),
       leadPrice: leadPrice.toString(),
-      homeowner: homeownerId,
-    });
+      projectId: jobId.toString(),
+      category: category.toString(),
+      homeowner: homeownerId.toString(),
+    },
+  });
 
-    const bid = await BidModel.findByIdAndUpdate(
-      bidId,
-      { bidTransaction: newTransaction._id },
-      { new: true }
-    ).populate([
+  const newTransaction = await BidTransactionHistoryModel.create({
+    user: req.user._id,
+    job: jobId,
+    bid: bidId,
+    amount: leadPrice.toString(),
+    transactionDate,
+    status: "pending",
+    category,
+    transactionId: paymentIntent.id,
+    leadPrice: leadPrice.toString(),
+    homeowner: homeownerId,
+  });
+
+  const bid = await BidModel.findByIdAndUpdate(
+    bidId,
+    { bidTransaction: newTransaction._id },
+    { new: true }
+  ).populate([
+    {
+      path: "job",
+      select: "title budget category",
+    },
+  ]);
+
+  const data = {
+    clientSecret: paymentIntent.client_secret,
+    originalAmount: leadPrice,
+    bid,
+  };
+
+  return res.status(201).json(data);
+});
+
+export const getPaymentHistory = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+
+  const transactions = await BidTransactionHistoryModel.find({
+    user: userId,
+  })
+    .populate([
       {
         path: "job",
-        select: "title budget category",
+        select: "title",
       },
-    ]);
+    ])
+    .sort({ createdAt: -1 });
 
-    const data = {
-      clientSecret: paymentIntent.client_secret,
-      originalAmount: leadPrice,
-      bid,
-    };
+  return res.status(200).json({
+    success: true,
+    transactions: transactions,
+  });
+});
 
-    return res.status(201).json(data);
-  } catch (error) {
-    console.error("Error in createPayment:", error);
-    return next(new InternalServerError());
-  }
-};
-
-export const getPaymentHistory = async (req, res, next) => {
-  const userId = req.user._id;
-  try {
-    const transactions = await BidTransactionHistoryModel.find({
-      user: userId,
-    })
-      .populate([
-        {
-          path: "job",
-          select: "title",
-        },
-      ])
-      .sort({ createdAt: -1 });
-
-    return res.status(200).json({
-      success: true,
-      transactions: transactions,
-    });
-  } catch (error) {
-    return next(new InternalServerError("Failed to fetch payment history."));
-  }
-};
-
-export const getHomeownerContact = async (req, res, next) => {
+export const getHomeownerContact = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const { transactionId } = req.body;
 
-  try {
-    const paymentIntent = await stripe.paymentIntents.retrieve(transactionId);
-    let homeowner = null;
-    switch (paymentIntent.status) {
-      case "succeeded":
-        homeowner = await AccountModel.findById(
-          paymentIntent.metadata.homeowner
-        )
-          .select("email username profile profileType")
-          .populate({
-            path: "profile",
-            select: "phone propertyDetails.address",
-          });
-        return res.status(200).json({
-          success: true,
-          homeowner,
+  const paymentIntent = await stripe.paymentIntents.retrieve(transactionId);
+  let homeowner = null;
+  switch (paymentIntent.status) {
+    case "succeeded":
+      homeowner = await AccountModel.findById(paymentIntent.metadata.homeowner)
+        .select("email username profile profileType")
+        .populate({
+          path: "profile",
+          select: "phone propertyDetails.address",
         });
-      case "requires_payment_method":
-        return res.status(200).json({
-          success: true,
-          message: "required payment",
-          paymentIntent,
-        });
-      default:
-        return res.status(200).json({
-          success: true,
-          message: "failed",
-        });
-    }
-  } catch (error) {
-    return next(new InternalServerError("Failed to fetch homeowner contact."));
+      return res.status(200).json({
+        success: true,
+        homeowner,
+      });
+    case "requires_payment_method":
+      return res.status(200).json({
+        success: true,
+        message: "required payment",
+        paymentIntent,
+      });
+    default:
+      return res.status(200).json({
+        success: true,
+        message: "failed",
+      });
   }
-};
+});
 
-export const handleStripeWebhook = async (req, res) => {
+export const handleStripeWebhook = asyncHandler(async (req, res) => {
   const sig = req.headers["stripe-signature"];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  try {
-    const event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
 
-    switch (event.type) {
-      case "payment_intent.succeeded":
-        const { bidId, homeowner, user, projectId } =
-          event.data.object.metadata;
+  const event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
 
-        const userData = await AccountModel.findById(user).select("email");
-        const bid = await BidModel.findById(bidId);
-        const room = await createRoom([homeowner, user], projectId);
-        const job = await JobModel.findByIdAndUpdate(
-          projectId,
-          {
-            bidStatus: "closed",
-            progress: "0",
-            status: "in-progress",
-            room: room._id,
-          },
-          { new: true }
-        );
-        const transaction = await BidTransactionHistoryModel.findOneAndUpdate(
-          { user, job: projectId, bid: bidId },
-          {
-            status: "succeeded",
-          },
-          { new: true }
-        );
+  switch (event.type) {
+    case "payment_intent.succeeded":
+      const { bidId, homeowner, user, projectId } = event.data.object.metadata;
 
-        const isoStartDate = new Date(bid.startDate).toISOString();
+      const userData = await AccountModel.findById(user).select("email");
+      const bid = await BidModel.findById(bidId);
+      const room = await createRoom([homeowner, user], projectId);
+      const job = await JobModel.findByIdAndUpdate(
+        projectId,
+        {
+          bidStatus: "closed",
+          progress: "0",
+          status: "in-progress",
+          room: room._id,
+        },
+        { new: true }
+      );
+      const transaction = await BidTransactionHistoryModel.findOneAndUpdate(
+        { user, job: projectId, bid: bidId },
+        {
+          status: "succeeded",
+        },
+        { new: true }
+      );
 
-        await EventsModel.create({
-          homeowner: homeowner,
-          job: projectId,
-          contractor: user,
-          eventType: "general",
-          title: job.title,
-          description: `The project "${job.title}" is set to begin.`,
-          date: isoStartDate,
-        });
+      const isoStartDate = new Date(bid.startDate).toISOString();
 
-        const mailOptions = invoiceMailOptions(transaction, userData.email);
-        await sendEmail(mailOptions);
-        break;
-      default:
-        console.log(`Unhandled event type ${event.type}`);
-        break;
-    }
+      await EventsModel.create({
+        homeowner: homeowner,
+        job: projectId,
+        contractor: user,
+        eventType: "general",
+        title: job.title,
+        description: `The project "${job.title}" is set to begin.`,
+        date: isoStartDate,
+      });
 
-    res.status(200).send({ received: true });
-  } catch (err) {
-    console.error("Webhook Error:", err.message);
-    res.status(400).send(`Webhook Error: ${err.message}`);
+      const mailOptions = invoiceMailOptions(transaction, userData.email);
+      await sendEmail(mailOptions);
+      break;
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+      break;
   }
-};
+
+  return res.status(200).send({ received: true });
+});

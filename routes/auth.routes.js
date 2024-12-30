@@ -3,7 +3,6 @@ import {
   loginController,
   signUpController,
   resendOtpController,
-  updateUserInfo,
   findUser,
   verifyUserAndResetPassword,
   resetPassword,
@@ -22,8 +21,6 @@ router.post("/register", signUpController);
 router.post("/login", loginController);
 router.post("/otp/verify-account", verifyAccount);
 router.post("/resend-otp", resendOtpController);
-router.post("/update-user-info", authMiddleware, updateUserInfo);
-
 router.post("/find-user", findUser);
 router.post("/find-and-verify", verifyUserAndResetPassword);
 router.post("/reset-password", resetPassword);

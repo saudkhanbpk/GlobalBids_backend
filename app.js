@@ -6,7 +6,7 @@ import bodyParser from "body-parser";
 import authRoutes from "./routes/auth.routes.js";
 import { connectDB } from "./config/db.js";
 import errorHandler from "./error/errorHandler.js";
-import { RouteNotFoundError } from "./error/AppError.js";
+import { InternalServerError, RouteNotFoundError } from "./error/AppError.js";
 import jobsRouter from "./routes/jobs.routes.js";
 import contractorRouter from "./routes/contractor.routes.js";
 import homeownerRoutes from "./routes/homeowner.routes.js";
@@ -26,6 +26,7 @@ import cookieParser from "cookie-parser";
 import { handleStripeWebhook } from "./controller/stripe.controller.js";
 import sendOverdueNotifications from "./services/sendOverdueNotification.service.js";
 import chatbotRouter from "./routes/chatbot.routes.js";
+import { asyncHandler } from "./utils/asyncHandler.js";
 
 dotenv.config();
 const app = express();
@@ -42,9 +43,12 @@ app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
 app.use(errorHandler);
 
-app.get("/", (_req, res) => {
-  return res.status(200).json({ message: "Hello GlobalBids!" });
-});
+app.get(
+  "/",
+  asyncHandler(async (_req, res) => {
+    return res.status(200).json({ message: "Hello GlobalBids!" });
+  })
+);
 
 app.use(passport.initialize());
 

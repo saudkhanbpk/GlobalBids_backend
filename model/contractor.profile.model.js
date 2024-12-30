@@ -52,7 +52,7 @@ const ContractorProfileSchema = new mongoose.Schema(
         description: { type: String, trim: true },
       },
     ],
-    portfolioMedia: [{ type: String, trim: true }],
+    portfolioMedia: [{ type: String, trim: true, default: [] }],
     coverPhoto: { type: String, trim: true },
     about: { type: String, trim: true },
     weeklySchedule: {
