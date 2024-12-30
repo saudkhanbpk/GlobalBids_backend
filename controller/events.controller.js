@@ -7,13 +7,14 @@ import EventsModel from "../model/events.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const createEvent = asyncHandler(async (req, res) => {
-  const { title, date, description, eventType, homeownerId, jobId } = req.body;
+  const { title, date, description, eventType, homeownerId, jobId, fromTime, toTime } = req.body;
   const userId = req.user._id;
   const notificationService = req.app.get("notificationService");
 
-  if (!title || !date || !description || !eventType) {
+  if (!title || !date || !description || !eventType || !toTime || !fromTime) {
     throw new ValidationError("all fields are required");
   }
+
   const event = new EventsModel({
     homeowner: homeownerId,
     project: jobId,
@@ -22,7 +23,10 @@ export const createEvent = asyncHandler(async (req, res) => {
     description,
     contractor: userId,
     eventType,
+    fromTime,
+    toTime,
   });
+
   await event.save();
   await notificationService.sendNotification({
     recipientId: homeownerId,

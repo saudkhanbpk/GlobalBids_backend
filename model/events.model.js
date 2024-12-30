@@ -25,6 +25,8 @@ const eventsSchema = new mongoose.Schema(
     reminderId: {
       type: mongoose.Schema.Types.ObjectId,
     },
+    fromTime: { type: String },
+    toTime: { type: String },
     notified: { type: Boolean, default: false },
   },
   {
