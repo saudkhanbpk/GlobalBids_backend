@@ -138,7 +138,7 @@ export const verifyAccount = asyncHandler(async (req, res) => {
   });
 });
 
-export const resendOtpController = async (req, res) => {
+export const resendOtpController = asyncHandler(async (req, res) => {
   const userId = req.body.id;
   const now = new Date();
   const otpType = req.query.type;
@@ -192,9 +192,9 @@ export const resendOtpController = async (req, res) => {
     message: "OTP sent successfully",
     otpId: otpEntry._id,
   });
-};
+});
 
-export const findUser = async (req, res) => {
+export const findUser = asyncHandler(async (req, res) => {
   const { email } = req.body;
   if (!email) {
     throw new ValidationError("email is required");
@@ -222,9 +222,9 @@ export const findUser = async (req, res) => {
     userId: user._id,
     message: "Opt has been send to your email",
   });
-};
+});
 
-export const verifyUserAndResetPassword = async (req, res) => {
+export const verifyUserAndResetPassword = asyncHandler(async (req, res) => {
   const { userId, otp, otpId } = req.body;
 
   const otpDoc = await OtpModel.findOne({
@@ -248,9 +248,9 @@ export const verifyUserAndResetPassword = async (req, res) => {
   });
   await reset.save();
   return res.status(200).json({ success: true, token: reset.token });
-};
+});
 
-export const resetPassword = async (req, res) => {
+export const resetPassword = asyncHandler(async (req, res) => {
   const { password, token, userId } = req.body;
 
   const savedToken = await ResetPasswordModel.findOne({ accountId: userId });
@@ -267,9 +267,9 @@ export const resetPassword = async (req, res) => {
   return res
     .status(200)
     .json({ success: true, message: "Password updated successfully" });
-};
+});
 
-export const getUser = async (req, res) => {
+export const getUser = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const role = req.user.role;
 
@@ -279,9 +279,9 @@ export const getUser = async (req, res) => {
   }
   const user = await AccountModel.findById(userId).populate(populateOptions);
   return res.status(200).json({ user, success: true });
-};
+});
 
-export const markUsersAsFirstTimeLogin = async (req, res) => {
+export const markUsersAsFirstTimeLogin = asyncHandler(async (req, res) => {
   const { _id } = req.user._id;
 
   const user = await AccountModel.findByIdAndUpdate(_id, {
@@ -295,9 +295,9 @@ export const markUsersAsFirstTimeLogin = async (req, res) => {
   return res
     .status(200)
     .json({ success: true, message: "User marked as first time login" });
-};
+});
 
-export const changePassword = async (req, res) => {
+export const changePassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword, confirmNewPassword } = req.body;
   const userId = req.user._id;
 
@@ -325,9 +325,9 @@ export const changePassword = async (req, res) => {
   return res
     .status(200)
     .json({ success: true, message: "Password updated successfully" });
-};
+});
 
-export const logout = async (req, res) => {
+export const logout = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const user = await AccountModel.findByIdAndUpdate(
@@ -346,9 +346,9 @@ export const logout = async (req, res) => {
     .clearCookie("accessToken", defaultCookiesOptions)
     .clearCookie("refreshToken", defaultCookiesOptions)
     .json({ success: true, message: "Logout successful" });
-};
+});
 
-export const refreshAccessToken = async (req, res) => {
+export const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
     req.cookies?.refreshToken ||
     req.headers("Authorization")?.replace("Bearer ", "");
@@ -365,8 +365,10 @@ export const refreshAccessToken = async (req, res) => {
   );
 
   if (!user) {
-    throw AuthenticationError("Invalid refresh Token");
+    throw new AuthenticationError("Invalid refresh Token");
   }
+
+  console.log(incomingRefreshToken, user.refreshToken);
 
   if (incomingRefreshToken !== user?.refreshToken) {
     throw new AuthenticationError("Invalid refresh token", 440);
@@ -381,4 +383,4 @@ export const refreshAccessToken = async (req, res) => {
       accessToken,
       message: "Access token refreshed successfully!",
     });
-};
+});

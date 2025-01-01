@@ -3,16 +3,24 @@ import MessageModel from "../model/chat.message.model.js";
 import RoomModel from "../model/chat.room.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-export const getAllMessages = asyncHandler(async (req, res, next) => {
+export const getAllMessages = asyncHandler(async (req, res) => {
   const { roomId } = req.body;
 
   if (!roomId) {
     return res.status(400).json({ message: "roomId is required" });
   }
 
-  const messages = await MessageModel.find({ roomId }).sort({
-    timestamp: 1,
-  });
+  const messages = await MessageModel.find({ roomId })
+    .sort({
+      timestamp: 1,
+    })
+    .populate({
+      path: "eventId",
+      populate: {
+        path: "job",
+        select: "title",
+      },
+    });
 
   if (!messages.length) {
     return res.status(404).json({ message: "No messages found" });
@@ -21,7 +29,7 @@ export const getAllMessages = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, messages });
 });
 
-export const getRooms = asyncHandler(async (req, res, next) => {
+export const getRooms = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const rooms = await RoomModel.find({ users: userId }).populate({
@@ -46,7 +54,7 @@ export const deleteRoom = asyncHandler(async (req, res) => {
   return res.status(200).json({ success: true, id });
 });
 
-export const sendMessage = asyncHandler(async (req, res, next) => {
+export const sendMessage = asyncHandler(async (req, res) => {
   const user = req.user;
   const io = req.app.get("io");
   const notificationService = req.app.get("notificationService");
@@ -58,6 +66,7 @@ export const sendMessage = asyncHandler(async (req, res, next) => {
     roomId,
     senderId,
     socketId,
+    eventId,
   } = req.body;
 
   let room = await RoomModel.findOne({
@@ -68,12 +77,29 @@ export const sendMessage = asyncHandler(async (req, res, next) => {
     roomId,
     senderId,
     receiverId,
-    message,
     timestamp,
     timeZone,
   };
 
-  const newMessage = new MessageModel(messageData);
+  if (message) {
+    messageData.message = message;
+  }
+
+  if (eventId) {
+    messageData.eventId = eventId;
+  }
+
+  let newMessage = await MessageModel.create(messageData);
+  if (eventId) {
+    newMessage = await newMessage.populate({
+      path: "eventId",
+      populate: {
+        path: "job",
+        select: "title",
+      },
+    });
+  }
+
   switch (user.role) {
     case "contractor":
       room.lastMessageContractor = newMessage._id;
@@ -109,14 +135,13 @@ export const sendMessage = asyncHandler(async (req, res, next) => {
       }
     });
   }
-  await newMessage.save();
   room.last_message = newMessage._id;
   await room.save();
 
   return res.status(201).json({ success: true, newMessage });
 });
 
-export const markMessagesAsRead = asyncHandler(async (req, res, next) => {
+export const markMessagesAsRead = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const { roomId } = req.body;
 
@@ -134,7 +159,7 @@ export const markMessagesAsRead = asyncHandler(async (req, res, next) => {
     .json({ success: true, message: "Messages marked as read" });
 });
 
-export const getUnreadMessages = asyncHandler(async (req, res, next) => {
+export const getUnreadMessages = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const result = await RoomModel.aggregate([
@@ -182,7 +207,7 @@ export const getUnreadMessages = asyncHandler(async (req, res, next) => {
   });
 });
 
-export const getRoom = asyncHandler(async (req, res, next) => {
+export const getRoom = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const room = await RoomModel.findById(id).populate({
@@ -198,7 +223,7 @@ export const getRoom = asyncHandler(async (req, res, next) => {
   return res.status(200).json({ success: true, room, userStatus });
 });
 
-export const recentInteractions = asyncHandler(async (req, res, next) => {
+export const recentInteractions = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const lastMessageField =
     req.user.role === "homeowner"

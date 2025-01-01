@@ -17,7 +17,9 @@ const messageSchema = new mongoose.Schema(
     },
     message: {
       type: String,
-      required: true,
+      required: function () {
+        return !this.eventId;
+      },
     },
     timestamp: {
       type: Date,
@@ -26,6 +28,10 @@ const messageSchema = new mongoose.Schema(
     timeZone: {
       type: String,
     },
+    eventId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Event",
+    },
     status: {
       type: String,
       enum: ["delivered", "read"],
@@ -33,7 +39,6 @@ const messageSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 const MessageModel = mongoose.model("Message", messageSchema);
 

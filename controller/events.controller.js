@@ -1,13 +1,18 @@
-import {
-  InternalServerError,
-  NotFoundError,
-  ValidationError,
-} from "../error/AppError.js";
+import { ValidationError } from "../error/AppError.js";
 import EventsModel from "../model/events.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const createEvent = asyncHandler(async (req, res) => {
-  const { title, date, description, eventType, homeownerId, jobId, fromTime, toTime } = req.body;
+  const {
+    title,
+    date,
+    description,
+    eventType,
+    homeownerId,
+    job,
+    fromTime,
+    toTime,
+  } = req.body;
   const userId = req.user._id;
   const notificationService = req.app.get("notificationService");
 
@@ -15,9 +20,9 @@ export const createEvent = asyncHandler(async (req, res) => {
     throw new ValidationError("all fields are required");
   }
 
-  const event = new EventsModel({
+  let event = new EventsModel({
     homeowner: homeownerId,
-    project: jobId,
+    job,
     title,
     date,
     description,
@@ -28,6 +33,11 @@ export const createEvent = asyncHandler(async (req, res) => {
   });
 
   await event.save();
+  event = await event.populate({
+    path: "job",
+    select: "title",
+  });
+
   await notificationService.sendNotification({
     recipientId: homeownerId,
     recipientType: "Homeowner",
@@ -37,9 +47,7 @@ export const createEvent = asyncHandler(async (req, res) => {
     type: "event",
     url: `/home-owner/schedule`,
   });
-  return res
-    .status(200)
-    .json({ success: true, event, message: "event has been added" });
+  return res.status(200).json({ success: true, event, message: "event added" });
 });
 
 export const getEvents = asyncHandler(async (req, res) => {
@@ -79,15 +87,21 @@ export const updateEvent = asyncHandler(async (req, res) => {
   const id = req.params.id;
   const userId = req.user._id;
 
-  const event = await EventsModel.findOneAndUpdate(
+  let event = await EventsModel.findOneAndUpdate(
     { _id: id, contractor: userId },
     req.body,
     { new: true }
-  );
+  ).populate({
+    path: "job",
+    select: "title",
+  });
+
   if (!event) {
     throw new NotFoundError(
       "Event not found or you don't have permission to update it"
     );
   }
-  return res.status(200).json({ success: true, event });
+  return res
+    .status(200)
+    .json({ success: true, event, message: "event updated" });
 });
