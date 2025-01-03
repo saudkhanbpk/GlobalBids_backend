@@ -1,7 +1,6 @@
 import BidModel from "../model/bids.model.js";
 import {
   BusinessLogicError,
-  InternalServerError,
   NotFoundError,
   ValidationError,
 } from "../error/AppError.js";
@@ -253,14 +252,17 @@ export const bidEarningOverview = asyncHandler(async (req, res) => {
             $cond: [{ $eq: ["$_id.year", currentYear] }, "$totalEarnings", 0],
           },
         },
+        totalEarnings: { $sum: "$totalEarnings" },
       },
     },
   ]);
+
   res.status(200).json({
     success: true,
     data: {
       monthlyEarnings: results?.monthlyEarnings || 0,
       yearlyEarnings: results?.yearlyEarnings || 0,
+      totalEarnings: results?.totalEarnings || 0,
     },
   });
 });
